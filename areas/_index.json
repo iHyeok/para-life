@@ -7,6 +7,20 @@
       "visibility": "public",
       "description": "Keep growing as a developer. Stay up to date, ship quality work.",
       "tags": ["dev", "career"]
+    },
+    {
+      "id": "naultech",
+      "title": "NaulTech",
+      "visibility": "limited",
+      "description": "Video signal processing work",
+      "tags": ["work", "video", "signal-processing"]
+    },
+    {
+      "id": "ernf",
+      "title": "ERNF",
+      "visibility": "limited",
+      "description": "Technical Director responsibilities",
+      "tags": ["work", "tech-director"]
     }
   ]
 }

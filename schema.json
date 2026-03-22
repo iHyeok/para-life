@@ -6,9 +6,9 @@
   "definitions": {
     "visibility": {
       "type": "string",
-      "enum": ["public", "private"],
+      "enum": ["public", "limited", "private"],
       "default": "public",
-      "description": "공개 여부. private 항목은 대시보드에서 숨김."
+      "description": "공개 여부. public: 전체 공개, limited: 목록에만 표시(상세 접근 불가), private: 완전 숨김."
     },
 
     "status": {

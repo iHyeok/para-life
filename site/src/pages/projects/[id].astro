@@ -7,7 +7,7 @@ import { getProjects, getProject } from "../../lib/data";
 export function getStaticPaths() {
   const projects = getProjects();
   return projects
-    .filter((p: any) => p.visibility !== "private")
+    .filter((p: any) => p.visibility === "public")
     .map((p: any) => ({ params: { id: p.id } }));
 }
 

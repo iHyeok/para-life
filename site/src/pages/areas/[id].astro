@@ -5,7 +5,7 @@ import { getAreas, getArea } from "../../lib/data";
 export function getStaticPaths() {
   const areas = getAreas();
   return areas
-    .filter((a: any) => a.visibility !== "private")
+    .filter((a: any) => a.visibility === "public")
     .map((a: any) => ({ params: { id: a.id } }));
 }
 

@@ -5,7 +5,7 @@ import { getResources, getResource } from "../../lib/data";
 export function getStaticPaths() {
   const resources = getResources();
   return resources
-    .filter((r: any) => r.visibility !== "private")
+    .filter((r: any) => r.visibility === "public")
     .map((r: any) => ({ params: { id: r.id } }));
 }
 
