@@ -22,12 +22,18 @@ PARA methodology based life/task management system.
 ## Tasks
 
 - [x] Define repo structure and data schema
-- [ ] Build Cloudflare Pages frontend (dashboard)
-- [ ] Set up GitHub Actions for auto-deploy
+- [x] Build Cloudflare Pages frontend (dashboard)
+- [x] Set up GitHub Actions for auto-deploy
 - [ ] Implement PARA CRUD operations
+- [ ] Add daily log feature
+- [ ] Custom domain setup
 
 ## Progress Log
 
 ### 2026-03-22
 
 - Initial repo structure and schema created
+- Astro frontend built (dark theme, dashboard with stats/cards, detail pages)
+- Cloudflare Pages deployment complete
+- GitHub auto-deploy configured (push to main triggers rebuild)
+- Telegram integration working (Claude Code manages data via chat)
