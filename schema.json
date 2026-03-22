@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PARA Life Management Schema",
+  "description": "PARA 기반 생활/작업 관리 시스템의 데이터 스키마 정의",
+
+  "definitions": {
+    "visibility": {
+      "type": "string",
+      "enum": ["public", "private"],
+      "default": "public",
+      "description": "공개 여부. private 항목은 대시보드에서 숨김."
+    },
+
+    "status": {
+      "type": "string",
+      "enum": ["active", "on-hold", "completed", "cancelled"],
+      "description": "항목의 현재 상태"
+    },
+
+    "priority": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "default": "medium"
+    },
+
+    "project_index_item": {
+      "type": "object",
+      "required": ["id", "title", "status", "area"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "kebab-case 고유 ID. 파일명과 동일. 예: para-app-mvp"
+        },
+        "title": {
+          "type": "string",
+          "description": "프로젝트 표시 이름"
+        },
+        "status": { "$ref": "#/definitions/status" },
+        "priority": { "$ref": "#/definitions/priority" },
+        "visibility": { "$ref": "#/definitions/visibility" },
+        "area": {
+          "type": "string",
+          "description": "소속 Area의 id. 예: dev-career"
+        },
+        "goal": {
+          "type": "string",
+          "description": "완료 조건. 한 문장으로."
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date",
+          "description": "목표 마감일. YYYY-MM-DD"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date",
+          "description": "생성일"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date",
+          "description": "최종 수정일"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "area_index_item": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "kebab-case 고유 ID. 예: health, finance"
+        },
+        "title": {
+          "type": "string",
+          "description": "영역 표시 이름"
+        },
+        "visibility": { "$ref": "#/definitions/visibility" },
+        "description": {
+          "type": "string",
+          "description": "이 영역에서 유지해야 할 기준/목표"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "resource_index_item": {
+      "type": "object",
+      "required": ["id", "title", "topic"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "kebab-case 고유 ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "자료 주제 이름"
+        },
+        "topic": {
+          "type": "string",
+          "description": "분류 주제. 예: react, investing, cooking"
+        },
+        "visibility": { "$ref": "#/definitions/visibility" },
+        "source": {
+          "type": "string",
+          "description": "정보 출처. 예: twitter, discord, article"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "archive_index_item": {
+      "type": "object",
+      "required": ["id", "title", "originalType", "archivedAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "originalType": {
+          "type": "string",
+          "enum": ["project", "area", "resource"],
+          "description": "원래 어디에 있었는지"
+        },
+        "archivedAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "reason": {
+          "type": "string",
+          "description": "보관 사유. 예: completed, no-longer-relevant"
+        }
+      }
+    },
+
+    "daily_log": {
+      "type": "object",
+      "description": "일일 로그 마크다운 파일의 frontmatter 구조",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "mood": {
+          "type": "string",
+          "enum": ["great", "good", "neutral", "bad", "terrible"]
+        },
+        "highlights": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "오늘의 주요 성과/이벤트"
+        }
+      }
+    }
+  }
+}

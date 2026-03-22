@@ -1,0 +1,17 @@
+{
+  "description": "현재 진행 중인 프로젝트 목록. 완료 조건이 명확한 구체적 목표들.",
+  "items": [
+    {
+      "id": "para-app",
+      "title": "PARA Life Management App",
+      "status": "active",
+      "priority": "high",
+      "visibility": "public",
+      "area": "dev-career",
+      "goal": "PARA 기반 생활관리 웹앱 MVP 완성 및 Cloudflare 배포",
+      "createdAt": "2026-03-22",
+      "updatedAt": "2026-03-22",
+      "tags": ["para", "cloudflare", "web"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "description": "지속적으로 관리해야 하는 삶의 영역들. 끝이 없는 책임과 역할.",
+  "items": [
+    {
+      "id": "dev-career",
+      "title": "Development Career",
+      "visibility": "public",
+      "description": "Keep growing as a developer. Stay up to date, ship quality work.",
+      "tags": ["dev", "career"]
+    }
+  ]
+}
