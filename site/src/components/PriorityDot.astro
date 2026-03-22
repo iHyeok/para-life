@@ -1,0 +1,26 @@
+---
+interface Props {
+  priority: string;
+}
+
+const { priority } = Astro.props;
+
+const colors: Record<string, string> = {
+  high: "var(--red)",
+  medium: "var(--yellow)",
+  low: "var(--text-muted)",
+};
+
+const color = colors[priority] || "var(--text-muted)";
+---
+
+<span class="dot" style={`background: ${color}`} title={priority}></span>
+
+<style>
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+</style>

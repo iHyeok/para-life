@@ -1,0 +1,112 @@
+---
+import StatusBadge from "./StatusBadge.astro";
+import PriorityDot from "./PriorityDot.astro";
+
+interface Props {
+  project: any;
+}
+
+const { project } = Astro.props;
+const tasks = project.detail?.content?.match(/- \[.\]/g) || [];
+const done = project.detail?.content?.match(/- \[x\]/g) || [];
+const progress = tasks.length > 0 ? Math.round((done.length / tasks.length) * 100) : 0;
+---
+
+<a href={`/projects/${project.id}`} class="card">
+  <div class="card-header">
+    <div class="title-row">
+      <PriorityDot priority={project.priority || "medium"} />
+      <h3>{project.title}</h3>
+    </div>
+    <StatusBadge status={project.status} />
+  </div>
+  {project.goal && <p class="goal">{project.goal}</p>}
+  {tasks.length > 0 && (
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" style={`width: ${progress}%`}></div>
+      </div>
+      <span class="progress-text">{done.length}/{tasks.length}</span>
+    </div>
+  )}
+  <div class="meta">
+    {project.area && <span class="area">@ {project.area}</span>}
+    {project.deadline && <span class="deadline">~ {project.deadline}</span>}
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+    color: var(--text);
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .goal {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .progress-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+</style>

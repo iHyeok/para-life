@@ -1,0 +1,57 @@
+---
+interface Props {
+  area: any;
+}
+
+const { area } = Astro.props;
+---
+
+<a href={`/areas/${area.id}`} class="card">
+  <h3>{area.title}</h3>
+  {area.description && <p class="desc">{area.description}</p>}
+  {area.tags?.length > 0 && (
+    <div class="tags">
+      {area.tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+    </div>
+  )}
+</a>
+
+<style>
+  .card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+    color: var(--text);
+  }
+
+  .card:hover {
+    border-color: var(--purple);
+    text-decoration: none;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    color: var(--purple);
+  }
+</style>

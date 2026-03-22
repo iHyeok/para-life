@@ -1,0 +1,199 @@
+---
+import Base from "../layouts/Base.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import AreaCard from "../components/AreaCard.astro";
+import ResourceCard from "../components/ResourceCard.astro";
+import { getProjects, getAreas, getResources, getArchives } from "../lib/data";
+
+const projects = getProjects().filter((p: any) => p.visibility !== "private");
+const areas = getAreas().filter((a: any) => a.visibility !== "private");
+const resources = getResources().filter((r: any) => r.visibility !== "private");
+const archives = getArchives();
+
+const activeProjects = projects.filter((p: any) => p.status === "active");
+const holdProjects = projects.filter((p: any) => p.status === "on-hold");
+---
+
+<Base title="PARA Life Dashboard">
+  <div class="hero">
+    <h1>PARA Life</h1>
+    <p class="subtitle">Projects, Areas, Resources, Archives</p>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num">{activeProjects.length}</span>
+        <span class="stat-label">Active Projects</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">{areas.length}</span>
+        <span class="stat-label">Areas</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">{resources.length}</span>
+        <span class="stat-label">Resources</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">{archives.length}</span>
+        <span class="stat-label">Archived</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="projects">
+    <h2>Projects</h2>
+    {activeProjects.length > 0 && (
+      <div class="grid">
+        {activeProjects.map((p: any) => <ProjectCard project={p} />)}
+      </div>
+    )}
+    {holdProjects.length > 0 && (
+      <>
+        <h3 class="subsection">On Hold</h3>
+        <div class="grid">
+          {holdProjects.map((p: any) => <ProjectCard project={p} />)}
+        </div>
+      </>
+    )}
+    {projects.length === 0 && <p class="empty">No projects yet.</p>}
+  </section>
+
+  <section id="areas">
+    <h2>Areas</h2>
+    {areas.length > 0 ? (
+      <div class="grid">
+        {areas.map((a: any) => <AreaCard area={a} />)}
+      </div>
+    ) : (
+      <p class="empty">No areas yet.</p>
+    )}
+  </section>
+
+  <section id="resources">
+    <h2>Resources</h2>
+    {resources.length > 0 ? (
+      <div class="grid">
+        {resources.map((r: any) => <ResourceCard resource={r} />)}
+      </div>
+    ) : (
+      <p class="empty">No resources yet.</p>
+    )}
+  </section>
+
+  <section id="archives">
+    <h2>Archives</h2>
+    {archives.length > 0 ? (
+      <ul class="archive-list">
+        {archives.map((a: any) => (
+          <li>
+            <span class="archive-type">{a.originalType}</span>
+            <span>{a.title}</span>
+            <span class="archive-date">{a.archivedAt}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">No archived items.</p>
+    )}
+  </section>
+</Base>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    font-size: 1rem;
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  section {
+    margin-top: 3rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .subsection {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .archive-list {
+    list-style: none;
+  }
+
+  .archive-list li {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .archive-type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .archive-date {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+interface Props {
+  resource: any;
+}
+
+const { resource } = Astro.props;
+---
+
+<a href={`/resources/${resource.id}`} class="card">
+  <h3>{resource.title}</h3>
+  <div class="meta">
+    <span class="topic">{resource.topic}</span>
+    {resource.source && <span class="source">{resource.source}</span>}
+  </div>
+  {resource.tags?.length > 0 && (
+    <div class="tags">
+      {resource.tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+    </div>
+  )}
+</a>
+
+<style>
+  .card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+    color: var(--text);
+  }
+
+  .card:hover {
+    border-color: var(--green);
+    text-decoration: none;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .topic {
+    color: var(--green);
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+</style>

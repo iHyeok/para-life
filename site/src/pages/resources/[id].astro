@@ -1,0 +1,96 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getResources, getResource } from "../../lib/data";
+
+export function getStaticPaths() {
+  const resources = getResources();
+  return resources
+    .filter((r: any) => r.visibility !== "private")
+    .map((r: any) => ({ params: { id: r.id } }));
+}
+
+const { id } = Astro.params;
+const resource = getResource(id!);
+if (!resource) return Astro.redirect("/");
+
+const lines = (resource as any).content?.split("\n") || [];
+---
+
+<Base title={`${(resource as any).title} - PARA Life`}>
+  <div class="back"><a href="/">&larr; Dashboard</a></div>
+
+  <article>
+    <header>
+      <h1>{(resource as any).title}</h1>
+      <div class="meta">
+        <span class="topic">{(resource as any).topic}</span>
+        {(resource as any).source && <span>Source: {(resource as any).source}</span>}
+      </div>
+    </header>
+
+    <div class="content">
+      {lines.map((line: string) => {
+        if (line.startsWith("## ")) return <h2>{line.slice(3)}</h2>;
+        if (line.startsWith("### ")) return <h3>{line.slice(4)}</h3>;
+        if (line.startsWith("- ")) return <div class="list-item">{line.slice(2)}</div>;
+        if (line.trim() === "") return <br />;
+        return <p>{line}</p>;
+      })}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .topic {
+    color: var(--green);
+  }
+
+  .content {
+    margin-top: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .list-item {
+    padding: 0.2rem 0 0.2rem 1rem;
+    font-size: 0.9rem;
+    position: relative;
+  }
+
+  .list-item::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+</style>

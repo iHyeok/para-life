@@ -1,0 +1,32 @@
+---
+interface Props {
+  status: string;
+}
+
+const { status } = Astro.props;
+
+const colors: Record<string, string> = {
+  active: "var(--green)",
+  "on-hold": "var(--yellow)",
+  completed: "var(--text-muted)",
+  cancelled: "var(--red)",
+};
+
+const color = colors[status] || "var(--text-muted)";
+---
+
+<span class="badge" style={`--badge-color: ${color}`}>{status}</span>
+
+<style>
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--badge-color);
+    color: var(--badge-color);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+</style>
