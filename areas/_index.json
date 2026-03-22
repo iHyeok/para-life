@@ -9,6 +9,13 @@
       "tags": ["dev", "career"]
     },
     {
+      "id": "ai-study",
+      "title": "AI Study",
+      "visibility": "public",
+      "description": "AI/ML 관련 학습 및 역량 개발",
+      "tags": ["ai", "study", "ml"]
+    },
+    {
       "id": "naultech",
       "title": "NaulTech",
       "visibility": "limited",
