@@ -4,20 +4,29 @@ interface Props {
 }
 
 const { resource } = Astro.props;
+const isLimited = resource.visibility === "limited";
+const href = isLimited ? `/me/resources/${resource.id}` : `/resources/${resource.id}`;
 ---
 
-<a href={`/resources/${resource.id}`} class="card">
-  <h3>{resource.title}</h3>
-  <div class="meta">
-    <span class="topic">{resource.topic}</span>
-    {resource.source && <span class="source">{resource.source}</span>}
-  </div>
-  {resource.tags?.length > 0 && (
-    <div class="tags">
-      {resource.tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+{isLimited ? (
+  <a href={href} class="card limited">
+    <h3>{resource.title}</h3>
+    <span class="lock">Limited</span>
+  </a>
+) : (
+  <a href={href} class="card">
+    <h3>{resource.title}</h3>
+    <div class="meta">
+      <span class="topic">{resource.topic}</span>
+      {resource.source && <span class="source">{resource.source}</span>}
     </div>
-  )}
-</a>
+    {resource.tags?.length > 0 && (
+      <div class="tags">
+        {resource.tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+      </div>
+    )}
+  </a>
+)}
 
 <style>
   .card {
@@ -33,6 +42,27 @@ const { resource } = Astro.props;
   .card:hover {
     border-color: var(--green);
     text-decoration: none;
+  }
+
+  .card.limited {
+    opacity: 0.7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card.limited:hover {
+    border-color: var(--green);
+    opacity: 0.85;
+  }
+
+  .lock {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
   }
 
   h3 {

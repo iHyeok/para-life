@@ -7,33 +7,50 @@ interface Props {
 }
 
 const { project } = Astro.props;
+const isLimited = project.visibility === "limited";
 const tasks = project.detail?.content?.match(/- \[.\]/g) || [];
 const done = project.detail?.content?.match(/- \[x\]/g) || [];
 const progress = tasks.length > 0 ? Math.round((done.length / tasks.length) * 100) : 0;
+const href = isLimited ? `/me/projects/${project.id}` : `/projects/${project.id}`;
 ---
 
-<a href={`/projects/${project.id}`} class="card">
-  <div class="card-header">
-    <div class="title-row">
-      <PriorityDot priority={project.priority || "medium"} />
-      <h3>{project.title}</h3>
-    </div>
-    <StatusBadge status={project.status} />
-  </div>
-  {project.goal && <p class="goal">{project.goal}</p>}
-  {tasks.length > 0 && (
-    <div class="progress-section">
-      <div class="progress-bar">
-        <div class="progress-fill" style={`width: ${progress}%`}></div>
+{isLimited ? (
+  <a href={href} class="card limited">
+    <div class="card-header">
+      <div class="title-row">
+        <PriorityDot priority={project.priority || "medium"} />
+        <h3>{project.title}</h3>
       </div>
-      <span class="progress-text">{done.length}/{tasks.length}</span>
+      <span class="lock">Limited</span>
     </div>
-  )}
-  <div class="meta">
-    {project.area && <span class="area">@ {project.area}</span>}
-    {project.deadline && <span class="deadline">~ {project.deadline}</span>}
-  </div>
-</a>
+    <div class="meta">
+      {project.area && <span class="area">@ {project.area}</span>}
+    </div>
+  </a>
+) : (
+  <a href={href} class="card">
+    <div class="card-header">
+      <div class="title-row">
+        <PriorityDot priority={project.priority || "medium"} />
+        <h3>{project.title}</h3>
+      </div>
+      <StatusBadge status={project.status} />
+    </div>
+    {project.goal && <p class="goal">{project.goal}</p>}
+    {tasks.length > 0 && (
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" style={`width: ${progress}%`}></div>
+        </div>
+        <span class="progress-text">{done.length}/{tasks.length}</span>
+      </div>
+    )}
+    <div class="meta">
+      {project.area && <span class="area">@ {project.area}</span>}
+      {project.deadline && <span class="deadline">~ {project.deadline}</span>}
+    </div>
+  </a>
+)}
 
 <style>
   .card {
@@ -49,6 +66,24 @@ const progress = tasks.length > 0 ? Math.round((done.length / tasks.length) * 10
   .card:hover {
     border-color: var(--accent);
     text-decoration: none;
+  }
+
+  .card.limited {
+    opacity: 0.7;
+  }
+
+  .card.limited:hover {
+    border-color: var(--accent);
+    opacity: 0.85;
+  }
+
+  .lock {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
   }
 
   .card-header {

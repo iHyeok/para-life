@@ -1,0 +1,165 @@
+---
+import Base from "../../../layouts/Base.astro";
+import StatusBadge from "../../../components/StatusBadge.astro";
+import PriorityDot from "../../../components/PriorityDot.astro";
+import { getProjects, getProject } from "../../../lib/data";
+
+export function getStaticPaths() {
+  const projects = getProjects();
+  return projects
+    .filter((p: any) => p.visibility === "limited" || p.visibility === "private")
+    .map((p: any) => ({ params: { id: p.id } }));
+}
+
+const { id } = Astro.params;
+const project = getProject(id!);
+if (!project) return Astro.redirect("/me/");
+
+const lines = (project as any).content?.split("\n") || [];
+---
+
+<Base title={`${(project as any).title} - PARA Life`}>
+  <div class="back"><a href="/me/">&larr; Dashboard</a></div>
+
+  <article>
+    <header>
+      <div class="title-row">
+        <PriorityDot priority={(project as any).priority || "medium"} />
+        <h1>{(project as any).title}</h1>
+        <StatusBadge status={(project as any).status} />
+      </div>
+      <div class="meta">
+        {(project as any).area && <span>Area: <strong>{(project as any).area}</strong></span>}
+        {(project as any).deadline && <span>Deadline: <strong>{(project as any).deadline}</strong></span>}
+        {(project as any).createdAt && <span>Created: {(project as any).createdAt}</span>}
+      </div>
+      {(project as any).goal && <p class="goal">{(project as any).goal}</p>}
+      {(project as any).tags?.length > 0 && (
+        <div class="tags">
+          {(project as any).tags.map((t: string) => <span class="tag">#{t}</span>)}
+        </div>
+      )}
+    </header>
+
+    <div class="content">
+      {lines.map((line: string) => {
+        if (line.startsWith("## ")) return <h2>{line.slice(3)}</h2>;
+        if (line.startsWith("### ")) return <h3>{line.slice(4)}</h3>;
+        if (line.startsWith("- [x] ")) return <div class="task done"><span class="check">&#10003;</span>{line.slice(6)}</div>;
+        if (line.startsWith("- [ ] ")) return <div class="task"><span class="check-empty"></span>{line.slice(6)}</div>;
+        if (line.startsWith("- ")) return <div class="list-item">{line.slice(2)}</div>;
+        if (line.trim() === "") return <br />;
+        return <p>{line}</p>;
+      })}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .goal {
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  .content {
+    margin-top: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .content p {
+    margin-bottom: 0.3rem;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+  }
+
+  .task.done {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  .check {
+    color: var(--green);
+    font-weight: bold;
+    width: 1.2rem;
+  }
+
+  .check-empty {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .list-item {
+    padding: 0.2rem 0 0.2rem 1rem;
+    font-size: 0.9rem;
+    position: relative;
+  }
+
+  .list-item::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+</style>

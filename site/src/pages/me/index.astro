@@ -1,24 +1,23 @@
 ---
-import Base from "../layouts/Base.astro";
-import ProjectCard from "../components/ProjectCard.astro";
-import AreaCard from "../components/AreaCard.astro";
-import ResourceCard from "../components/ResourceCard.astro";
-import { getProjects, getAreas, getResources, getArchives } from "../lib/data";
+import Base from "../../layouts/Base.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import AreaCard from "../../components/AreaCard.astro";
+import ResourceCard from "../../components/ResourceCard.astro";
+import { getProjects, getAreas, getResources, getArchives } from "../../lib/data";
 
-const publicOrLimited = (item: any) => item.visibility === "public" || item.visibility === "limited";
-const projects = getProjects().filter(publicOrLimited);
-const areas = getAreas().filter(publicOrLimited);
-const resources = getResources().filter(publicOrLimited);
+const projects = getProjects();
+const areas = getAreas();
+const resources = getResources();
 const archives = getArchives();
 
 const activeProjects = projects.filter((p: any) => p.status === "active");
 const holdProjects = projects.filter((p: any) => p.status === "on-hold");
 ---
 
-<Base title="PARA Life Dashboard">
+<Base title="PARA Life - Private Dashboard">
   <div class="hero">
     <h1>PARA Life</h1>
-    <p class="subtitle">Projects, Areas, Resources, Archives</p>
+    <p class="subtitle">Private Dashboard</p>
     <div class="stats">
       <div class="stat">
         <span class="stat-num">{activeProjects.length}</span>

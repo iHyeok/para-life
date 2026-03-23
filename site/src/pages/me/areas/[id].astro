@@ -1,0 +1,102 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getAreas, getArea } from "../../../lib/data";
+
+export function getStaticPaths() {
+  const areas = getAreas();
+  return areas
+    .filter((a: any) => a.visibility === "limited" || a.visibility === "private")
+    .map((a: any) => ({ params: { id: a.id } }));
+}
+
+const { id } = Astro.params;
+const area = getArea(id!);
+if (!area) return Astro.redirect("/me/");
+
+const lines = (area as any).content?.split("\n") || [];
+---
+
+<Base title={`${(area as any).title} - PARA Life`}>
+  <div class="back"><a href="/me/">&larr; Dashboard</a></div>
+
+  <article>
+    <header>
+      <h1>{(area as any).title}</h1>
+      {(area as any).description && <p class="desc">{(area as any).description}</p>}
+      {(area as any).tags?.length > 0 && (
+        <div class="tags">
+          {(area as any).tags.map((t: string) => <span class="tag">#{t}</span>)}
+        </div>
+      )}
+    </header>
+
+    <div class="content">
+      {lines.map((line: string) => {
+        if (line.startsWith("## ")) return <h2>{line.slice(3)}</h2>;
+        if (line.startsWith("### ")) return <h3>{line.slice(4)}</h3>;
+        if (line.startsWith("- ")) return <div class="list-item">{line.slice(2)}</div>;
+        if (line.trim() === "") return <br />;
+        return <p>{line}</p>;
+      })}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .desc {
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    color: var(--purple);
+  }
+
+  .content {
+    margin-top: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .list-item {
+    padding: 0.2rem 0 0.2rem 1rem;
+    font-size: 0.9rem;
+    position: relative;
+  }
+
+  .list-item::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+</style>
