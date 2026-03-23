@@ -25,6 +25,18 @@
       "createdAt": "2026-03-22",
       "updatedAt": "2026-03-22",
       "tags": ["ai", "study", "presentation"]
+    },
+    {
+      "id": "ernf-learning",
+      "title": "ERNF 학습",
+      "status": "active",
+      "priority": "medium",
+      "visibility": "limited",
+      "area": "ernf",
+      "goal": "ERNF 관련 기술 학습 및 도구 배포",
+      "createdAt": "2026-03-23",
+      "updatedAt": "2026-03-23",
+      "tags": ["ernf", "learning"]
     }
   ]
 }
