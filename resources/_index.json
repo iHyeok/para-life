@@ -1,4 +1,14 @@
 {
   "description": "관심 주제별 참고자료 모음. SNS, 커뮤니티 등에서 수집한 정보.",
-  "items": []
+  "items": [
+    {
+      "id": "whatdreamscost-comfyui",
+      "title": "WhatDreamsCost ComfyUI Nodes (LTX 2.3)",
+      "topic": "ComfyUI",
+      "visibility": "limited",
+      "source": "Reddit / Arca",
+      "createdAt": "2026-03-23",
+      "tags": ["ltx", "comfyui", "video", "filmmaking"]
+    }
+  ]
 }
