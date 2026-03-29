@@ -9,6 +9,15 @@
       "source": "Reddit / Arca",
       "createdAt": "2026-03-23",
       "tags": ["ltx", "comfyui", "video", "filmmaking"]
+    },
+    {
+      "id": "lora-character-training",
+      "title": "LoRA 캐릭터 학습",
+      "topic": "LoRA Training",
+      "visibility": "limited",
+      "source": "Arca",
+      "createdAt": "2026-03-29",
+      "tags": ["lora", "sdxl", "character", "training", "ernf"]
     }
   ]
 }
