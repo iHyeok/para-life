@@ -8,7 +8,7 @@ area: "dev-career"
 goal: "PARA 기반 생활관리 웹앱 MVP 완성 및 Cloudflare 배포"
 deadline: ""
 createdAt: "2026-03-22"
-updatedAt: "2026-03-22"
+updatedAt: "2026-03-31"
 tags: ["para", "cloudflare", "web"]
 ---
 
@@ -24,9 +24,19 @@ PARA methodology based life/task management system.
 - [x] Define repo structure and data schema
 - [x] Build Cloudflare Pages frontend (dashboard)
 - [x] Set up GitHub Actions for auto-deploy
+- [x] Visibility 기반 접근 제어 (public/limited/private + /me/ 대시보드)
+- [x] Cloudflare Access 인증 (/me/* 보호)
+- [x] PARA-SPEC.md 명세서 작성
+- [x] /para 글로벌 스킬 생성
+- [x] Phase 0-1: tmux 환경 구성 (launchd 자동시작)
+- [x] Phase 0-2: Cloudflare Tunnel 구성 (api.kyxi.net → localhost:3847)
+- [ ] Phase 0-3: fakechat Channel 체험 및 검증
+- [ ] Phase 1: Custom Channel MCP Server 개발
+- [ ] Phase 2: para-life 채팅 UI 개발 (/me/chat)
+- [ ] Phase 3: para-life 자동 업데이트 연동
+- [ ] Phase 4: 고도화 (프로젝트별 채널 분리, 알림 통합, 브리핑)
 - [ ] Implement PARA CRUD operations
 - [ ] Add daily log feature
-- [ ] Custom domain setup
 
 ## Progress Log
 
@@ -37,3 +47,18 @@ PARA methodology based life/task management system.
 - Cloudflare Pages deployment complete
 - GitHub auto-deploy configured (push to main triggers rebuild)
 - Telegram integration working (Claude Code manages data via chat)
+
+### 2026-03-23
+
+- Visibility 접근 제어 구현 (public/limited/private)
+- /me/ 인증 대시보드 및 상세페이지 생성
+- Cloudflare Access 연동
+- PARA-SPEC.md 시스템 명세서 작성
+- /para 글로벌 스킬 생성 (~/.claude/skills/para/)
+
+### 2026-03-31
+
+- Orchestrator 로드맵 수립 (Phase 0~4)
+- Phase 0-1: tmux 환경 구성 완료 (dev 세션, launchd 자동시작)
+- Phase 0-2: Cloudflare Tunnel 구성 완료 (api.kyxi.net, 도메인 kyxi.net)
+- 로드맵 문서 추가 (docs/orchestrator-roadmap.md)
