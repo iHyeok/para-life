@@ -31,6 +31,10 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 ### 2026-03-31
 
 - tag-supporter 배포 완료 (https://tag-supporter.pages.dev/)
+- **prompt-gallery 배포 진행중**
+  - Cloudflare Tunnel이 현재 아키텍처(로컬 PC, SQLite, Meilisearch)에 가장 적합한 외부 서빙 방법임을 분석 — Tailscale 없이 브라우저만으로 협업자 접근 가능
+  - MCP 서버 구축 완료 — 10개 도구(검색/CRUD/태그/즐겨찾기) 제공, Claude Code·Cursor 등 AI 에이전트가 갤러리 직접 조작 가능, ComfyUI/NovelAI/Nanobanana 파이프라인 자동 업로드 지원
+  - README 업데이트 — MCP 서버 사용법(아키텍처, 설치, 설정, 예시)과 Cloudflare Tunnel 옵션 문서 반영
 
 ### 2026-03-23
 
