@@ -10,6 +10,7 @@ deadline: ""
 createdAt: ""
 updatedAt: ""
 tags: []
+relatedResources: []
 ---
 
 ## Overview

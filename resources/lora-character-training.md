@@ -6,6 +6,8 @@ visibility: "limited"
 source: "Arca"
 createdAt: "2026-03-29"
 tags: ["lora", "sdxl", "character", "training", "ernf"]
+area: "ernf"
+relatedProjects: ["ernf-learning"]
 ---
 
 ## 요약

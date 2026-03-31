@@ -11,9 +11,13 @@ tags: ["ai", "study", "ml"]
 - AI 트렌드와 기술 지속 학습
 - 스터디/발표 자료 준비 및 공유
 
-## Current Projects
+## Related Projects
 
-- AI 스터디 자료 준비 (2026-03-24)
+- [AI 스터디 자료 준비](../projects/ai-study-prep.md) — completed
+
+## Related Resources
+
+-
 
 ## Notes
 

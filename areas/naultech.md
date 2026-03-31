@@ -11,7 +11,11 @@ tags: ["work", "video", "signal-processing"]
 - Deliver quality signal processing solutions
 - Stay current with video processing technologies
 
-## Current Projects
+## Related Projects
+
+-
+
+## Related Resources
 
 -
 

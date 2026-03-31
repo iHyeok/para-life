@@ -12,9 +12,13 @@ tags: ["dev", "career"]
 - Learn new tools and frameworks as needed
 - Maintain clean, well-documented code
 
-## Current Projects
+## Related Projects
 
-- PARA Life Management App
+- [PARA Life Management App](../projects/para-app.md) — active
+
+## Related Resources
+
+-
 
 ## Notes
 

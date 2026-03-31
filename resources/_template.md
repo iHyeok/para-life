@@ -3,15 +3,17 @@ id: ""
 title: ""
 topic: ""
 visibility: "public"
+area: ""
 source: ""
 createdAt: ""
 tags: []
+relatedProjects: []
 ---
 
-## Notes
+## 요약
 
 
 
-## Links
+## 참고자료
 
 -

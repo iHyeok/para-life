@@ -11,9 +11,13 @@ tags: ["work", "tech-director"]
 - Oversee technical direction and architecture decisions
 - Guide team on technical best practices
 
-## Current Projects
+## Related Projects
 
--
+- [ERNF 학습](../projects/ernf-learning.md) — active
+
+## Related Resources
+
+- [LoRA 캐릭터 학습](../resources/lora-character-training.md)
 
 ## Notes
 

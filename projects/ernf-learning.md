@@ -10,6 +10,7 @@ deadline: ""
 createdAt: "2026-03-23"
 updatedAt: "2026-03-31"
 tags: ["ernf", "learning"]
+relatedResources: ["lora-character-training"]
 ---
 
 ## Overview

@@ -10,6 +10,7 @@ deadline: "2026-03-24"
 createdAt: "2026-03-22"
 updatedAt: "2026-03-31"
 tags: ["ai", "study", "presentation"]
+relatedResources: []
 ---
 
 ## Overview

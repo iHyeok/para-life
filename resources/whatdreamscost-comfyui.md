@@ -6,6 +6,8 @@ visibility: "public"
 source: "Reddit / Arca"
 createdAt: "2026-03-23"
 tags: ["ltx", "comfyui", "video", "filmmaking"]
+area: ""
+relatedProjects: []
 ---
 
 ## Notes

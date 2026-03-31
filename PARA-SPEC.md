@@ -43,14 +43,15 @@ para-life/
   "deadline": "YYYY-MM-DD (optional)",
   "createdAt": "YYYY-MM-DD",
   "updatedAt": "YYYY-MM-DD",
-  "tags": ["tag1", "tag2"]
+  "tags": ["tag1", "tag2"],
+  "relatedResources": ["resource-id (optional)"]
 }
 ```
 
 ### Project (.md)
 ```markdown
 ---
-id / title / status / priority / visibility / area / goal / deadline / createdAt / updatedAt / tags
+id / title / status / priority / visibility / area / goal / deadline / createdAt / updatedAt / tags / relatedResources
 ---
 
 ## Overview
@@ -83,16 +84,18 @@ id / title / status / priority / visibility / area / goal / deadline / createdAt
   "title": "리소스명",
   "topic": "주제 카테고리",
   "visibility": "public | limited | private",
+  "area": "area-id (optional)",
   "source": "출처",
   "createdAt": "YYYY-MM-DD",
-  "tags": ["tag1"]
+  "tags": ["tag1"],
+  "relatedProjects": ["project-id (optional)"]
 }
 ```
 
 ### Resource (.md) - 참고자료 구조
 ```markdown
 ---
-id / title / topic / visibility / source / createdAt / tags
+id / title / topic / visibility / area / source / createdAt / tags / relatedProjects
 ---
 
 ## 요약

@@ -11,7 +11,8 @@
       "goal": "PARA 기반 생활관리 웹앱 MVP 완성 및 Cloudflare 배포",
       "createdAt": "2026-03-22",
       "updatedAt": "2026-03-31",
-      "tags": ["para", "cloudflare", "web"]
+      "tags": ["para", "cloudflare", "web"],
+      "relatedResources": []
     },
     {
       "id": "ai-study-prep",
@@ -24,7 +25,8 @@
       "deadline": "2026-03-24",
       "createdAt": "2026-03-22",
       "updatedAt": "2026-03-31",
-      "tags": ["ai", "study", "presentation"]
+      "tags": ["ai", "study", "presentation"],
+      "relatedResources": []
     },
     {
       "id": "ernf-learning",
@@ -36,7 +38,8 @@
       "goal": "ERNF 관련 기술 학습 및 도구 배포",
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-31",
-      "tags": ["ernf", "learning"]
+      "tags": ["ernf", "learning"],
+      "relatedResources": ["lora-character-training"]
     }
   ]
 }
