@@ -123,7 +123,7 @@ function mime(ext: string) {
 const mcp = new Server(
   { name: "para-life-channel", version: "0.1.0" },
   {
-    capabilities: { tools: {}, experimental: { "claude/channel": {} } },
+    capabilities: { tools: {}, experimental: { "claude/channel": {}, "claude/channel/permission": {} } },
     instructions: `The sender reads the para-life chat UI, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches the UI.\n\nMessages from the para-life chat arrive as <channel source="para-life" chat_id="web" message_id="...">. If the tag has a file_path attribute, Read that file — it is an upload from the UI. Reply with the reply tool.\n\nYou are the PARA Life orchestrator. Your cwd is ~/para-life. Refer to PARA-SPEC.md for data management rules. You can read other project directories for status checks but only write to ~/para-life.`,
   }
 );
@@ -219,6 +219,37 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 });
 
 await mcp.connect(new StdioServerTransport());
+
+// --- Permission relay: CC → WebSocket → User → WebSocket → CC ---
+mcp.setNotificationHandler(
+  { method: "notifications/claude/channel/permission_request" } as any,
+  async (notification: any) => {
+    const { id, tool, description } = notification.params ?? {};
+    if (id) {
+      broadcast({
+        type: "permission_request",
+        id: id as string,
+        tool: (tool as string) ?? "unknown",
+        description: (description as string) ?? "",
+      });
+
+      // Wait for user response via WebSocket
+      const allowed = await new Promise<boolean>((resolve) => {
+        const timeout = setTimeout(() => {
+          pendingPermissions.delete(id as string);
+          resolve(false); // Auto-deny after 60s
+        }, 60000);
+        pendingPermissions.set(id as string, { resolve, timeout });
+      });
+
+      // Send response back to CC
+      void mcp.notification({
+        method: "notifications/claude/channel/permission",
+        params: { id, allowed },
+      });
+    }
+  }
+);
 
 // --- Deliver message to Claude Code ---
 function deliver(
@@ -459,6 +490,18 @@ header h1 { font-size: 1rem; font-weight: 700; }
   opacity: 0.6;
   margin-top: 0.3rem;
 }
+.msg.thinking {
+  opacity: 0.5;
+  padding: 0.6rem 1.2rem;
+}
+.dots span {
+  animation: blink 1.4s infinite;
+  font-size: 1.2rem;
+  letter-spacing: 0.15rem;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
 .msg .reply-ref {
   font-size: 0.75rem;
   opacity: 0.7;
@@ -579,7 +622,7 @@ function connect() {
   };
   ws.onmessage = (e) => {
     const m = JSON.parse(e.data);
-    if (m.type === 'msg') addMsg(m);
+    if (m.type === 'msg') { hideThinking(); addMsg(m); }
     if (m.type === 'edit') {
       const el = msgMap[m.id];
       if (el) el.querySelector('.body').textContent = m.text + ' (edited)';
@@ -622,6 +665,19 @@ function respondPermission(id, allowed) {
   ws.send(JSON.stringify({ type: 'permission_response', id, allowed }));
 }
 
+let thinkingEl = null;
+function showThinking() {
+  if (thinkingEl) return;
+  thinkingEl = document.createElement('div');
+  thinkingEl.className = 'msg assistant thinking';
+  thinkingEl.innerHTML = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+  msgs.appendChild(thinkingEl);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideThinking() {
+  if (thinkingEl) { thinkingEl.remove(); thinkingEl = null; }
+}
+
 function send() {
   const text = textEl.value.trim();
   const file = fileInput.files[0];
@@ -632,6 +688,7 @@ function send() {
   autoResize();
   const id = 'u' + Date.now() + '-' + (++uid);
   addMsg({ id, from: 'user', text, ts: Date.now(), file: file ? { url: URL.createObjectURL(file), name: file.name } : undefined });
+  showThinking();
   if (file) {
     const fd = new FormData();
     fd.set('id', id);
