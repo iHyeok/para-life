@@ -136,9 +136,14 @@ id / title / topic / visibility / area / source / createdAt / tags / relatedProj
 2. Project의 경우 `updatedAt` 갱신
 
 ### 항목 완료/아카이브
-1. `_index.json`에서 항목 제거
-2. `archives/_index.json`에 추가 (originalType, archivedAt 포함)
-3. `.md` 파일은 archives/로 이동
+
+프로젝트가 completed 상태가 되면 즉시 아카이브 처리한다. completed 상태로 projects/에 남겨두지 않는다.
+
+1. `projects/_index.json`에서 항목 제거
+2. `archives/_index.json`에 추가 (originalType, area, archivedAt 포함)
+3. `.md` 파일을 `archives/`로 이동
+4. 관련 Area `.md`의 Related Projects에서 해당 항목 제거
+5. 관련 Resource의 `relatedProjects`에서 해당 프로젝트 id 제거
 
 ### Resource에 참고자료 추가
 1. 해당 주제의 resource `.md` 파일에 "## 참고자료" 섹션에 추가

@@ -1,4 +1,14 @@
 {
   "description": "완료되거나 비활성화된 항목들의 보관소.",
-  "items": []
+  "items": [
+    {
+      "id": "ai-study-prep",
+      "title": "AI 스터디 자료 준비",
+      "originalType": "project",
+      "visibility": "public",
+      "area": "ai-study",
+      "archivedAt": "2026-03-31",
+      "tags": ["ai", "study", "presentation"]
+    }
+  ]
 }

@@ -13,7 +13,7 @@ tags: ["ai", "study", "ml"]
 
 ## Related Projects
 
-- [AI 스터디 자료 준비](../projects/ai-study-prep.md) — completed
+-
 
 ## Related Resources
 

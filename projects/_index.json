@@ -15,20 +15,6 @@
       "relatedResources": []
     },
     {
-      "id": "ai-study-prep",
-      "title": "AI 스터디 자료 준비",
-      "status": "completed",
-      "priority": "high",
-      "visibility": "public",
-      "area": "ai-study",
-      "goal": "3월 24일 AI 스터디 발표 자료 완성",
-      "deadline": "2026-03-24",
-      "createdAt": "2026-03-22",
-      "updatedAt": "2026-03-31",
-      "tags": ["ai", "study", "presentation"],
-      "relatedResources": []
-    },
-    {
       "id": "ernf-learning",
       "title": "ERNF 학습",
       "status": "active",

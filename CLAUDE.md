@@ -33,9 +33,13 @@
 ```
 
 ### 프로젝트 상태 전환
-- active → completed: status 변경, 완료 기록
+- active → completed: **즉시 아카이브 처리** (completed 상태로 projects/에 남기지 않음)
+  1. projects/_index.json에서 제거
+  2. archives/_index.json에 추가 (originalType, area, archivedAt)
+  3. .md를 archives/로 이동
+  4. 관련 Area .md의 Related Projects에서 제거
+  5. 관련 Resource의 relatedProjects에서 제거
 - active → on-hold: status 변경, 사유 기록
-- completed → archived: _index.json에서 제거, archives/_index.json에 추가, .md를 archives/로 이동
 
 ### 레퍼런스 추가
 - 기존 주제가 있으면 해당 .md에 참고자료 추가
