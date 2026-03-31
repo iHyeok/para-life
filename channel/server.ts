@@ -227,9 +227,9 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 await mcp.connect(new StdioServerTransport());
 
 // --- Permission relay: CC → WebSocket → User → WebSocket → CC ---
-mcp.setNotificationHandler(
-  { method: "notifications/claude/channel/permission_request" } as any,
-  async (notification: any) => {
+// Use fallback notification handler to catch permission requests
+(mcp as any).fallbackNotificationHandler = async (notification: any) => {
+  if (notification.method === "notifications/claude/channel/permission_request") {
     const { id, tool, description } = notification.params ?? {};
     if (id) {
       broadcast({
@@ -239,23 +239,21 @@ mcp.setNotificationHandler(
         description: (description as string) ?? "",
       });
 
-      // Wait for user response via WebSocket
       const allowed = await new Promise<boolean>((resolve) => {
         const timeout = setTimeout(() => {
           pendingPermissions.delete(id as string);
-          resolve(false); // Auto-deny after 60s
+          resolve(false);
         }, 60000);
         pendingPermissions.set(id as string, { resolve, timeout });
       });
 
-      // Send response back to CC
       void mcp.notification({
         method: "notifications/claude/channel/permission",
         params: { id, allowed },
       });
     }
   }
-);
+};
 
 // --- Deliver message to Claude Code ---
 function deliver(
