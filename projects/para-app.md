@@ -30,9 +30,9 @@ PARA methodology based life/task management system.
 - [x] /para 글로벌 스킬 생성
 - [x] Phase 0-1: tmux 환경 구성 (launchd 자동시작)
 - [x] Phase 0-2: Cloudflare Tunnel 구성 (api.kyxi.net → localhost:3847)
-- [ ] Phase 0-3: fakechat Channel 체험 및 검증
-- [ ] Phase 1: Custom Channel MCP Server 개발
-- [ ] Phase 2: para-life 채팅 UI 개발 (/me/chat)
+- [x] Phase 0-3: fakechat Channel 체험 및 검증
+- [x] Phase 1: Custom Channel MCP Server 개발
+- [ ] Phase 2: para-life 채팅 UI 개발 (/me/chat, Cloudflare Tunnel 외부 접속)
 - [ ] Phase 3: para-life 자동 업데이트 연동
 - [ ] Phase 4: 고도화 (프로젝트별 채널 분리, 알림 통합, 브리핑)
 - [ ] Implement PARA CRUD operations
@@ -62,3 +62,9 @@ PARA methodology based life/task management system.
 - Phase 0-1: tmux 환경 구성 완료 (dev 세션, launchd 자동시작)
 - Phase 0-2: Cloudflare Tunnel 구성 완료 (api.kyxi.net, 도메인 kyxi.net)
 - 로드맵 문서 추가 (docs/orchestrator-roadmap.md)
+- Phase 0-3: fakechat 채널 검증 완료 (브라우저↔CC 양방향 통신, tmux detach 유지 확인)
+- Phase 1: Custom Channel MCP Server 개발 완료
+  - channel/server.ts 작성 (fakechat 기반, 포트 3847, 다크테마 UI)
+  - 핵심 발견: `--channels` 대신 `--dangerously-load-development-channels server:name` 단독 사용이 올바른 방법
+  - fakechat 수정 방식은 무결성 체크로 인해 불가 → .mcp.json에 별도 서버로 등록
+  - tmux 시작 스크립트에 자동 실행 반영

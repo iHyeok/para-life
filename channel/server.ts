@@ -25,6 +25,7 @@ import {
 import { homedir } from "os";
 import { join, extname, basename } from "path";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { execSync } from "child_process";
 import type { ServerWebSocket } from "bun";
 
 // --- Config ---
@@ -225,22 +226,48 @@ function deliver(
   text: string,
   file?: { path: string; name: string }
 ): void {
-  void mcp.notification({
-    method: "notifications/claude/channel",
-    params: {
-      content: text || `(${file?.name ?? "attachment"})`,
-      meta: {
-        chat_id: "web",
-        message_id: id,
-        user: "web",
-        ts: new Date().toISOString(),
-        ...(file ? { file_path: file.path } : {}),
+  try {
+    const result = mcp.notification({
+      method: "notifications/claude/channel",
+      params: {
+        content: text || `(${file?.name ?? "attachment"})`,
+        meta: {
+          chat_id: "web",
+          message_id: id,
+          user: "web",
+          ts: new Date().toISOString(),
+          ...(file ? { file_path: file.path } : {}),
+        },
       },
-    },
-  });
+    });
+    // Handle both sync and async cases
+    if (result && typeof (result as any).catch === "function") {
+      (result as any).catch((err: unknown) => {
+        process.stderr.write(`deliver async error: ${err}\n`);
+      });
+    }
+  } catch (err) {
+    process.stderr.write(`deliver sync error: ${err}\n`);
+  }
 }
 
+// Global unhandled rejection handler to prevent crash
+process.on("unhandledRejection", (err) => {
+  process.stderr.write(`unhandled rejection: ${err}\n`);
+});
+
+// --- Kill stale process on our port ---
+try {
+  const pid = execSync(`lsof -ti :${PORT}`, { encoding: "utf-8" }).trim();
+  if (pid) {
+    process.stderr.write(`killing stale process on port ${PORT}: pid ${pid}\n`);
+    execSync(`kill ${pid}`);
+    Bun.sleepSync(500);
+  }
+} catch {}
+
 // --- HTTP + WebSocket Server ---
+try {
 Bun.serve({
   port: PORT,
   hostname: "0.0.0.0", // Accept tunnel connections
@@ -349,6 +376,9 @@ Bun.serve({
     },
   },
 });
+} catch (e) {
+  process.stderr.write(`server start error: ${e}\n`);
+}
 
 process.stderr.write(`para-life-channel: http://localhost:${PORT}\n`);
 
