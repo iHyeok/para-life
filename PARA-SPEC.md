@@ -158,9 +158,13 @@ npx wrangler r2 object put para-life-assets/{category}/{id}/{filename} \
 - 리소스 첨부: `resources/{resource-id}/{filename}`
 - 영역 관련: `areas/{area-id}/{filename}`
 
+### 공개 URL
+- 커스텀 도메인: `https://kyxi.net/{path}`
+- 예시: `https://kyxi.net/projects/ai-study-prep/result.mp4`
+
 ### 기록 방법
-- 해당 `.md` 파일의 Resources 섹션에 `r2://para-life-assets/...` 경로 기록
-- 공개 URL이 필요하면 Cloudflare 대시보드에서 퍼블릭 도메인 설정 필요
+- 해당 `.md` 파일의 Resources 섹션에 마크다운 링크로 기록
+- 형식: `[파일 설명](https://kyxi.net/{category}/{id}/{filename})`
 
 ## Commit Convention
 

@@ -46,7 +46,7 @@
 - 채널에서 파일이 첨부되면 R2 버킷 `para-life-assets`에 업로드
 - 경로: `{category}/{id}/{filename}` (예: `projects/ai-study-prep/result.mp4`)
 - 명령: `npx wrangler r2 object put para-life-assets/{path} --file {local} --content-type {mime} --remote`
-- 업로드 후 해당 `.md`의 Resources에 `r2://para-life-assets/...` 경로 기록
+- 업로드 후 해당 `.md`의 Resources에 `[설명](https://kyxi.net/{path})` 링크 기록
 
 ### 일일/주간 브리핑
 - 전체 프로젝트 상태 요약
