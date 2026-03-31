@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-03-23"
+updatedAt: "2026-03-31"
 tags: ["ernf", "learning"]
 ---
 
@@ -18,7 +18,7 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 
 ## Tasks
 
-- [ ] tag-supporter 배포하기
+- [x] tag-supporter 배포하기 — https://tag-supporter.pages.dev/
 - [ ] XYZ 워크플로우 만들기
 - [ ] anima 스타일 학습하기
 - [ ] anima 케릭터 학습하기
@@ -27,6 +27,10 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [ ] 워크플로우에 prompt gallery 연동시키기
 
 ## Progress Log
+
+### 2026-03-31
+
+- tag-supporter 배포 완료 (https://tag-supporter.pages.dev/)
 
 ### 2026-03-23
 
