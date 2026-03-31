@@ -650,8 +650,11 @@ function autoResize() {
   textEl.style.height = Math.min(textEl.scrollHeight, 120) + 'px';
 }
 textEl.addEventListener('input', autoResize);
+let composing = false;
+textEl.addEventListener('compositionstart', () => { composing = true; });
+textEl.addEventListener('compositionend', () => { composing = false; });
 textEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  if (e.key === 'Enter' && !e.shiftKey && !composing) { e.preventDefault(); send(); }
 });
 </script>
 </body>
