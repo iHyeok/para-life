@@ -15,6 +15,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 import {
   readFileSync,
   writeFileSync,
@@ -227,33 +228,39 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 await mcp.connect(new StdioServerTransport());
 
 // --- Permission relay: CC → WebSocket → User → WebSocket → CC ---
-// Use fallback notification handler to catch permission requests
-(mcp as any).fallbackNotificationHandler = async (notification: any) => {
-  if (notification.method === "notifications/claude/channel/permission_request") {
-    const { id, tool, description } = notification.params ?? {};
-    if (id) {
-      broadcast({
-        type: "permission_request",
-        id: id as string,
-        tool: (tool as string) ?? "unknown",
-        description: (description as string) ?? "",
-      });
+mcp.setNotificationHandler(
+  z.object({
+    method: z.literal("notifications/claude/channel/permission_request"),
+    params: z.object({
+      request_id: z.string(),
+      tool_name: z.string(),
+      description: z.string(),
+      input_preview: z.string(),
+    }),
+  }),
+  async ({ params }) => {
+    const { request_id, tool_name, description } = params;
+    broadcast({
+      type: "permission_request",
+      id: request_id,
+      tool: tool_name,
+      description,
+    });
 
-      const allowed = await new Promise<boolean>((resolve) => {
-        const timeout = setTimeout(() => {
-          pendingPermissions.delete(id as string);
-          resolve(false);
-        }, 60000);
-        pendingPermissions.set(id as string, { resolve, timeout });
-      });
+    const allowed = await new Promise<boolean>((resolve) => {
+      const timeout = setTimeout(() => {
+        pendingPermissions.delete(request_id);
+        resolve(false);
+      }, 60000);
+      pendingPermissions.set(request_id, { resolve, timeout });
+    });
 
-      void mcp.notification({
-        method: "notifications/claude/channel/permission",
-        params: { id, allowed },
-      });
-    }
-  }
-};
+    void mcp.notification({
+      method: "notifications/claude/channel/permission",
+      params: { request_id, behavior: allowed ? "allow" : "deny" },
+    });
+  },
+);
 
 // --- Deliver message to Claude Code ---
 function deliver(
