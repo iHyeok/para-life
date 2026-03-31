@@ -141,6 +141,27 @@ id / title / topic / visibility / source / createdAt / tags
 1. 해당 주제의 resource `.md` 파일에 "## 참고자료" 섹션에 추가
 2. `_index.json`은 수정 불필요 (이미 존재하는 리소스인 경우)
 
+## 파일 업로드 (Cloudflare R2)
+
+파일 첨부가 필요한 경우 Cloudflare R2 버킷 `para-life-assets`에 업로드한다.
+
+### 업로드 방법
+```bash
+npx wrangler r2 object put para-life-assets/{category}/{id}/{filename} \
+  --file {로컬파일경로} \
+  --content-type {MIME타입} \
+  --remote
+```
+
+### 경로 규칙
+- 프로젝트 결과물: `projects/{project-id}/{filename}`
+- 리소스 첨부: `resources/{resource-id}/{filename}`
+- 영역 관련: `areas/{area-id}/{filename}`
+
+### 기록 방법
+- 해당 `.md` 파일의 Resources 섹션에 `r2://para-life-assets/...` 경로 기록
+- 공개 URL이 필요하면 Cloudflare 대시보드에서 퍼블릭 도메인 설정 필요
+
 ## Commit Convention
 
 ```

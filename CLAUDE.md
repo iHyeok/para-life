@@ -42,6 +42,12 @@
 - 새 주제면 resource .md 새로 생성 + _index.json에 추가
 - visibility 미지정 시 사용자에게 물어볼 것
 
+### 파일 업로드
+- 채널에서 파일이 첨부되면 R2 버킷 `para-life-assets`에 업로드
+- 경로: `{category}/{id}/{filename}` (예: `projects/ai-study-prep/result.mp4`)
+- 명령: `npx wrangler r2 object put para-life-assets/{path} --file {local} --content-type {mime} --remote`
+- 업로드 후 해당 `.md`의 Resources에 `r2://para-life-assets/...` 경로 기록
+
 ### 일일/주간 브리핑
 - 전체 프로젝트 상태 요약
 - 마감 임박 항목 알림

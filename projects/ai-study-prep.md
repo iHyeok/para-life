@@ -8,7 +8,7 @@ area: "ai-study"
 goal: "3월 24일 AI 스터디 발표 자료 완성"
 deadline: "2026-03-24"
 createdAt: "2026-03-22"
-updatedAt: "2026-03-22"
+updatedAt: "2026-03-31"
 tags: ["ai", "study", "presentation"]
 ---
 
@@ -19,6 +19,7 @@ AI 스터디 발표를 위한 자료 준비.
 ## Resources
 
 - [발표 자료 (Google Slides)](https://docs.google.com/presentation/d/10oifovhQp5_1zjXcGKzFqnRtlHswWWmFFnOo4bL91OM/edit?usp=sharing)
+- 결과물 영상: `r2://para-life-assets/projects/ai-study-prep/ai-study-result.mp4`
 
 ## Tasks
 
@@ -26,6 +27,10 @@ AI 스터디 발표를 위한 자료 준비.
 - [ ] 발표 연습
 
 ## Progress Log
+
+### 2026-03-31
+
+- AI 스터디 결과물 영상 R2 업로드 완료
 
 ### 2026-03-22
 
