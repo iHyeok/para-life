@@ -1,0 +1,184 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getArchives, getArchive } from "../../../lib/data";
+
+export function getStaticPaths() {
+  const archives = getArchives();
+  return archives
+    .filter((a: any) => a.visibility === "limited" || a.visibility === "private")
+    .map((a: any) => ({ params: { id: a.id } }));
+}
+
+const { id } = Astro.params;
+const archive = getArchive(id!);
+if (!archive) return Astro.redirect("/me/");
+
+const meta = getArchives().find((a: any) => a.id === id);
+const lines = (archive as any).content?.split("\n") || [];
+---
+
+<Base title={`${(archive as any).title} - PARA Life`}>
+  <div class="back"><a href="/me/">&larr; Dashboard</a></div>
+
+  <article>
+    <header>
+      <div class="title-row">
+        <h1>{(archive as any).title}</h1>
+        <span class="badge archived">Archived</span>
+        {meta?.originalType && <span class="badge type">{meta.originalType}</span>}
+      </div>
+      <div class="meta">
+        {meta?.area && <span>Area: <strong>{meta.area}</strong></span>}
+        {meta?.archivedAt && <span>Archived: {meta.archivedAt}</span>}
+        {(archive as any).createdAt && <span>Created: {(archive as any).createdAt}</span>}
+      </div>
+      {(archive as any).goal && <p class="goal">{(archive as any).goal}</p>}
+      {(archive as any).tags?.length > 0 && (
+        <div class="tags">
+          {(archive as any).tags.map((t: string) => <span class="tag">#{t}</span>)}
+        </div>
+      )}
+    </header>
+
+    <div class="content">
+      {lines.map((line: string) => {
+        if (line.startsWith("## ")) return <h2>{line.slice(3)}</h2>;
+        if (line.startsWith("### ")) return <h3>{line.slice(4)}</h3>;
+        if (line.startsWith("- [x] ")) return <div class="task done"><span class="check">&#10003;</span>{line.slice(6)}</div>;
+        if (line.startsWith("- [ ] ")) return <div class="task"><span class="check-empty"></span>{line.slice(6)}</div>;
+        if (line.startsWith("- ")) return <div class="list-item">{line.slice(2)}</div>;
+        if (line.trim() === "") return <br />;
+        return <p>{line}</p>;
+      })}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .badge.archived {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .badge.type {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .goal {
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border-left: 3px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .content {
+    margin-top: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .content p {
+    margin-bottom: 0.3rem;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+  }
+
+  .task.done {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  .check {
+    color: var(--green);
+    font-weight: bold;
+    width: 1.2rem;
+  }
+
+  .check-empty {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .list-item {
+    padding: 0.2rem 0 0.2rem 1rem;
+    font-size: 0.9rem;
+    position: relative;
+  }
+
+  .list-item::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+</style>

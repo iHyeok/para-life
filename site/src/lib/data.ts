@@ -44,7 +44,14 @@ export function getResources() {
 
 export function getArchives() {
   const index = readIndex("archives");
-  return index.items;
+  return index.items.map((item: any) => ({
+    ...item,
+    detail: readMarkdown("archives", item.id),
+  }));
+}
+
+export function getArchive(id: string) {
+  return readMarkdown("archives", id);
 }
 
 export function getProject(id: string) {

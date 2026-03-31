@@ -82,13 +82,18 @@ const holdProjects = projects.filter((p: any) => p.status === "on-hold");
     <h2>Archives</h2>
     {archives.length > 0 ? (
       <ul class="archive-list">
-        {archives.map((a: any) => (
-          <li>
-            <span class="archive-type">{a.originalType}</span>
-            <span>{a.title}</span>
-            <span class="archive-date">{a.archivedAt}</span>
-          </li>
-        ))}
+        {archives.map((a: any) => {
+          const href = `/me/archives/${a.id}/`;
+          return (
+            <li>
+              <a href={href} class="archive-link">
+                <span class="archive-type">{a.originalType}</span>
+                <span>{a.title}</span>
+                <span class="archive-date">{a.archivedAt}</span>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     ) : (
       <p class="empty">No archived items.</p>
@@ -174,12 +179,22 @@ const holdProjects = projects.filter((p: any) => p.status === "on-hold");
   }
 
   .archive-list li {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .archive-link {
     display: flex;
     gap: 1rem;
     align-items: center;
     padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border);
     font-size: 0.9rem;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .archive-link:hover {
+    color: var(--accent);
   }
 
   .archive-type {
