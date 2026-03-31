@@ -26,6 +26,10 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [ ] prompt gallery 배포하기
 - [ ] 워크플로우에 prompt gallery 연동시키기
 
+## Resources
+
+- [LoftA 포즈 탐구 레퍼런스](https://kyxi.net/projects/ernf-learning/lofta_pose_exploration.png)
+
 ## Progress Log
 
 ### 2026-03-31
