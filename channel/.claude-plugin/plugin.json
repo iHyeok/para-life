@@ -1,0 +1,6 @@
+{
+  "name": "para-life-channel",
+  "description": "PARA Life orchestrator channel - chat UI with Cloudflare Access auth for remote project management",
+  "version": "0.1.0",
+  "keywords": ["para-life", "channel", "orchestrator", "mcp"]
+}
