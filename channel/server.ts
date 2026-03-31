@@ -94,6 +94,8 @@ type PermissionWaiter = {
 // --- State ---
 const clients = new Set<ServerWebSocket<unknown>>();
 const pendingPermissions = new Map<string, PermissionWaiter>();
+const history: Wire[] = [];
+const MAX_HISTORY = 200;
 let seq = 0;
 
 function nextId() {
@@ -101,6 +103,10 @@ function nextId() {
 }
 
 function broadcast(m: Wire) {
+  if (m.type === "msg") {
+    history.push(m);
+    if (history.length > MAX_HISTORY) history.shift();
+  }
   const data = JSON.stringify(m);
   for (const ws of clients) if (ws.readyState === 1) ws.send(data);
 }
@@ -384,7 +390,8 @@ Bun.serve({
   websocket: {
     open: (ws) => {
       clients.add(ws);
-      broadcast({ type: "status", connected: true });
+      // Send history to newly connected client
+      for (const m of history) ws.send(JSON.stringify(m));
     },
     close: (ws) => {
       clients.delete(ws);
@@ -402,7 +409,11 @@ Bun.serve({
           return;
         }
         const { id, text } = data as { id: string; text: string };
-        if (id && text?.trim()) deliver(id, text.trim());
+        if (id && text?.trim()) {
+          history.push({ type: "msg", id, from: "user", text: text.trim(), ts: Date.now() });
+          if (history.length > MAX_HISTORY) history.shift();
+          deliver(id, text.trim());
+        }
       } catch {}
     },
   },
