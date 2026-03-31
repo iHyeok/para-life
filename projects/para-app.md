@@ -32,7 +32,7 @@ PARA methodology based life/task management system.
 - [x] Phase 0-2: Cloudflare Tunnel 구성 (api.kyxi.net → localhost:3847)
 - [x] Phase 0-3: fakechat Channel 체험 및 검증
 - [x] Phase 1: Custom Channel MCP Server 개발
-- [ ] Phase 2: para-life 채팅 UI 개발 (/me/chat, Cloudflare Tunnel 외부 접속)
+- [x] Phase 2: para-life 채팅 UI + Cloudflare Tunnel 외부 접속 + Access 인증
 - [ ] Phase 3: para-life 자동 업데이트 연동
 - [ ] Phase 4: 고도화 (프로젝트별 채널 분리, 알림 통합, 브리핑)
 - [ ] Implement PARA CRUD operations
@@ -68,3 +68,7 @@ PARA methodology based life/task management system.
   - 핵심 발견: `--channels` 대신 `--dangerously-load-development-channels server:name` 단독 사용이 올바른 방법
   - fakechat 수정 방식은 무결성 체크로 인해 불가 → .mcp.json에 별도 서버로 등록
   - tmux 시작 스크립트에 자동 실행 반영
+- Phase 2: 채팅 UI + 외부 접속 완료
+  - Cloudflare Tunnel 경유 api.kyxi.net → localhost:3847 동작 확인
+  - Cloudflare Access 인증 설정 (api.kyxi.net 보호)
+  - 한글 IME 중복 전송 버그 수정
