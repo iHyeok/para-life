@@ -75,3 +75,7 @@ PARA methodology based life/task management system.
 - Phase 3: 자동 업데이트 연동 완료
   - CLAUDE.md 작성 (오케스트레이터 역할, 쓰기 권한, 크로스 프로젝트 참조 규칙)
   - 채팅 경유 PARA 데이터 관리 동작 확인
+- 채널 UI 개선
+  - Thinking indicator (... 애니메이션)
+  - Permission relay (채팅 UI에서 Allow/Deny 승인)
+  - 메시지 히스토리 (새로고침 시 이전 대화 유지, 최대 200개)
