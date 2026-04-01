@@ -22,6 +22,17 @@
       "createdAt": "2026-03-29",
       "tags": ["lora", "sdxl", "character", "training", "ernf"],
       "relatedProjects": ["ernf-learning"]
+    },
+    {
+      "id": "anima-prompting",
+      "title": "Anima Preview 2 프롬프팅",
+      "topic": "Prompting",
+      "visibility": "limited",
+      "area": "ernf",
+      "source": "Arca",
+      "createdAt": "2026-04-01",
+      "tags": ["anima", "prompting", "quality-tags", "ernf"],
+      "relatedProjects": ["ernf-learning"]
     }
   ]
 }

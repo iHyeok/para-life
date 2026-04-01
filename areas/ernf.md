@@ -18,6 +18,7 @@ tags: ["work", "tech-director"]
 ## Related Resources
 
 - [LoRA 캐릭터 학습](../resources/lora-character-training.md)
+- [Anima Preview 2 프롬프팅](../resources/anima-prompting.md)
 
 ## Notes
 
