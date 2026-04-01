@@ -30,6 +30,7 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 ## Resources
 
 - [LoftA 포즈 탐구 레퍼런스](https://kyxi.net/projects/ernf-learning/lofta_pose_exploration.png)
+- [Anima Preview 2 프롬프팅](https://kyxi.net/resources/anima-prompting/sample-maid.png) — 퀄리티 태그 민감도, 아티스트 태그 활용 팁
 
 ## Progress Log
 
