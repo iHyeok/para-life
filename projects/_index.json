@@ -23,7 +23,7 @@
       "area": "ernf",
       "goal": "ERNF 관련 기술 학습 및 도구 배포",
       "createdAt": "2026-03-23",
-      "updatedAt": "2026-03-31",
+      "updatedAt": "2026-04-01",
       "tags": ["ernf", "learning"],
       "relatedResources": ["lora-character-training", "anima-prompting"]
     }
