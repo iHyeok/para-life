@@ -34,5 +34,17 @@
       "tags": ["anima", "prompting", "quality-tags", "ernf"],
       "relatedProjects": ["ernf-learning"]
     }
+    ,
+    {
+      "id": "seedance-2",
+      "title": "Seedance 2.0 (Dreamina)",
+      "topic": "Video Generation",
+      "visibility": "public",
+      "area": "ai-study",
+      "source": "Dreamina",
+      "createdAt": "2026-04-01",
+      "tags": ["seedance", "dreamina", "video-generation", "ai"],
+      "relatedProjects": []
+    }
   ]
 }
