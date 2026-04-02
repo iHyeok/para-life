@@ -26,6 +26,19 @@
       "updatedAt": "2026-04-01",
       "tags": ["ernf", "learning"],
       "relatedResources": ["lora-character-training", "anima-prompting"]
+    },
+    {
+      "id": "ernf-tech-eval",
+      "title": "ERNF 기술 평가 Metric 시스템",
+      "status": "active",
+      "priority": "high",
+      "visibility": "limited",
+      "area": "ernf",
+      "goal": "새로운 AI 이미지 생성 기술의 성능 비교 기준/방법 수립 및 자동 반복 평가 파이프라인 구축",
+      "createdAt": "2026-04-02",
+      "updatedAt": "2026-04-02",
+      "tags": ["ernf", "evaluation", "benchmark", "automation"],
+      "relatedResources": []
     }
   ]
 }

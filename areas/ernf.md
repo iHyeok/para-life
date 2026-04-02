@@ -14,6 +14,7 @@ tags: ["work", "tech-director"]
 ## Related Projects
 
 - [ERNF 학습](../projects/ernf-learning.md) — active
+- [ERNF 기술 평가 Metric 시스템](../projects/ernf-tech-eval.md) — active
 
 ## Related Resources
 
