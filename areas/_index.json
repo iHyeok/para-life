@@ -23,6 +23,13 @@
       "tags": ["work", "video", "signal-processing"]
     },
     {
+      "id": "black-market",
+      "title": "암시장",
+      "visibility": "private",
+      "description": "아이디어 인큐베이터. 구체화되면 Project로 승격.",
+      "tags": ["ideas", "incubation"]
+    },
+    {
       "id": "ernf",
       "title": "ERNF",
       "visibility": "limited",
