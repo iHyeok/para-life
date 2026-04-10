@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-04-01"
+updatedAt: "2026-04-10"
 tags: ["ernf", "learning"]
 relatedResources: ["lora-character-training", "anima-prompting"]
 ---
@@ -34,6 +34,17 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [see-through 테스트 결과](https://kyxi.net/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
 
 ## Progress Log
+
+### 2026-04-10
+
+- **see-through serverless 작업 진행중** — Docker 컨테이너 내에서 requirements 설치 시 네트워크 이슈 발생
+  - `pip install -r requirements.txt` 실행 시 `timm @ git+https://github.com/huggingface/pytorch-image-models@...` 라인에서 실패
+  - 에러: `fatal: unable to access 'https://github.com/huggingface/pytorch-image-models/': Could not resolve host: github.com`
+  - 원인: 컨테이너 내부에서 github.com DNS resolve 불가 (네트워크/DNS 설정 문제)
+  - 대응 방향:
+    - Docker 네트워크/DNS 설정 확인 (`--dns 8.8.8.8` 또는 호스트 네트워크 모드)
+    - 또는 timm을 사전 빌드된 wheel로 교체하거나, 컨테이너 빌드 단계에서 미리 clone
+    - 또는 requirements.txt에서 git 의존성 제거 후 별도 설치
 
 ### 2026-04-01
 
