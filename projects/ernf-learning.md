@@ -40,11 +40,16 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - **see-through serverless 작업 진행중** — Docker 컨테이너 내에서 requirements 설치 시 네트워크 이슈 발생
   - `pip install -r requirements.txt` 실행 시 `timm @ git+https://github.com/huggingface/pytorch-image-models@...` 라인에서 실패
   - 에러: `fatal: unable to access 'https://github.com/huggingface/pytorch-image-models/': Could not resolve host: github.com`
-  - 원인: 컨테이너 내부에서 github.com DNS resolve 불가 (네트워크/DNS 설정 문제)
-  - 대응 방향:
-    - Docker 네트워크/DNS 설정 확인 (`--dns 8.8.8.8` 또는 호스트 네트워크 모드)
-    - 또는 timm을 사전 빌드된 wheel로 교체하거나, 컨테이너 빌드 단계에서 미리 clone
-    - 또는 requirements.txt에서 git 의존성 제거 후 별도 설치
+  - 원인: 컨테이너 내부에서 pip 서브프로세스가 git clone 시점에 github.com resolve 실패 (네트워크/DNS 설정 문제)
+  - **해결**: 문제 패키지만 수동 클론 후 로컬 설치 → 나머지는 requirements로 설치
+    ```bash
+    git clone https://github.com/huggingface/pytorch-image-models /tmp/timm-src
+    cd /tmp/timm-src
+    git checkout 6e3fdda39508db30766f9d9e6ec32380ebee8b8c
+    pip install .
+    # 이후 requirements.txt 정상 설치
+    pip install -r requirements.txt
+    ```
 
 ### 2026-04-01
 
