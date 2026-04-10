@@ -41,6 +41,11 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - **see-through VRAM 요구량 측정**
   - 1024 해상도: VRAM 16GB
   - 2048 해상도: VRAM 22GB
+- **see-through 모델 캐시 크기** (총 ~12.6GB, `/workspace/.cache/huggingface/hub/`)
+  - `24yearsold/seethroughv0.0.1_marigold` — 3.1GB
+  - `frankjoshua/juggernautXL_version6Rundiffusion` — 126KB (메타데이터만)
+  - `layerdifforg/seethroughv0.0.2_layerdiff3d` — 9.5GB
+  - → 컨테이너 이미지 베이킹 시 모델 사전 다운로드 필요, 콜드 스타트 최소화 고려
 - **see-through serverless 작업 진행중** — Docker 컨테이너 내에서 requirements 설치 시 네트워크 이슈 발생
   - `pip install -r requirements.txt` 실행 시 `timm @ git+https://github.com/huggingface/pytorch-image-models@...` 라인에서 실패
   - 에러: `fatal: unable to access 'https://github.com/huggingface/pytorch-image-models/': Could not resolve host: github.com`
