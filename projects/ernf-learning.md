@@ -38,6 +38,9 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 ### 2026-04-10
 
 - **see-through runpod 환경 구축** — 새 pod 생성 → 환경세팅 → `inference_psd` 실행까지 약 1시간 10분 소요 (향후 자동화/이미지화 필요)
+- **see-through VRAM 요구량 측정**
+  - 1024 해상도: VRAM 16GB
+  - 2048 해상도: VRAM 22GB
 - **see-through serverless 작업 진행중** — Docker 컨테이너 내에서 requirements 설치 시 네트워크 이슈 발생
   - `pip install -r requirements.txt` 실행 시 `timm @ git+https://github.com/huggingface/pytorch-image-models@...` 라인에서 실패
   - 에러: `fatal: unable to access 'https://github.com/huggingface/pytorch-image-models/': Could not resolve host: github.com`
