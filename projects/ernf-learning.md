@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-04-10"
+updatedAt: "2026-04-13"
 tags: ["ernf", "learning"]
 relatedResources: ["lora-character-training", "anima-prompting"]
 ---
@@ -34,6 +34,14 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [see-through 테스트 결과](https://kyxi.net/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
 
 ## Progress Log
+
+### 2026-04-13
+
+- **see-through serverless — network volume 제약 확인**
+  - RunPod serverless에서 대부분 GPU 티어가 Unavailable 상태 ([스크린샷](https://kyxi.net/projects/ernf-learning/runpod-serverless-gpu-availability.png))
+  - 24GB PRO만 사용 가능, 48GB PRO는 Low Supply, 나머지 전부 Unavailable
+  - network volume은 특정 데이터센터/GPU에 종속되어, 가용 GPU가 없으면 워커 스케일업 불가
+  - 결론: network volume 방식은 현실적 제약이 큼 → 모델을 컨테이너 이미지에 직접 베이킹하는 방향 검토 필요
 
 ### 2026-04-10
 
