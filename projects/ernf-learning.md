@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-04-13"
+updatedAt: "2026-04-14"
 tags: ["ernf", "learning"]
 relatedResources: ["lora-character-training", "anima-prompting"]
 ---
@@ -34,6 +34,13 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [see-through 테스트 결과](https://kyxi.net/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
 
 ## Progress Log
+
+### 2026-04-14
+
+- **see-through serverless 연동 완료!** ([워커 현황](https://kyxi.net/projects/ernf-learning/see-through-serverless-workers.png))
+  - RunPod serverless (Queue based) 엔드포인트 구동 확인
+  - RTX 5090 워커 5대 (US 3, IS 1, NO 1) initializing/throttled 상태
+  - network volume 제약 → 컨테이너 이미지 베이킹 방식으로 전환하여 해결한 것으로 보임
 
 ### 2026-04-13
 
