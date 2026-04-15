@@ -18,6 +18,7 @@ tags: ["ai", "study", "ml"]
 ## Related Resources
 
 - [Seedance 2.0 (Dreamina)](../resources/seedance-2.md)
+- [AI 쇼케이스](../resources/ai-showcase.md)
 
 ## Notes
 

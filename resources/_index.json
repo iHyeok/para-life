@@ -46,5 +46,17 @@
       "tags": ["seedance", "dreamina", "video-generation", "ai"],
       "relatedProjects": []
     }
+    ,
+    {
+      "id": "ai-showcase",
+      "title": "AI 쇼케이스",
+      "topic": "AI",
+      "visibility": "public",
+      "area": "ai-study",
+      "source": "Various",
+      "createdAt": "2026-04-15",
+      "tags": ["ai", "showcase", "ads"],
+      "relatedProjects": []
+    }
   ]
 }
