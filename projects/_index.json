@@ -40,5 +40,19 @@
       "tags": ["ernf", "evaluation", "benchmark", "automation"],
       "relatedResources": []
     }
+    ,
+    {
+      "id": "english-vocab",
+      "title": "영어공부 페이지 만들기",
+      "status": "active",
+      "priority": "low",
+      "visibility": "public",
+      "area": "global-prep",
+      "goal": "모르는 단어를 추가하면 의미·발음·유글리쉬 예시가 자동 생성되는 영어 단어장 페이지 구축",
+      "createdAt": "2026-04-22",
+      "updatedAt": "2026-04-22",
+      "tags": ["english", "vocabulary", "automation"],
+      "relatedResources": []
+    }
   ]
 }
