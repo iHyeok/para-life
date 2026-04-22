@@ -293,10 +293,68 @@ para-life UI에서 채널 선택 UI 제공.
 
 ## 우선순위 및 일정 가이드
 
-| Phase | 예상 소요 | 우선순위 | 선행 조건 |
-|-------|----------|---------|----------|
-| Phase 0 | 1~2시간 | 즉시 | 없음 |
-| Phase 1 | 2~3일 | 높음 | Phase 0 완료, fakechat 구조 이해 |
-| Phase 2 | 2~3일 | 높음 | Phase 1 완료 |
-| Phase 3 | 1일 | 중간 | Phase 2 완료 |
-| Phase 4 | 필요 시 | 낮음 | 전체 안정화 후 |
+| Phase | 상태 | 비고 |
+|-------|------|------|
+| Phase 0 | ✅ 완료 | tmux, Cloudflare Tunnel (kyxi.net), fakechat 검증 |
+| Phase 1 | ✅ 완료 | Custom Channel MCP Server (channel/server.ts) |
+| Phase 2 | ✅ 완료 | 채팅 UI + Tunnel 외부 접속 + Access 인증 |
+| Phase 3 | ✅ 완료 | CLAUDE.md, 자동 업데이트 연동 |
+| Phase 4-1 | ✅ 완료 | Multichat UI (다중 채널 관리) |
+| Phase 4 나머지 | 미정 | 알림 통합, 브리핑 자동화 |
+
+## 운영 가이드
+
+### 서비스 시작
+
+```bash
+# 전체 환경 시작 (tmux 세션 + orchestrator CC + multichat 서버)
+~/scripts/start-dev-env.sh
+```
+
+이 스크립트가 실행하는 것:
+1. tmux `dev` 세션 생성
+2. `multichat` 윈도우: `python3 -m http.server 5174` (multichat UI 서빙)
+3. `orchestrator` 윈도우: `claude --dangerously-load-development-channels server:para-life-channel`
+
+### 서비스 접속
+
+| 서비스 | 로컬 | 외부 (Cloudflare Tunnel) |
+|--------|------|--------------------------|
+| Multichat UI | http://localhost:5174 | https://main.kyxi.net |
+| 채널 서버 (para-life) | http://localhost:3847 | https://api.kyxi.net |
+| 채널 서버 (보조) | http://localhost:3848 | https://api2.kyxi.net |
+
+### 자동 시작 (launchd)
+
+- **tmux 세션**: `~/Library/LaunchAgents/com.para-life.dev-tmux.plist` (부팅 시)
+- **Cloudflare Tunnel**: `~/Library/LaunchAgents/com.para-life.cloudflared.plist` (부팅 시, KeepAlive)
+
+### 수동 조작
+
+```bash
+# tmux 세션 접속
+tmux attach -t dev
+
+# 윈도우 전환: Ctrl+B → 0(orchestrator), 1(multichat)
+
+# CC 재시작 (orchestrator 윈도우에서)
+exit
+pkill -f "bun.*server.ts"
+claude --dangerously-load-development-channels server:para-life-channel
+
+# multichat 서버 재시작 (multichat 윈도우에서)
+# Ctrl+C로 중단 후
+python3 -m http.server 5174
+```
+
+### 핵심 파일
+
+| 파일 | 용도 |
+|------|------|
+| `channel/server.ts` | MCP 채널 서버 (CC ↔ WebSocket 브릿지) |
+| `multichat/` | 다중 채널 채팅 UI (React, CDN) |
+| `CLAUDE.md` | 오케스트레이터 동작 규칙 |
+| `PARA-SPEC.md` | 데이터 스키마 및 운영 규칙 |
+| `.mcp.json` | 채널 서버 MCP 등록 |
+| `~/scripts/start-dev-env.sh` | tmux 시작 스크립트 |
+| `~/.cloudflared/config.yml` | Cloudflare Tunnel 라우팅 |

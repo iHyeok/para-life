@@ -35,7 +35,8 @@ PARA methodology based life/task management system.
 - [x] Phase 1: Custom Channel MCP Server 개발
 - [x] Phase 2: para-life 채팅 UI + Cloudflare Tunnel 외부 접속 + Access 인증
 - [x] Phase 3: para-life 자동 업데이트 연동 (CLAUDE.md, 크로스 프로젝트 규칙)
-- [ ] Phase 4: 고도화 (프로젝트별 채널 분리, 알림 통합, 브리핑)
+- [x] Phase 4-1: Multichat UI (다중 채널 관리 인터페이스)
+- [ ] Phase 4: 고도화 (알림 통합, 브리핑 자동화)
 - [ ] Implement PARA CRUD operations
 - [ ] Add daily log feature
 
@@ -80,3 +81,13 @@ PARA methodology based life/task management system.
   - Thinking indicator (... 애니메이션)
   - Permission relay (채팅 UI에서 Allow/Deny 승인)
   - 메시지 히스토리 (새로고침 시 이전 대화 유지, 최대 200개)
+
+### 2026-04-22
+
+- Multichat UI 구현 완료
+  - 다중 채널 사이드바 + 대화 뷰 (React, CDN, no-build)
+  - WebSocket 자동 연결/재연결, 채널별 상태 관리
+  - 채널 추가/제거 (localStorage 저장)
+  - Permission relay, thinking indicator, 한글 IME 지원
+  - main.kyxi.net 경유 외부 접속
+  - tmux 시작 스크립트에 multichat 서버 자동 시작 추가
