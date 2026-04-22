@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-04-14"
+updatedAt: "2026-04-22"
 tags: ["ernf", "learning"]
 relatedResources: ["lora-character-training", "anima-prompting"]
 ---
@@ -32,10 +32,13 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - [LoftA 포즈 탐구 레퍼런스](https://kyxi.net/projects/ernf-learning/lofta_pose_exploration.png)
 - [Anima Preview 2 프롬프팅](https://kyxi.net/resources/anima-prompting/sample-maid.png) — 퀄리티 태그 민감도, 아티스트 태그 활용 팁
 - [see-through 테스트 결과](https://kyxi.net/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
+- anima 케릭터 LoRA 2차 결과물 — [레퍼런스](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-reference.png), [00115](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00115.png), [00116](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00116.png), [00117](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00117.png)
 
 ## Progress Log
 
-### 2026-04-14
+### 2026-04-22
+
+- **anima 케릭터 LoRA 2차 학습 결과물 공유** — 레퍼런스 캐릭터(FANTYPIE 워터마크) 기반 테스트 샘플 3장 (00115/00116/00117). 선글라스·초커·오픈 재킷·헤테로크로미아 등 핵심 디테일 재현 확인
 
 - **see-through serverless 연동 완료!** ([워커 현황](https://kyxi.net/projects/ernf-learning/see-through-serverless-workers.png))
   - RunPod serverless (Queue based) 엔드포인트 구동 확인
