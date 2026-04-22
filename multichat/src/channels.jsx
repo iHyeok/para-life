@@ -86,13 +86,17 @@ class ChannelManager {
   }
 
   async uploadFile(id, text, file) {
-    const fd = new FormData();
-    fd.set('id', id);
-    fd.set('text', text || '');
-    fd.set('file', file);
+    if (!this.ws || this.ws.readyState !== 1) return;
     try {
-      const res = await fetch(`${this.httpUrl}/upload`, { method: 'POST', body: fd, credentials: 'include' });
-      if (!res.ok) console.error('upload failed:', res.status, await res.text());
+      const buf = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      this.ws.send(JSON.stringify({
+        type: 'file_upload',
+        id,
+        text: text || '',
+        fileName: file.name,
+        fileData: base64,
+      }));
     } catch (err) {
       console.error('upload error:', err);
     }

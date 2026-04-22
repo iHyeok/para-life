@@ -425,6 +425,19 @@ Bun.serve({
           }
           return;
         }
+        // File upload via WebSocket (base64 encoded)
+        if (data.type === "file_upload") {
+          const { id, text, fileName, fileData } = data;
+          if (id && fileName && fileData) {
+            mkdirSync(INBOX_DIR, { recursive: true });
+            const ext = extname(fileName).toLowerCase() || ".bin";
+            const path = join(INBOX_DIR, `${Date.now()}${ext}`);
+            writeFileSync(path, Buffer.from(fileData, "base64"));
+            deliver(id, text || "", { path, name: fileName });
+          }
+          return;
+        }
+
         const { id, text } = data as { id: string; text: string };
         if (id && text?.trim()) {
           history.push({ type: "msg", id, from: "user", text: text.trim(), ts: Date.now() });
