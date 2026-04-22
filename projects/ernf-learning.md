@@ -39,6 +39,7 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 ### 2026-04-22
 
 - **anima 케릭터 LoRA 2차 학습 결과물 공유** — 레퍼런스 캐릭터(FANTYPIE 워터마크) 기반 테스트 샘플 3장 (00115/00116/00117). 선글라스·초커·오픈 재킷·헤테로크로미아 등 핵심 디테일 재현 확인
+  - 1차 대비 파라미터 변경: learning rate 0.0005 → 0.0001 (1/5로 감소), rank 2배, alpha 2배
 
 - **see-through serverless 연동 완료!** ([워커 현황](https://kyxi.net/projects/ernf-learning/see-through-serverless-workers.png))
   - RunPod serverless (Queue based) 엔드포인트 구동 확인
