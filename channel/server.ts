@@ -315,10 +315,12 @@ Bun.serve({
   hostname: "0.0.0.0", // Accept tunnel connections
   async fetch(req, server) {
     const url = new URL(req.url);
+    const origin = req.headers.get("origin") || "*";
     const cors: Record<string, string> = {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
     };
 
     // CORS preflight

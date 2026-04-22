@@ -91,7 +91,7 @@ class ChannelManager {
     fd.set('text', text || '');
     fd.set('file', file);
     try {
-      const res = await fetch(`${this.httpUrl}/upload`, { method: 'POST', body: fd });
+      const res = await fetch(`${this.httpUrl}/upload`, { method: 'POST', body: fd, credentials: 'include' });
       if (!res.ok) console.error('upload failed:', res.status, await res.text());
     } catch (err) {
       console.error('upload error:', err);
