@@ -240,7 +240,11 @@ function Sidebar({ channels, activeId, onSelect, onAdd, onRemove, density }) {
 }
 
 // ---- Message bubble ----
-function MessageBubble({ msg, isMe, showTime, grouped }) {
+function isImageFile(name) {
+  return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name || '');
+}
+
+function MessageBubble({ msg, isMe, showTime, grouped, httpUrl }) {
   const align = isMe ? 'flex-end' : 'flex-start';
   const bubbleStyle = {
     padding: '9px 13px', borderRadius: 14,
@@ -260,10 +264,33 @@ function MessageBubble({ msg, isMe, showTime, grouped }) {
     });
   }
 
+  const file = msg.file;
+  const fileUrl = file ? (file.url.startsWith('http') ? file.url : (httpUrl || '') + file.url) : null;
+  const fileIsImage = file && isImageFile(file.name);
+
   return (
     <div className="msg-in" style={{ display: 'flex', flexDirection: 'column', alignItems: align, marginTop: grouped ? 3 : 10 }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, flexDirection: isMe ? 'row-reverse' : 'row' }}>
-        <div style={bubbleStyle}>{msg.text}</div>
+        <div style={bubbleStyle}>
+          {msg.text && <div>{msg.text}</div>}
+          {file && fileIsImage && (
+            <a href={fileUrl} target="_blank" rel="noopener" style={{ display: 'block', marginTop: msg.text ? 6 : 0 }}>
+              <img src={fileUrl} alt={file.name} style={{
+                maxWidth: 300, maxHeight: 240, borderRadius: 8, display: 'block',
+              }} />
+            </a>
+          )}
+          {file && !fileIsImage && (
+            <a href={fileUrl} download={file.name} target="_blank" rel="noopener" style={{
+              display: 'flex', alignItems: 'center', gap: 6, marginTop: msg.text ? 6 : 0,
+              fontSize: 13, color: isMe ? 'var(--accent-ink)' : 'var(--accent)',
+              textDecoration: 'underline',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+              {file.name}
+            </a>
+          )}
+        </div>
         {showTime && (
           <div style={{ fontSize: 10, color: 'var(--ink-3)', fontFamily: 'JetBrains Mono, monospace', marginBottom: 2, whiteSpace: 'nowrap' }}>
             {formatClock(msg.ts)}
@@ -358,11 +385,38 @@ function ConversationHeader({ channel, onRemove }) {
   );
 }
 
+// ---- File chip ----
+function FileChip({ file, onRemove }) {
+  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      background: 'var(--hover)', border: '1px solid var(--line-2)',
+      borderRadius: 8, padding: '4px 8px', fontSize: 12, color: 'var(--ink-2)',
+    }}>
+      {isImage && file._preview && (
+        <img src={file._preview} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'cover' }} />
+      )}
+      <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+      <button onClick={onRemove} style={{
+        width: 16, height: 16, border: 'none', background: 'transparent',
+        color: 'var(--ink-3)', cursor: 'pointer', padding: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+    </div>
+  );
+}
+
 // ---- Composer ----
 function Composer({ onSend, disabled }) {
   const [text, setText] = useState('');
+  const [files, setFiles] = useState([]);
   const [composing, setComposing] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const taRef = useRef(null);
+  const fileRef = useRef(null);
 
   useLayoutEffect(() => {
     if (taRef.current) {
@@ -371,27 +425,77 @@ function Composer({ onSend, disabled }) {
     }
   }, [text]);
 
-  const submit = () => {
-    const v = text.trim();
-    if (!v) return;
-    onSend(v);
-    setText('');
+  const addFiles = (newFiles) => {
+    const arr = Array.from(newFiles).map(f => {
+      const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+      if (isImage) f._preview = URL.createObjectURL(f);
+      return f;
+    });
+    setFiles(prev => [...prev, ...arr]);
   };
 
+  const removeFile = (idx) => {
+    setFiles(prev => {
+      const next = [...prev];
+      if (next[idx]._preview) URL.revokeObjectURL(next[idx]._preview);
+      next.splice(idx, 1);
+      return next;
+    });
+  };
+
+  const submit = () => {
+    const v = text.trim();
+    if (!v && files.length === 0) return;
+    onSend(v, files);
+    setText('');
+    files.forEach(f => { if (f._preview) URL.revokeObjectURL(f._preview); });
+    setFiles([]);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
+  };
+
+  const hasContent = text.trim() || files.length > 0;
+
   return (
-    <div style={{
-      padding: '14px 24px 18px', background: 'var(--panel)',
-      borderTop: '1px solid var(--line)', flexShrink: 0,
-    }}>
+    <div
+      style={{
+        padding: '14px 24px 18px', background: 'var(--panel)',
+        borderTop: '1px solid var(--line)', flexShrink: 0,
+      }}
+      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
+      {/* File chips */}
+      {files.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          {files.map((f, i) => <FileChip key={i} file={f} onRemove={() => removeFile(i)} />)}
+        </div>
+      )}
       <div style={{
         display: 'flex', alignItems: 'flex-end', gap: 10,
-        background: 'var(--bg)', border: '1px solid var(--line-2)',
+        background: 'var(--bg)',
+        border: dragOver ? '2px dashed var(--accent)' : '1px solid var(--line-2)',
         borderRadius: 14, padding: '8px 10px 8px 14px',
         transition: 'border-color .12s',
       }}
         onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-        onBlur={e => e.currentTarget.style.borderColor = 'var(--line-2)'}
+        onBlur={e => { if (!dragOver) e.currentTarget.style.borderColor = 'var(--line-2)'; }}
       >
+        <input ref={fileRef} type="file" multiple style={{ display: 'none' }}
+          onChange={e => { if (e.target.files.length > 0) addFiles(e.target.files); }} />
+        <button onClick={() => fileRef.current?.click()} title="파일 첨부" style={{
+          width: 28, height: 28, border: 'none', background: 'transparent',
+          color: 'var(--ink-3)', cursor: 'pointer', borderRadius: 6,
+          marginBottom: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+        </button>
         <textarea
           ref={taRef}
           value={text}
@@ -404,7 +508,7 @@ function Composer({ onSend, disabled }) {
               submit();
             }
           }}
-          placeholder="메시지 입력…"
+          placeholder={dragOver ? '여기에 파일을 놓으세요' : '메시지 입력…'}
           disabled={disabled}
           rows={1}
           style={{
@@ -417,13 +521,13 @@ function Composer({ onSend, disabled }) {
         />
         <button
           onClick={submit}
-          disabled={!text.trim()}
+          disabled={!hasContent}
           title="전송 (Enter)"
           style={{
             width: 32, height: 32, border: 'none',
-            cursor: text.trim() ? 'pointer' : 'default',
-            background: text.trim() ? 'var(--accent)' : 'transparent',
-            color: text.trim() ? 'var(--accent-ink)' : 'var(--ink-3)',
+            cursor: hasContent ? 'pointer' : 'default',
+            background: hasContent ? 'var(--accent)' : 'transparent',
+            color: hasContent ? 'var(--accent-ink)' : 'var(--ink-3)',
             borderRadius: 10, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background .12s',
@@ -432,7 +536,7 @@ function Composer({ onSend, disabled }) {
         </button>
       </div>
       <div style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 6, paddingLeft: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.02em' }}>
-        Enter 전송 · Shift+Enter 줄바꿈
+        Enter 전송 · Shift+Enter 줄바꿈 · 파일 드래그앤드롭
       </div>
     </div>
   );
@@ -496,6 +600,7 @@ function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) 
               isMe={isMe}
               showTime={showTimestamps && g.showTime}
               grouped={g.grouped}
+              httpUrl={channel.httpUrl}
             />
           );
         })}

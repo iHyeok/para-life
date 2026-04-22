@@ -205,16 +205,30 @@ function App() {
     return enrichedChannels.find(ch => ch.id === activeId) || null;
   }, [enrichedChannels, activeId]);
 
-  const handleSend = (text) => {
+  const handleSend = (text, files = []) => {
     if (!activeId) return;
-    const id = window.generateMsgId();
     const mgr = managersRef.current[activeId];
-    if (mgr) {
+    if (!mgr) return;
+
+    if (files.length === 0) {
+      // Text only
+      const id = window.generateMsgId();
       mgr.send(id, text);
-      // Add user message locally
       dispatch({ type: 'MESSAGE', channelId: activeId, msg: { id, from: 'user', text, ts: Date.now() }, isActive: true });
-      dispatch({ type: 'SET_THINKING', channelId: activeId, value: true });
+    } else {
+      // Send each file as a separate message (server supports 1 file per message)
+      files.forEach((file, i) => {
+        const id = window.generateMsgId();
+        const msgText = i === 0 ? text : '';
+        mgr.uploadFile(id, msgText, file);
+        dispatch({
+          type: 'MESSAGE', channelId: activeId,
+          msg: { id, from: 'user', text: msgText || file.name, ts: Date.now(), file: { url: file._preview || '', name: file.name } },
+          isActive: true,
+        });
+      });
     }
+    dispatch({ type: 'SET_THINKING', channelId: activeId, value: true });
   };
 
   const handlePermissionRespond = (permId, allowed) => {
