@@ -88,8 +88,12 @@ class ChannelManager {
   async uploadFile(id, text, file) {
     if (!this.ws || this.ws.readyState !== 1) return;
     try {
-      const buf = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
       this.ws.send(JSON.stringify({
         type: 'file_upload',
         id,
