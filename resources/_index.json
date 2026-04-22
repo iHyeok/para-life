@@ -58,5 +58,17 @@
       "tags": ["ai", "showcase", "ads"],
       "relatedProjects": []
     }
+    ,
+    {
+      "id": "misc-assets",
+      "title": "잡동사니 보관소",
+      "topic": "Assets",
+      "visibility": "private",
+      "area": "",
+      "source": "Various",
+      "createdAt": "2026-04-22",
+      "tags": ["misc", "assets", "storage"],
+      "relatedProjects": []
+    }
   ]
 }
