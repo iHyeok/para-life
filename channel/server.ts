@@ -315,12 +315,22 @@ Bun.serve({
   hostname: "0.0.0.0", // Accept tunnel connections
   async fetch(req, server) {
     const url = new URL(req.url);
+    const cors: Record<string, string> = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
+
+    // CORS preflight
+    if (req.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: cors });
+    }
 
     // Health check (no auth needed)
     if (url.pathname === "/health") {
       return new Response(
         JSON.stringify({ status: "ok", clients: clients.size }),
-        { headers: { "content-type": "application/json" } }
+        { headers: { ...cors, "content-type": "application/json" } }
       );
     }
 
@@ -328,7 +338,7 @@ Bun.serve({
     if (!SKIP_AUTH) {
       const token = extractToken(req);
       if (!token || !(await verifyToken(token))) {
-        return new Response("Unauthorized", { status: 401 });
+        return new Response("Unauthorized", { status: 401, headers: cors });
       }
     }
 
@@ -345,10 +355,10 @@ Bun.serve({
         return new Response("bad", { status: 400 });
       try {
         return new Response(readFileSync(join(OUTBOX_DIR, f)), {
-          headers: { "content-type": mime(extname(f).toLowerCase()) },
+          headers: { ...cors, "content-type": mime(extname(f).toLowerCase()) },
         });
       } catch {
-        return new Response("404", { status: 404 });
+        return new Response("404", { status: 404, headers: cors });
       }
     }
 
@@ -368,7 +378,7 @@ Bun.serve({
         file = { path, name: f.name };
       }
       deliver(id, text, file);
-      return new Response(null, { status: 204 });
+      return new Response(null, { status: 204, headers: cors });
     }
 
     // Permission response from UI
@@ -380,7 +390,7 @@ Bun.serve({
         waiter.resolve(body.allowed);
         pendingPermissions.delete(body.id);
       }
-      return new Response(null, { status: 204 });
+      return new Response(null, { status: 204, headers: cors });
     }
 
     // Serve chat UI
