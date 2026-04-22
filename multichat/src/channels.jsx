@@ -88,11 +88,14 @@ class ChannelManager {
   async uploadFile(id, text, file) {
     const fd = new FormData();
     fd.set('id', id);
-    fd.set('text', text);
+    fd.set('text', text || '');
     fd.set('file', file);
     try {
-      await fetch(`${this.httpUrl}/upload`, { method: 'POST', body: fd });
-    } catch {}
+      const res = await fetch(`${this.httpUrl}/upload`, { method: 'POST', body: fd });
+      if (!res.ok) console.error('upload failed:', res.status, await res.text());
+    } catch (err) {
+      console.error('upload error:', err);
+    }
   }
 
   _setStatus(s) {
