@@ -152,8 +152,6 @@ function escapeHtml(s: string) {
 
 const SAFE_URL = /^(https?:|mailto:|\/|\.|#)/i;
 
-const CATEGORIES: Category[] = ["projects", "areas", "resources", "archives"];
-
 /** Resolve "../projects/foo.md"-style links between PARA items to site URLs (archived items included). */
 function resolveItemLink(href: string, view: View): string | null | undefined {
   const m = href.match(/^(?:\.\.?\/)*(projects|areas|resources|archives)\/([\w-]+)\.md(#.*)?$/);

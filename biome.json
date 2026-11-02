@@ -1,0 +1,65 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": [
+			"channel/**/*.ts",
+			"multichat/src/**",
+			"multichat/test/**",
+			"multichat/playwright.config.ts",
+			"site/src/**/*.ts",
+			"site/scripts/**",
+			"site/test/**",
+			"!multichat/build",
+			"!**/node_modules"
+		]
+	},
+	"formatter": { "enabled": false },
+	"assist": { "enabled": false },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"style": {
+				"useTemplate": "off",
+				"noNonNullAssertion": "off"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["multichat/src/**"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noSvgWithoutTitle": "off",
+						"useButtonType": "off",
+						"noStaticElementInteractions": "off",
+						"useKeyWithClickEvents": "off"
+					},
+					"security": {
+						"noDangerouslySetInnerHtml": "off"
+					},
+					"suspicious": {
+						"noArrayIndexKey": "off",
+						"useIterableCallbackReturn": "off"
+					},
+					"complexity": { "useOptionalChain": "off" },
+					"correctness": { "noUnusedVariables": "off" }
+				}
+			}
+		},
+		{
+			"includes": ["channel/test/**", "multichat/test/**", "site/test/**"],
+			"linter": {
+				"rules": {
+					"suspicious": { "noExplicitAny": "off" }
+				}
+			}
+		}
+	]
+}

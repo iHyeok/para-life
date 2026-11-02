@@ -21,11 +21,11 @@ import {
   mkdirSync,
   statSync,
   copyFileSync,
-} from "fs";
-import { homedir } from "os";
-import { join, extname, basename } from "path";
+} from "node:fs";
+import { homedir } from "node:os";
+import { join, extname, basename } from "node:path";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import type { ServerWebSocket } from "bun";
 import { ChatStore, type StoredMsg } from "./store";
 
@@ -266,7 +266,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       case "edit_message": {
         // Only Claude's own replies can be edited
         const target = store.get(String(args.message_id));
-        if (!target || target.from !== "assistant") {
+        if (target?.from !== "assistant") {
           throw new Error(`no assistant message ${args.message_id}`);
         }
         store.edit(target.id, String(args.text));
@@ -375,8 +375,8 @@ function deliver(
       },
     });
     // Handle both sync and async cases
-    if (result && typeof (result as any).catch === "function") {
-      (result as any).catch((err: unknown) => {
+    if (result && typeof (result as Promise<void>).catch === "function") {
+      (result as Promise<void>).catch((err: unknown) => {
         process.stderr.write(`deliver async error: ${err}\n`);
       });
     }

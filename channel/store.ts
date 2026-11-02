@@ -9,8 +9,8 @@
  * Keeping the hot file small keeps its pages cached and makes backups/inspection cheap.
  */
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "fs";
-import { join } from "path";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 export type StoredMsg = {
   id: string;
