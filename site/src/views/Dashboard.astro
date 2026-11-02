@@ -3,6 +3,8 @@ import Base from "../layouts/Base.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import AreaCard from "../components/AreaCard.astro";
 import ResourceCard from "../components/ResourceCard.astro";
+import FocusList from "../components/FocusList.astro";
+import ActivityFeed from "../components/ActivityFeed.astro";
 import {
   detailHref,
   getArchives,
@@ -38,16 +40,21 @@ const archives = listed(getArchives()).sort((a, b) => (b.archivedAt ?? "").local
 const activeProjects = projects.filter((p) => p.status === "active").sort(byFocus);
 const holdProjects = projects.filter((p) => p.status === "on-hold").sort(byFocus);
 const title = view === "me" ? "PARA Life - Private Dashboard" : "PARA Life Dashboard";
+// Locked (limited) projects only show their title in the public view
+const openProjects = projects.filter((p) => !isLocked(p, view));
+const focusProjects = activeProjects.filter((p) => !isLocked(p, view));
 ---
 
 <Base title={title} view={view}>
   <div class="hero">
-    <h1>PARA Life</h1>
-    <p class="subtitle">{view === "me" ? "Private Dashboard" : "Projects, Areas, Resources, Archives"}</p>
+    <div>
+      <h1>PARA Life</h1>
+      <p class="subtitle">{view === "me" ? "Private Dashboard" : "Projects, Areas, Resources, Archives"}</p>
+    </div>
     <div class="stats">
       <a class="stat" href="#projects">
         <span class="stat-num">{activeProjects.length}</span>
-        <span class="stat-label">Active Projects</span>
+        <span class="stat-label">Active</span>
       </a>
       <a class="stat" href="#areas">
         <span class="stat-num">{areas.length}</span>
@@ -63,6 +70,18 @@ const title = view === "me" ? "PARA Life - Private Dashboard" : "PARA Life Dashb
       </a>
     </div>
   </div>
+
+  {focusProjects.length > 0 && (
+    <section id="focus">
+      <h2>Focus <span class="hint">다음 할 일 · 마감 · 마지막 업데이트</span></h2>
+      <FocusList projects={focusProjects} view={view} />
+    </section>
+  )}
+
+  <section id="activity">
+    <h2>Recent Activity</h2>
+    <ActivityFeed projects={openProjects} view={view} />
+  </section>
 
   <section id="projects">
     <h2>Projects</h2>
@@ -127,60 +146,73 @@ const title = view === "me" ? "PARA Life - Private Dashboard" : "PARA Life Dashb
 
 <style>
   .hero {
-    text-align: center;
-    padding: 3rem 0 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    padding: 1rem 0 0.5rem;
   }
 
   h1 {
-    font-size: clamp(2rem, 8vw, 2.5rem);
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
     font-weight: 800;
     letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   .subtitle {
     color: var(--text-muted);
-    margin-top: 0.3rem;
-    font-size: 1rem;
+    margin-top: 0.2rem;
+    font-size: 0.95rem;
   }
 
   .stats {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem 2.5rem;
-    margin-top: 2rem;
+    gap: 0.5rem;
   }
 
   .stat {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 4.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
     color: inherit;
   }
 
   .stat:hover {
     text-decoration: none;
-  }
-
-  .stat:hover .stat-num {
-    color: var(--text);
+    border-color: var(--accent);
   }
 
   .stat-num {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    color: var(--accent);
+    line-height: 1.2;
+    color: var(--text);
     font-variant-numeric: tabular-nums;
   }
 
   .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     color: var(--text-muted);
-    margin-top: 0.2rem;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
   }
 
   section {
-    margin-top: 3rem;
+    margin-top: 2.5rem;
     scroll-margin-top: 1rem;
   }
 
@@ -250,13 +282,18 @@ const title = view === "me" ? "PARA Life - Private Dashboard" : "PARA Life Dashb
   }
 
   @media (max-width: 640px) {
-    .hero {
-      padding: 1.5rem 0 1rem;
+    .stats {
+      width: 100%;
     }
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .stat {
+      flex: 1;
+      min-width: 0;
+      padding: 0.5rem 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
     }
   }
 </style>

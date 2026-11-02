@@ -11,8 +11,29 @@
   --orange: #fb923c;
   --red: #f87171;
   --purple: #c084fc;
+  --text-strong: #fff;
   --radius: 10px;
   color-scheme: dark;
+}
+
+/* Follows the OS theme; colors re-tuned for contrast on a light background */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fafaf9;
+    --bg-card: #ffffff;
+    --bg-hover: #f5f5f4;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --text-muted: #57534e;
+    --text-strong: #0c0a09;
+    --accent: #2563eb;
+    --green: #15803d;
+    --yellow: #a16207;
+    --orange: #c2410c;
+    --red: #dc2626;
+    --purple: #9333ea;
+    color-scheme: light;
+  }
 }
 
 * {
@@ -22,8 +43,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto,
-    "Noto Sans KR", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
@@ -261,7 +282,7 @@ time.stale {
 }
 
 .prose strong {
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .prose code {

@@ -512,7 +512,7 @@ function FileChip({ file, onRemove }) {
 // Touch keyboards have no Shift+Enter: there Enter is a newline and the button sends
 const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
-function Composer({ onSend, offline }) {
+function Composer({ onSend, offline, quickPrompts = [] }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
   const [composing, setComposing] = useState(false);
@@ -579,6 +579,18 @@ function Composer({ onSend, offline }) {
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
+      {/* Quick prompts: only while the input is empty */}
+      {quickPrompts.length > 0 && !text && files.length === 0 && (
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 8, paddingBottom: 2 }}>
+          {quickPrompts.map(q => (
+            <button key={q.label} onClick={() => onSend(q.text, [])} className="focus-ring" style={{
+              flexShrink: 0, padding: '5px 11px', borderRadius: 999,
+              border: '1px solid var(--line-2)', background: 'var(--bg)', color: 'var(--ink-2)',
+              fontSize: 12.5, cursor: 'pointer', whiteSpace: 'nowrap',
+            }}>{q.label}</button>
+          ))}
+        </div>
+      )}
       {/* File chips */}
       {files.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
@@ -762,7 +774,7 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onSend, onRetry,
         )}
         </div>
       </div>
-      <Composer onSend={onSend} offline={channel.status !== 'connected'} />
+      <Composer onSend={onSend} offline={channel.status !== 'connected'} quickPrompts={(window.QUICK_PROMPTS || {})[channel.id] || []} />
     </section>
   );
 }

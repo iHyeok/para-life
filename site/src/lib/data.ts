@@ -212,3 +212,47 @@ export function taskProgress(body: string) {
   const done = body.match(/^\s*[-*] \[[xX]\]/gm)?.length ?? 0;
   return { total, done, percent: total ? Math.round((done / total) * 100) : 0 };
 }
+
+// --- Focus / activity helpers (read the conventional PARA-SPEC sections) ---
+
+/** Lines of a "## Heading" section, up to the next "## " heading. */
+function section(body: string, heading: string): string[] {
+  const lines = body.split("\n");
+  const start = lines.findIndex((l) => l.trim().toLowerCase() === `## ${heading}`.toLowerCase());
+  if (start < 0) return [];
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((l) => l.startsWith("## "));
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
+/** Inline markdown -> plain text for one-line summaries. */
+export function plainText(s: string) {
+  return s
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[*_`~]/g, "")
+    .trim();
+}
+
+/** Open top-level tasks under "## Tasks", in order. */
+export function openTasks(body: string) {
+  return section(body, "Tasks")
+    .map((l) => l.match(/^[-*] \[ \] (.+)$/)?.[1])
+    .filter((t): t is string => !!t && !!t.trim())
+    .map(plainText);
+}
+
+export interface LogEntry {
+  date: string;
+  items: string[];
+}
+
+/** "### YYYY-MM-DD" entries under "## Progress Log", with their top-level bullets. */
+export function progressLog(body: string): LogEntry[] {
+  const entries: LogEntry[] = [];
+  for (const line of section(body, "Progress Log")) {
+    const date = line.match(/^### (\d{4}-\d{2}-\d{2})\s*$/)?.[1];
+    if (date) entries.push({ date, items: [] });
+    else if (entries.length && /^[-*] \S/.test(line)) entries[entries.length - 1].items.push(plainText(line.slice(2)));
+  }
+  return entries.filter((e) => e.items.length > 0);
+}

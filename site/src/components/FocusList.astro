@@ -1,0 +1,91 @@
+---
+import PriorityDot from "./PriorityDot.astro";
+import { detailHref, openTasks, type Project, type View } from "../lib/data";
+
+interface Props {
+  projects: Project[];
+  view: View;
+}
+
+// "What should I do next": each active project's next open tasks, deadline and staleness
+const { projects, view } = Astro.props;
+---
+
+<ol class="focus">
+  {projects.map((p) => {
+    const next = openTasks(p.body).slice(0, 2);
+    return (
+      <li>
+        <div class="head">
+          <PriorityDot priority={p.priority} />
+          <a href={detailHref("projects", p, view)} class="title">{p.title}</a>
+          <span class="when">
+            {p.deadline && <time datetime={p.deadline} data-dday>{p.deadline}</time>}
+            {p.updatedAt && (
+              <span class="updated">
+                업데이트 <time datetime={p.updatedAt} data-ago>{p.updatedAt}</time>
+              </span>
+            )}
+          </span>
+        </div>
+        {next.length > 0 ? (
+          <ul class="next">
+            {next.map((t) => <li>{t}</li>)}
+          </ul>
+        ) : (
+          <p class="none">남은 태스크 없음 — 완료 처리할지 확인</p>
+        )}
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .focus {
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+  }
+
+  .focus > li {
+    padding: 0.9rem 1.1rem;
+  }
+
+  .focus > li + li {
+    border-top: 1px solid var(--border);
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.6rem;
+  }
+
+  .title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .when {
+    margin-left: auto;
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .next {
+    list-style-type: "□  ";
+    margin: 0.4rem 0 0 1.4rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .none {
+    margin: 0.4rem 0 0 1.1rem;
+    font-size: 0.85rem;
+    color: var(--yellow);
+  }
+</style>
