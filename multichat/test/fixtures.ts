@@ -15,7 +15,7 @@ import { test as base, expect, type Page } from "@playwright/test";
 const MULTICHAT_DIR = path.resolve(__dirname, "..");
 const SERVER_PATH = path.resolve(__dirname, "..", "..", "channel", "server.ts");
 const SEED_SCRIPT = path.resolve(__dirname, "seed.ts");
-const BUN = process.env.BUN_BIN ?? "bun";
+export const BUN = process.env.BUN_BIN ?? "bun";
 
 export async function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -46,7 +46,7 @@ const TYPES: Record<string, string> = {
 };
 
 /** Minimal static file server for multichat/ (what Cloudflare Pages serves in production). */
-async function serveStatic(root: string) {
+export async function serveStatic(root: string) {
   const port = await freePort();
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://x");
@@ -185,7 +185,12 @@ export class Channel {
 }
 
 /** Point multichat at the test channel before the app boots. */
-export async function openChat(page: Page, ui: { origin: string }, channel: Channel, extraInit?: () => void) {
+export async function openChat(
+  page: Page,
+  ui: { origin: string },
+  channel: { wsUrl: string; httpUrl: string },
+  extraInit?: () => void,
+) {
   await page.addInitScript(
     ({ wsUrl, httpUrl }) => {
       localStorage.setItem(
