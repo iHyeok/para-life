@@ -1,74 +1,128 @@
 [
  {
-  "scene_id": "t01_title",
+  "scene_id": "b01_hook",
   "start": 0.0,
-  "duration": 13.267,
+  "duration": 15.3,
   "audio": true
  },
  {
-  "scene_id": "t02_ocean",
-  "start": 13.267,
-  "duration": 20.133,
+  "scene_id": "b02_paper",
+  "start": 15.3,
+  "duration": 20.067,
   "audio": true
  },
  {
-  "scene_id": "t03_measure",
-  "start": 33.4,
-  "duration": 20.867,
+  "scene_id": "b03_ocean",
+  "start": 35.367,
+  "duration": 25.233,
   "audio": true
  },
  {
-  "scene_id": "t04_methods",
-  "start": 54.267,
-  "duration": 23.3,
+  "scene_id": "b04_measure",
+  "start": 60.6,
+  "duration": 20.633,
   "audio": true
  },
  {
-  "scene_id": "t05_setup",
-  "start": 77.567,
-  "duration": 17.1,
+  "scene_id": "b05_direction",
+  "start": 81.233,
+  "duration": 23.967,
   "audio": true
  },
  {
-  "scene_id": "t06_results",
-  "start": 94.667,
-  "duration": 16.9,
+  "scene_id": "b06_setup",
+  "start": 105.2,
+  "duration": 23.767,
   "audio": true
  },
  {
-  "scene_id": "t07_traits",
-  "start": 111.567,
-  "duration": 16.067,
+  "scene_id": "b07_five_ways",
+  "start": 128.967,
+  "duration": 18.767,
   "audio": true
  },
  {
-  "scene_id": "t08_meaning",
-  "start": 127.633,
-  "duration": 16.1,
+  "scene_id": "b08_actadd",
+  "start": 147.733,
+  "duration": 18.233,
   "audio": true
  },
  {
-  "scene_id": "t09_sliders",
-  "start": 143.733,
-  "duration": 23.633,
+  "scene_id": "b09_ablation",
+  "start": 165.967,
+  "duration": 19.2,
   "audio": true
  },
  {
-  "scene_id": "t10_limits",
-  "start": 167.367,
-  "duration": 10.533,
+  "scene_id": "b10_probe",
+  "start": 185.167,
+  "duration": 18.833,
   "audio": true
  },
  {
-  "scene_id": "t11_research",
-  "start": 177.9,
-  "duration": 19.933,
+  "scene_id": "b11_scorecard",
+  "start": 204.0,
+  "duration": 25.2,
   "audio": true
  },
  {
-  "scene_id": "t12_end",
-  "start": 197.833,
-  "duration": 8.967,
+  "scene_id": "b12_read_write",
+  "start": 229.2,
+  "duration": 21.733,
+  "audio": true
+ },
+ {
+  "scene_id": "b13_layers",
+  "start": 250.933,
+  "duration": 21.5,
+  "audio": true
+ },
+ {
+  "scene_id": "b14_traits",
+  "start": 272.433,
+  "duration": 24.1,
+  "audio": true
+ },
+ {
+  "scene_id": "b15_neuro",
+  "start": 296.533,
+  "duration": 16.7,
+  "audio": true
+ },
+ {
+  "scene_id": "b16_why",
+  "start": 313.233,
+  "duration": 26.767,
+  "audio": true
+ },
+ {
+  "scene_id": "b17_fluency",
+  "start": 340.0,
+  "duration": 20.4,
+  "audio": true
+ },
+ {
+  "scene_id": "b18_caveats",
+  "start": 360.4,
+  "duration": 26.5,
+  "audio": true
+ },
+ {
+  "scene_id": "b19_takeaways",
+  "start": 386.9,
+  "duration": 14.4,
+  "audio": true
+ },
+ {
+  "scene_id": "b20_research",
+  "start": 401.3,
+  "duration": 32.7,
+  "audio": true
+ },
+ {
+  "scene_id": "b21_end",
+  "start": 434.0,
+  "duration": 10.0,
   "audio": true
  }
 ]
