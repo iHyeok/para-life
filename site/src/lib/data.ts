@@ -327,7 +327,8 @@ function bodyLines(body: string): string[] {
  */
 export function meBodyIndex(): Record<string, string[]> {
   const index: Record<string, string[]> = {};
-  for (const category of CATEGORIES) {
+  const categories: Category[] = ["projects", "areas", "resources", "archives"];
+  for (const category of categories) {
     for (const item of load(category)) {
       const lines = bodyLines(item.body);
       if (lines.length) index[detailHref(category, item, "me")] = lines;
