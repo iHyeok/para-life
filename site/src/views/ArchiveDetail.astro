@@ -1,0 +1,36 @@
+---
+import DetailLayout from "./DetailLayout.astro";
+import { detailHref, getItem, listedArea, type View } from "../lib/data";
+
+interface Props {
+  id: string;
+  view: View;
+}
+
+const { id, view } = Astro.props;
+const archive = getItem("archives", id);
+const area = listedArea(archive.area, view);
+---
+
+<DetailLayout title={archive.title} view={view} body={archive.body}>
+  <div class="title-row">
+    <h1>{archive.title}</h1>
+    <span class="badge">Archived</span>
+    {archive.originalType && <span class="badge" style="--badge-color: var(--accent)">{archive.originalType}</span>}
+  </div>
+  <div class="meta">
+    {area && (
+      <span>
+        Area: <a href={detailHref("areas", area, view)}><strong>{area.title}</strong></a>
+      </span>
+    )}
+    {archive.archivedAt && <span>Archived: {archive.archivedAt}</span>}
+    {archive.createdAt && <span>Created: {archive.createdAt}</span>}
+  </div>
+  {archive.goal && <p class="goal">{archive.goal}</p>}
+  {archive.tags && archive.tags.length > 0 && (
+    <div class="tags">
+      {archive.tags.map((t) => <span class="tag">#{t}</span>)}
+    </div>
+  )}
+</DetailLayout>

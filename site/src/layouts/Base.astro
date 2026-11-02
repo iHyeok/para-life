@@ -1,27 +1,44 @@
 ---
+import { homeHref, type View } from "../lib/data";
+
 interface Props {
   title?: string;
+  view?: View;
 }
 
-const { title = "PARA Life" } = Astro.props;
+const { title = "PARA Life", view = "public" } = Astro.props;
+const home = homeHref(view);
 ---
 
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
     <title>{title}</title>
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
     <header>
       <nav>
-        <a href="/" class="logo">PARA Life</a>
+        <a href={home} class="logo">
+          PARA Life
+          {view === "me" && <span class="me-badge">Private</span>}
+        </a>
         <div class="nav-links">
-          <a href="/#projects">Projects</a>
-          <a href="/#areas">Areas</a>
-          <a href="/#resources">Resources</a>
-          <a href="/#archives">Archives</a>
+          <a href={`${home}#projects`}>Projects</a>
+          <a href={`${home}#areas`}>Areas</a>
+          <a href={`${home}#resources`}>Resources</a>
+          <a href={`${home}#archives`}>Archives</a>
+          <span class="divider" aria-hidden="true"></span>
+          {view === "me" ? (
+            <>
+              <a href="https://main.kyxi.net" class="secondary">Chat</a>
+              <a href="/" class="secondary">공개 화면</a>
+            </>
+          ) : (
+            <a href="/me/" class="secondary">내 대시보드</a>
+          )}
         </div>
       </nav>
     </header>
@@ -31,6 +48,32 @@ const { title = "PARA Life" } = Astro.props;
     <footer>
       <p>PARA Life Management System</p>
     </footer>
+    <script is:inline>
+      // Static build: compute D-day / "n일 전" in the browser so they never go stale
+      (function () {
+        var DAY = 86400000;
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        function days(iso) {
+          var p = iso.split("-");
+          return Math.round((new Date(+p[0], p[1] - 1, +p[2]) - today) / DAY);
+        }
+        document.querySelectorAll("time[data-dday]").forEach(function (el) {
+          var iso = el.getAttribute("datetime");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+          var d = days(iso);
+          el.textContent = iso + " (" + (d === 0 ? "D-day" : d > 0 ? "D-" + d : "D+" + -d) + ")";
+          el.classList.add(d < 0 ? "overdue" : d <= 7 ? "soon" : "later");
+        });
+        document.querySelectorAll("time[data-ago]").forEach(function (el) {
+          var iso = el.getAttribute("datetime");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+          var d = -days(iso);
+          el.textContent = d <= 0 ? "오늘" : d === 1 ? "어제" : d + "일 전";
+          if (d >= 30) el.classList.add("stale");
+        });
+      })();
+    </script>
   </body>
 </html>
 
@@ -44,11 +87,16 @@ const { title = "PARA Life" } = Astro.props;
     max-width: 960px;
     margin: 0 auto;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 0.5rem 1.5rem;
   }
 
   .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--text);
@@ -59,9 +107,22 @@ const { title = "PARA Life" } = Astro.props;
     color: var(--accent);
   }
 
+  .me-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
   .nav-links {
     display: flex;
-    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.25rem;
     font-size: 0.9rem;
   }
 
@@ -72,6 +133,16 @@ const { title = "PARA Life" } = Astro.props;
   .nav-links a:hover {
     color: var(--text);
     text-decoration: none;
+  }
+
+  .nav-links .secondary {
+    color: var(--accent);
+  }
+
+  .divider {
+    width: 1px;
+    height: 1em;
+    background: var(--border);
   }
 
   main {
@@ -87,5 +158,24 @@ const { title = "PARA Life" } = Astro.props;
     color: var(--text-muted);
     font-size: 0.8rem;
     margin-top: 4rem;
+  }
+
+  @media (max-width: 640px) {
+    header {
+      padding: 0.75rem 1rem;
+    }
+
+    main {
+      padding: 1.25rem 1rem;
+    }
+
+    .nav-links {
+      gap: 0.25rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .divider {
+      display: none;
+    }
   }
 </style>

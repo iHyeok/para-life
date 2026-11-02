@@ -1,0 +1,262 @@
+---
+import Base from "../layouts/Base.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import AreaCard from "../components/AreaCard.astro";
+import ResourceCard from "../components/ResourceCard.astro";
+import {
+  detailHref,
+  getArchives,
+  getAreas,
+  getProjects,
+  getResources,
+  isListed,
+  isLocked,
+  type Project,
+  type View,
+} from "../lib/data";
+
+interface Props {
+  view: View;
+}
+
+const { view } = Astro.props;
+const listed = <T extends { visibility: Project["visibility"] }>(items: T[]) =>
+  items.filter((i) => isListed(i, view));
+
+const PRIORITY = { high: 0, medium: 1, low: 2 } as const;
+// Highest priority first, then nearest deadline, then most recently updated
+const byFocus = (a: Project, b: Project) =>
+  (PRIORITY[a.priority ?? "low"] - PRIORITY[b.priority ?? "low"]) ||
+  (a.deadline || "9999").localeCompare(b.deadline || "9999") ||
+  (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+
+const projects = listed(getProjects());
+const areas = listed(getAreas());
+const resources = listed(getResources());
+const archives = listed(getArchives()).sort((a, b) => (b.archivedAt ?? "").localeCompare(a.archivedAt ?? ""));
+
+const activeProjects = projects.filter((p) => p.status === "active").sort(byFocus);
+const holdProjects = projects.filter((p) => p.status === "on-hold").sort(byFocus);
+const title = view === "me" ? "PARA Life - Private Dashboard" : "PARA Life Dashboard";
+---
+
+<Base title={title} view={view}>
+  <div class="hero">
+    <h1>PARA Life</h1>
+    <p class="subtitle">{view === "me" ? "Private Dashboard" : "Projects, Areas, Resources, Archives"}</p>
+    <div class="stats">
+      <a class="stat" href="#projects">
+        <span class="stat-num">{activeProjects.length}</span>
+        <span class="stat-label">Active Projects</span>
+      </a>
+      <a class="stat" href="#areas">
+        <span class="stat-num">{areas.length}</span>
+        <span class="stat-label">Areas</span>
+      </a>
+      <a class="stat" href="#resources">
+        <span class="stat-num">{resources.length}</span>
+        <span class="stat-label">Resources</span>
+      </a>
+      <a class="stat" href="#archives">
+        <span class="stat-num">{archives.length}</span>
+        <span class="stat-label">Archived</span>
+      </a>
+    </div>
+  </div>
+
+  <section id="projects">
+    <h2>Projects</h2>
+    {activeProjects.length > 0 && (
+      <div class="grid">
+        {activeProjects.map((p) => <ProjectCard project={p} view={view} />)}
+      </div>
+    )}
+    {holdProjects.length > 0 && (
+      <>
+        <h3 class="subsection">On Hold</h3>
+        <div class="grid">
+          {holdProjects.map((p) => <ProjectCard project={p} view={view} />)}
+        </div>
+      </>
+    )}
+    {projects.length === 0 && <p class="empty">No projects yet.</p>}
+  </section>
+
+  <section id="areas">
+    <h2>Areas</h2>
+    {areas.length > 0 ? (
+      <div class="grid">
+        {areas.map((a) => <AreaCard area={a} view={view} />)}
+      </div>
+    ) : (
+      <p class="empty">No areas yet.</p>
+    )}
+  </section>
+
+  <section id="resources">
+    <h2>Resources</h2>
+    {resources.length > 0 ? (
+      <div class="grid">
+        {resources.map((r) => <ResourceCard resource={r} view={view} />)}
+      </div>
+    ) : (
+      <p class="empty">No resources yet.</p>
+    )}
+  </section>
+
+  <section id="archives">
+    <h2>Archives</h2>
+    {archives.length > 0 ? (
+      <ul class="archive-list">
+        {archives.map((a) => (
+          <li>
+            <a href={detailHref("archives", a, view)} class="archive-link">
+              {a.originalType && <span class="archive-type">{a.originalType}</span>}
+              <span class="archive-title">{a.title}</span>
+              {isLocked(a, view) && <span class="lock">Limited</span>}
+              <span class="archive-date">{a.archivedAt}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">No archived items.</p>
+    )}
+  </section>
+</Base>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 8vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    font-size: 1rem;
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2.5rem;
+    margin-top: 2rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: inherit;
+  }
+
+  .stat:hover {
+    text-decoration: none;
+  }
+
+  .stat:hover .stat-num {
+    color: var(--text);
+  }
+
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  section {
+    margin-top: 3rem;
+    scroll-margin-top: 1rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .subsection {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .archive-list {
+    list-style: none;
+  }
+
+  .archive-list li {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .archive-link {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    align-items: center;
+    padding: 0.6rem 0;
+    font-size: 0.9rem;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .archive-link:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .archive-type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .archive-title {
+    min-width: 0;
+  }
+
+  .archive-date {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 1.5rem 0 1rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

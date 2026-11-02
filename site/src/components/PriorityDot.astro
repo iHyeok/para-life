@@ -1,6 +1,6 @@
 ---
 interface Props {
-  priority: string;
+  priority?: string;
 }
 
 const { priority } = Astro.props;
@@ -11,16 +11,32 @@ const colors: Record<string, string> = {
   low: "var(--text-muted)",
 };
 
-const color = colors[priority] || "var(--text-muted)";
+const labels: Record<string, string> = { high: "높음", medium: "보통", low: "낮음" };
 ---
 
-<span class="dot" style={`background: ${color}`} title={priority}></span>
+{priority && colors[priority] && (
+  <span
+    class:list={["dot", priority]}
+    style={`--dot-color: ${colors[priority]}`}
+    role="img"
+    aria-label={`우선순위 ${labels[priority]}`}
+    title={`우선순위 ${labels[priority]}`}
+  ></span>
+)}
 
 <style>
   .dot {
+    flex-shrink: 0;
     display: inline-block;
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    background: var(--dot-color);
+  }
+
+  /* low is grey: draw it as a ring so it stays visible */
+  .dot.low {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--dot-color);
   }
 </style>

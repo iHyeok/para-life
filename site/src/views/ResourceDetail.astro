@@ -1,0 +1,34 @@
+---
+import DetailLayout from "./DetailLayout.astro";
+import { getItem, type View } from "../lib/data";
+
+interface Props {
+  id: string;
+  view: View;
+}
+
+const { id, view } = Astro.props;
+const resource = getItem("resources", id);
+---
+
+<DetailLayout title={resource.title} view={view} body={resource.body} accent="var(--green)">
+  <div class="title-row">
+    <h1>{resource.title}</h1>
+  </div>
+  <div class="meta">
+    {resource.topic && <span class="topic">{resource.topic}</span>}
+    {resource.source && <span>Source: {resource.source}</span>}
+    {resource.createdAt && <span>Created: {resource.createdAt}</span>}
+  </div>
+  {resource.tags && resource.tags.length > 0 && (
+    <div class="tags">
+      {resource.tags.map((t) => <span class="tag">#{t}</span>)}
+    </div>
+  )}
+</DetailLayout>
+
+<style>
+  .topic {
+    color: var(--green);
+  }
+</style>

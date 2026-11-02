@@ -1,79 +1,48 @@
 ---
+import { detailHref, isLocked, type Resource, type View } from "../lib/data";
+
 interface Props {
-  resource: any;
+  resource: Resource;
+  view: View;
 }
 
-const { resource } = Astro.props;
-const isLimited = resource.visibility === "limited";
-const href = isLimited ? `/me/resources/${resource.id}` : `/resources/${resource.id}`;
+const { resource, view } = Astro.props;
+const href = detailHref("resources", resource, view);
 ---
 
-{isLimited ? (
-  <a href={href} class="card limited">
+{isLocked(resource, view) ? (
+  <a href={href} class="card locked" style="--card-accent: var(--green)">
     <h3>{resource.title}</h3>
     <span class="lock">Limited</span>
   </a>
 ) : (
-  <a href={href} class="card">
+  <a href={href} class="card" style="--card-accent: var(--green)">
     <h3>{resource.title}</h3>
     <div class="meta">
-      <span class="topic">{resource.topic}</span>
-      {resource.source && <span class="source">{resource.source}</span>}
+      {resource.topic && <span class="topic">{resource.topic}</span>}
+      {resource.source && <span>{resource.source}</span>}
     </div>
-    {resource.tags?.length > 0 && (
+    {resource.tags && resource.tags.length > 0 && (
       <div class="tags">
-        {resource.tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+        {resource.tags.map((tag) => <span class="tag">#{tag}</span>)}
       </div>
     )}
   </a>
 )}
 
 <style>
-  .card {
-    display: block;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    transition: border-color 0.2s;
-    color: var(--text);
-  }
-
-  .card:hover {
-    border-color: var(--green);
-    text-decoration: none;
-  }
-
-  .card.limited {
-    opacity: 0.7;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .card.limited:hover {
-    border-color: var(--green);
-    opacity: 0.85;
-  }
-
-  .lock {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    padding: 0.1rem 0.4rem;
-    border-radius: 3px;
-    text-transform: uppercase;
-  }
-
   h3 {
-    font-size: 1rem;
-    font-weight: 600;
     margin-bottom: 0.4rem;
+  }
+
+  .locked h3 {
+    margin-bottom: 0;
   }
 
   .meta {
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-bottom: 0.5rem;
@@ -81,16 +50,5 @@ const href = isLimited ? `/me/resources/${resource.id}` : `/resources/${resource
 
   .topic {
     color: var(--green);
-  }
-
-  .tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    font-size: 0.75rem;
-    color: var(--text-muted);
   }
 </style>

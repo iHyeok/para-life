@@ -1,0 +1,25 @@
+---
+import Base from "../layouts/Base.astro";
+import { homeHref, renderMarkdown, type View } from "../lib/data";
+
+interface Props {
+  title: string;
+  view: View;
+  body: string;
+  accent?: string;
+}
+
+const { title, view, body, accent = "var(--accent)" } = Astro.props;
+const html = renderMarkdown(body, view);
+---
+
+<Base title={`${title} - PARA Life`} view={view}>
+  <div class="detail-back"><a href={homeHref(view)}>&larr; Dashboard</a></div>
+
+  <article style={`--card-accent: ${accent}`}>
+    <header class="detail-header">
+      <slot />
+    </header>
+    <div class="prose" set:html={html} />
+  </article>
+</Base>

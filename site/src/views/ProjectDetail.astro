@@ -1,0 +1,43 @@
+---
+import DetailLayout from "./DetailLayout.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import PriorityDot from "../components/PriorityDot.astro";
+import { detailHref, getItem, listedArea, type View } from "../lib/data";
+
+interface Props {
+  id: string;
+  view: View;
+}
+
+const { id, view } = Astro.props;
+const project = getItem("projects", id);
+const area = listedArea(project.area, view);
+---
+
+<DetailLayout title={project.title} view={view} body={project.body}>
+  <div class="title-row">
+    <PriorityDot priority={project.priority} />
+    <h1>{project.title}</h1>
+    <StatusBadge status={project.status} />
+  </div>
+  <div class="meta">
+    {area && (
+      <span>
+        Area: <a href={detailHref("areas", area, view)}><strong>{area.title}</strong></a>
+      </span>
+    )}
+    {project.deadline && (
+      <span>
+        Deadline: <strong><time datetime={project.deadline} data-dday>{project.deadline}</time></strong>
+      </span>
+    )}
+    {project.createdAt && <span>Created: {project.createdAt}</span>}
+    {project.updatedAt && <span>Updated: {project.updatedAt}</span>}
+  </div>
+  {project.goal && <p class="goal">{project.goal}</p>}
+  {project.tags && project.tags.length > 0 && (
+    <div class="tags">
+      {project.tags.map((t) => <span class="tag">#{t}</span>)}
+    </div>
+  )}
+</DetailLayout>
