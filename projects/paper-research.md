@@ -59,3 +59,4 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 단계: 0) Persona Vectors 재현(Qwen2.5-7B/Llama-3.1-8B) → 1) base 대 instruct 감정 벡터 비교 → 2) 프롬프트 페르소나 대 페르소나 벡터 조건에서 감정 표상·표현을 따로 측정(게이트 대 생성기) → 확장(최신 모델, 대형 모델)
   - 언어: 기제는 영어로 확인 후 한국어 함축·유머 평가로 확장하는 순서 제안(차별점 후보)
   - 미확인: Qwen 3.8 flash next·muse glimmer의 구조(dense/MoE)와 base 공개 여부 — 사용자 답변 대기
+- 결정: 언어는 영어로 기제 확인 → 한국어로 함축·유머 평가. 모델 사양은 사용자가 모델을 구동한 다른 Claude 세션에 질문지(모델별 repo·구조·base 공개 여부·실행 방식·양자화·hook 가능 여부, 환경, 추천)로 확인하기로 함
