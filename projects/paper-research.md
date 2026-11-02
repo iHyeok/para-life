@@ -8,9 +8,9 @@ area: "ai-study"
 goal: "링크·논문에서 쌓은 지식 노트를 바탕으로 토론하며 논문 주제를 잡고 초안을 작성"
 deadline: ""
 createdAt: "2026-11-02"
-updatedAt: "2026-11-02"
+updatedAt: "2026-11-03"
 tags: ["paper", "research", "llm", "writing"]
-relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion-concepts-llm-2026"]
+relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion-concepts-llm-2026", "big-five-steering-asymmetry-2026"]
 ---
 
 ## Overview
@@ -30,6 +30,7 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
 - [LLM의 말은 왜 재미가 없을까 — 함축·감정·'중간' 논지](../resources/llm-speech-implicature.md) — LLM 화법의 함축 부재, 유머·재미, 클리셰
 - [LLM의 기능적 감정 (Anthropic, 2026)](../resources/llm-functional-emotions.md) — 감정 표상·스티어링·정렬 사례, 학위 주제 3방향, 표상 대 표현
 - [[논문] Emotion Concepts and their Function in a LLM (Sofroniew et al., 2026)](../resources/emotion-concepts-llm-2026.md) — 원문 정독 노트: 방법·수치·그림, 수치 검증표, deflection 벡터, 사후학습의 감정 이동
+- [[논문] Behavioural Asymmetry Across Activation Interventions for Big Five Personality Control (Sheta, 2026)](../resources/big-five-steering-asymmetry-2026.md) — ActAdd만 양방향, 시스템 프롬프트가 더 강함(~72%), 신경성 저항, 프로브 방향 ≠ 인과 방향
 
 ## 실험 계획
 
@@ -81,3 +82,8 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
 - 모델 배치 제안: 0 재현은 Qwen2.5-7B-Instruct → 1 base 대 instruct는 Qwen2.5-7B 주력에 Gemma 4 12B(최신 모델 확인) → 2 페르소나 전환은 base 불필요라 Qwen3.8-27B(dense, Apache-2.0)를 RunPod H100에서 bf16으로 추가. 연구용 venv 새로 만들기. 할 일: Llama-3.1-8B 접근 신청, Qwen3-8B-Base 공개 여부 확인
 - 실험 계획 문서 위치 확인 대기 (이 파일의 섹션 대 별도 파일)
 - 실험 계획 섹션 추가, 실행용 private 저장소 `iHyeok/persona-emotion-gate` 생성(PLAN.md, 실행 담당 Claude용 CLAUDE.md, setup_env.sh, 스모크 테스트). 5090 PC에서 pull 받아 0단계부터 실행
+- Big Five 스티어링 논문 본문 정독(OpenReview 로그인 후 Chrome) → 지식 노트 `big-five-steering-asymmetry-2026`
+  - 영상 ② 제작 때 초록만 보고 판단한 것 정정: **시스템 프롬프트·few-shot도 비교했고, 시스템 프롬프트가 가장 강함(천장 ~72%)**. 모델은 Llama-3.2-3B / 3.1-8B Instruct, 최적 층 L12 / L14
+  - 가설과의 연결: 감정과 가장 가까운 신경성이 양방향 모두 저항하고, α<0에서 perplexity가 2배 → 게이트 가설의 정황 증거. 단 "판정 모델이 화용 단서를 못 잡는다"는 대안 설명을 배제해야 함
+  - 설계 교훈: 프로브로 읽히는 방향 ≠ 행동을 바꾸는 방향 → 2단계의 "표상" 측정은 평균차 사영·프로브·인과 스티어링 세 가지로 함께 본다
+  - Huang 외 2023(페르소나 지정해도 MBTI 자기보고 불변)과 긴장: 자기보고 대 생성 텍스트 판정이라는 측정 차이. "말로 묻는 성격 ≠ 글에 드러나는 성격"

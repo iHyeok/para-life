@@ -108,6 +108,19 @@
       "createdAt": "2026-11-02",
       "tags": ["paper", "llm", "interpretability", "emotion", "representation", "steering", "alignment", "post-training"],
       "relatedProjects": ["paper-research"]
+        },
+    {
+      "id": "big-five-steering-asymmetry-2026",
+      "title": "[논문] Behavioural Asymmetry Across Activation Interventions for Big Five Personality Control in LLMs (Sheta, 2026)",
+      "topic": "LLM 페르소나 스티어링·Big Five",
+      "kind": "knowledge",
+      "visibility": "private",
+      "area": "ai-study",
+      "source": "OpenReview · ICML 2026 Workshop MusIML (poster)",
+      "sourceUrl": "https://openreview.net/forum?id=X89cn3iy8b",
+      "createdAt": "2026-11-03",
+      "tags": ["paper", "llm", "interpretability", "persona", "big-five", "steering", "activation-addition", "probe", "ablation", "prompting"],
+      "relatedProjects": ["paper-research"]
     }
   ]
 }
