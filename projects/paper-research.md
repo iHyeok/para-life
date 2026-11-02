@@ -54,3 +54,8 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - [② Big Five 스티어링 ("The Steerable Self", ICML 2026 MusIML 워크숍)](/me/files/projects/paper-research/02-big-five-steering.mp4) 3:27 · [대본·근거표](/me/files/projects/paper-research/02-big-five-steering-script.md) — 본문 미확보(OpenReview 차단), 초록 2개만 근거. 대비로 Hoppe 외(arXiv 2603.03326) 슬라이더 연구 포함
   - 확인된 사실: Big Five 논문은 본 학회가 아니라 워크숍 발표, 프롬프팅 비교는 초록에 없음, "약 25%"가 상대·절대 증가인지 불명. Hoppe 외는 신경성을 2.88→4.1로 올려 "신경성은 안 움직인다"와 충돌하지만 조건이 달라 직접 비교 불가
 - 토론: 스티어링 연구의 대상 모델 → 기제 실험(표상·스티어링·게이트 대 생성기, base 대 instruct)은 활성화 접근이 되는 오픈 모델(7~8B, 예: Qwen2.5-7B·Llama-3.1-8B, 24GB GPU 1장 수준)로 하고, 프론티어 모델은 API로 프롬프트 페르소나의 행동 수준 비교군으로 쓰는 2단 구성 제안. 한계: 소형 모델 결과의 일반화. 사용자 GPU 환경 확인 대기
+- 실험 환경: RTX 5090(32GB) 자유 사용, 필요 시 RunPod 대여 검토. 사용자가 이미 돌려 본 모델: Qwen 3.8 flash next, 27B급, muse glimmer, gemma4
+  - 제안: 모델 선정 기준은 ① base·instruct 체크포인트 쌍 공개 ② 선행 연구와 겹침(재현 가능) ③ 첫 라운드는 dense. 주 실험은 7~12B bf16(5090), 27B 이상은 RunPod 80GB로 규모 점검(4비트 양자화는 방향 추정 영향 때문에 주 실험 비추)
+  - 단계: 0) Persona Vectors 재현(Qwen2.5-7B/Llama-3.1-8B) → 1) base 대 instruct 감정 벡터 비교 → 2) 프롬프트 페르소나 대 페르소나 벡터 조건에서 감정 표상·표현을 따로 측정(게이트 대 생성기) → 확장(최신 모델, 대형 모델)
+  - 언어: 기제는 영어로 확인 후 한국어 함축·유머 평가로 확장하는 순서 제안(차별점 후보)
+  - 미확인: Qwen 3.8 flash next·muse glimmer의 구조(dense/MoE)와 base 공개 여부 — 사용자 답변 대기
