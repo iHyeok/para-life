@@ -49,3 +49,7 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 가설 재정식화(제안): "페르소나가 있어야 표출"이 아니라 "기본 Assistant 페르소나가 표출을 억제하고, 다른 페르소나로 옮기면 같은 표상이 표현으로 풀린다". 실험은 페르소나 전환 시 표상 불변·표현 변화(게이트) 대 표상 자체 변화(생성기)를 구분하고, 프롬프트 페르소나와 스티어링 페르소나를 함께 비교
   - 측정 도구는 Big Five/persona vector 권장, MBTI는 페르소나 프롬프트 재료로만 쓰기를 권장 (심리측정 타당도 문제)
   - 다음 후보: Assistant Axis, Persona Vectors, Huang 외를 지식 노트로 정독
+- 학습용 설명 영상 2편 제작 (Manim 모션 그래픽 + Fish Audio 내레이션 보이스1, 무료 모델 `s2.1-pro-free`)
+  - [① Persona Vectors (Chen 외 2025, arXiv 2507.21509)](/me/files/projects/paper-research/01-persona-vectors.mp4) 4:35 · [대본·근거표](/me/files/projects/paper-research/01-persona-vectors-script.md) — 본문 전체 기반
+  - [② Big Five 스티어링 ("The Steerable Self", ICML 2026 MusIML 워크숍)](/me/files/projects/paper-research/02-big-five-steering.mp4) 3:27 · [대본·근거표](/me/files/projects/paper-research/02-big-five-steering-script.md) — 본문 미확보(OpenReview 차단), 초록 2개만 근거. 대비로 Hoppe 외(arXiv 2603.03326) 슬라이더 연구 포함
+  - 확인된 사실: Big Five 논문은 본 학회가 아니라 워크숍 발표, 프롬프팅 비교는 초록에 없음, "약 25%"가 상대·절대 증가인지 불명. Hoppe 외는 신경성을 2.88→4.1로 올려 "신경성은 안 움직인다"와 충돌하지만 조건이 달라 직접 비교 불가
