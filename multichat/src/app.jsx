@@ -6,6 +6,8 @@ const SEND_ACK_TIMEOUT = 20000;
 const emptyChannelState = () => ({
   messages: [], status: 'disconnected', nextRetryAt: null, unreadCount: 0,
   isThinking: false, pendingPermissions: [], echo: false,
+  // Older history on the server: true / false / null (unknown, e.g. old server)
+  hasMore: null, loadingOlder: false,
 });
 
 // Insert keeping ts order (history replays and echoes can carry older server timestamps)
@@ -108,6 +110,23 @@ function channelReducer(state, action) {
           ...(connected ? { pendingPermissions: [], echo: false } : {}),
         };
       });
+    case 'HISTORY_END':
+      return updateChannel(state, action.channelId, ch => ({
+        // Only meaningful while nothing older than the replay has been paged in
+        hasMore: ch.loadingOlder ? ch.hasMore : action.hasMore ?? null,
+      }));
+    case 'LOADING_OLDER':
+      return updateChannel(state, action.channelId, () => ({ loadingOlder: true }));
+    case 'HISTORY_PAGE':
+      return updateChannel(state, action.channelId, ch => {
+        const have = new Set(ch.messages.map(m => m.id));
+        const older = action.messages.filter(m => !have.has(m.id));
+        return {
+          messages: [...older, ...ch.messages].sort((a, b) => a.ts - b.ts),
+          hasMore: action.hasMore,
+          loadingOlder: false,
+        };
+      });
     case 'HELLO':
       return updateChannel(state, action.channelId, () => ({ echo: action.features.includes('echo') }));
     case 'SET_THINKING':
@@ -197,6 +216,12 @@ function App() {
         },
         onStatus: (chId, status, nextRetryAt) => {
           dispatch({ type: 'STATUS', channelId: chId, status, nextRetryAt });
+        },
+        onHistoryEnd: (chId, data) => {
+          dispatch({ type: 'HISTORY_END', channelId: chId, hasMore: data.hasMore });
+        },
+        onHistoryPage: (chId, data) => {
+          dispatch({ type: 'HISTORY_PAGE', channelId: chId, messages: data.messages.map(({ type, ...m }) => m), hasMore: data.hasMore });
         },
         onHello: (chId, data) => {
           dispatch({ type: 'HELLO', channelId: chId, features: data.features || [] });
@@ -353,6 +378,13 @@ function App() {
     }
   };
 
+  const handleLoadOlder = (chId) => {
+    const mgr = managersRef.current[chId];
+    const ch = channelStates[chId];
+    if (!mgr || !ch || ch.loadingOlder || ch.hasMore === false || !ch.messages.length) return;
+    if (mgr.requestOlder(ch.messages[0])) dispatch({ type: 'LOADING_OLDER', channelId: chId });
+  };
+
   const handleReconnect = (chId) => {
     const mgr = managersRef.current[chId];
     if (mgr) mgr.reconnect();
@@ -424,6 +456,7 @@ function App() {
           onBack={handleBack}
           onRemove={() => handleRemoveChannel(activeChannel.id)}
           onReconnect={() => handleReconnect(activeChannel.id)}
+          onLoadOlder={() => handleLoadOlder(activeChannel.id)}
           onSend={handleSend}
           onRetry={handleRetry}
           onPermissionRespond={handlePermissionRespond}

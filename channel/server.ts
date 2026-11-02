@@ -27,6 +27,7 @@ import { join, extname, basename } from "path";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { execSync } from "child_process";
 import type { ServerWebSocket } from "bun";
+import { ChatStore, type StoredMsg } from "./store";
 
 // --- Config ---
 const PORT = Number(process.env.PARA_CHANNEL_PORT ?? 3847);
@@ -101,6 +102,7 @@ type Msg = {
   ts: number;
   replyTo?: string;
   file?: { url: string; name: string };
+  edited?: boolean;
 };
 
 type Wire =
@@ -116,7 +118,8 @@ type Wire =
   | { type: "permission_resolved"; id: string; behavior: "allow" | "deny" | "expired" }
   | { type: "error"; id?: string; message: string }
   | { type: "hello"; features: string[] }
-  | { type: "history_end" }
+  | { type: "history_end"; hasMore?: boolean }
+  | { type: "history_page"; messages: Wire[]; hasMore: boolean }
   | { type: "pong" }
   | { type: "status"; connected: boolean };
 
@@ -128,9 +131,15 @@ type PendingPermission = {
 // --- State ---
 const clients = new Set<ServerWebSocket<unknown>>();
 const pendingPermissions = new Map<string, PendingPermission>();
-const history: Wire[] = [];
-const MAX_HISTORY = 200;
+// Chat history lives in SQLite (see store.ts) so it survives restarts
+const store = new ChatStore(STATE_DIR);
+const REPLAY_LIMIT = 200;
+const PAGE_LIMIT = 100;
+store.archive();
+setInterval(() => store.archive(), 24 * 60 * 60 * 1000).unref();
 let seq = 0;
+
+const asWire = (m: StoredMsg): Wire => ({ type: "msg", ...m });
 
 function nextId() {
   return `m${Date.now()}-${++seq}`;
@@ -138,12 +147,8 @@ function nextId() {
 
 function broadcast(m: Wire) {
   if (m.type === "msg") {
-    history.push(m);
-    if (history.length > MAX_HISTORY) history.shift();
-  } else if (m.type === "edit") {
-    // Keep history in sync so reconnecting clients see the edited text
-    const h = history.find((x) => x.type === "msg" && x.id === m.id);
-    if (h && h.type === "msg") h.text = m.text;
+    const { type: _, ...msg } = m;
+    store.save(msg);
   }
   const data = JSON.stringify(m);
   for (const ws of clients) if (ws.readyState === 1) ws.send(data);
@@ -260,10 +265,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
       case "edit_message": {
         // Only Claude's own replies can be edited
-        const target = history.find((m) => m.type === "msg" && m.id === args.message_id);
-        if (!target || target.type !== "msg" || target.from !== "assistant") {
+        const target = store.get(String(args.message_id));
+        if (!target || target.from !== "assistant") {
           throw new Error(`no assistant message ${args.message_id}`);
         }
+        store.edit(target.id, String(args.text));
         broadcast({
           type: "edit",
           id: args.message_id as string,
@@ -549,11 +555,14 @@ Bun.serve({
     open: (ws) => {
       clients.add(ws);
       // Lets clients know user messages are echoed back (= delivery ack)
-      ws.send(JSON.stringify({ type: "hello", features: ["echo", "ping", "history_end"] }));
-      // Send history, then still-open permission requests, to the new client
-      for (const m of history) ws.send(JSON.stringify(m));
+      ws.send(
+        JSON.stringify({ type: "hello", features: ["echo", "ping", "history_end", "history_page"] })
+      );
+      // Send recent history, then still-open permission requests, to the new client
+      const recent = store.recent(REPLAY_LIMIT);
+      for (const m of recent.messages) ws.send(JSON.stringify(asWire(m)));
       for (const p of pendingPermissions.values()) ws.send(JSON.stringify(p.request));
-      ws.send(JSON.stringify({ type: "history_end" }));
+      ws.send(JSON.stringify({ type: "history_end", hasMore: recent.hasMore }));
     },
     close: (ws) => {
       clients.delete(ws);
@@ -569,6 +578,15 @@ Bun.serve({
           respondPermission(data.id, data.allowed);
           return;
         }
+        // Older messages, one page at a time (cursor = oldest message the client has)
+        if (data.type === "history_before") {
+          const { ts, id } = data.before ?? {};
+          if (typeof ts !== "number" || typeof id !== "string") return;
+          const limit = Math.min(PAGE_LIMIT, Math.max(1, Number(data.limit) || 50));
+          const page = store.before({ ts, id }, limit);
+          ws.send(JSON.stringify({ type: "history_page", messages: page.messages.map(asWire), hasMore: page.hasMore }));
+          return;
+        }
         // File upload via WebSocket (base64 encoded)
         if (data.type === "file_upload") {
           const { id, text, fileName, fileData } = data;
@@ -578,9 +596,9 @@ Bun.serve({
             typeof fileData === "string" &&
             fileData
           ) {
-            const seen = history.find((m) => m.type === "msg" && m.id === id);
+            const seen = store.get(id);
             if (seen) {
-              ws.send(JSON.stringify(seen));
+              ws.send(JSON.stringify(asWire(seen)));
               return;
             }
             const buf = Buffer.from(fileData, "base64");
@@ -601,9 +619,9 @@ Bun.serve({
         const { id, text } = data as { id: unknown; text: unknown };
         if (typeof id === "string" && typeof text === "string" && text.trim()) {
           // A retry of an already-delivered message only needs the ack again
-          if (history.some((m) => m.type === "msg" && m.id === id)) {
-            const m = history.find((m) => m.type === "msg" && m.id === id)!;
-            ws.send(JSON.stringify(m));
+          const seen = store.get(id);
+          if (seen) {
+            ws.send(JSON.stringify(asWire(seen)));
             return;
           }
           echoUser(id, text.trim());

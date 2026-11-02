@@ -668,17 +668,37 @@ function Composer({ onSend, offline, quickPrompts = [] }) {
 }
 
 // ---- Conversation body ----
-function Conversation({ channel, onBack, onRemove, onReconnect, onSend, onRetry, onPermissionRespond, showTimestamps }) {
+function Conversation({ channel, onBack, onRemove, onReconnect, onLoadOlder, onSend, onRetry, onPermissionRespond, showTimestamps }) {
   const scrollRef = useRef(null);
   const contentRef = useRef(null);
   // Follow new messages only while the reader is at the bottom
   const stickRef = useRef(true);
   const lastIdRef = useRef(null);
   const last = channel.messages[channel.messages.length - 1];
+  const first = channel.messages[0];
+  // When older messages are prepended, keep the viewport on what the reader was looking at
+  const prependRef = useRef(null);
 
   const toBottom = () => {
     const el = scrollRef.current;
     if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+  };
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    const p = prependRef.current;
+    if (el && p && first && p.firstId !== first.id) {
+      el.scrollTop = el.scrollHeight - p.fromBottom;
+      prependRef.current = null;
+    }
+  }, [first && first.id]);
+
+  const loadOlder = () => {
+    const el = scrollRef.current;
+    if (!el || !first) return;
+    prependRef.current = { firstId: first.id, fromBottom: el.scrollHeight - el.scrollTop };
+    stickRef.current = false;
+    onLoadOlder();
   };
 
   useLayoutEffect(() => {
@@ -697,9 +717,13 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onSend, onRetry,
     return () => ro.disconnect();
   }, []);
 
+  const canLoadOlder = channel.hasMore !== false && !!first && channel.status === 'connected';
+
   const onScroll = () => {
     const el = scrollRef.current;
     stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    // Reaching the top pages in older history (only when the server says there is some)
+    if (el.scrollTop < 60 && channel.hasMore === true && !channel.loadingOlder) loadOlder();
   };
 
   // Group consecutive by sender; insert day dividers
@@ -735,6 +759,14 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onSend, onRetry,
       <ConversationHeader channel={channel} onBack={onBack} onRemove={onRemove} onReconnect={onReconnect} />
       <div ref={scrollRef} onScroll={onScroll} className="pad-x" style={{ flex: 1, overflowY: 'auto', paddingTop: 8, paddingBottom: 20 }}>
         <div ref={contentRef}>
+        {canLoadOlder && channel.hasMore !== null && (
+          <div style={{ textAlign: 'center', margin: '8px 0 4px' }}>
+            <button onClick={loadOlder} disabled={channel.loadingOlder} className="focus-ring" style={{
+              border: '1px solid var(--line-2)', background: 'var(--panel)', color: 'var(--ink-2)',
+              borderRadius: 999, padding: '4px 12px', fontSize: 12, cursor: channel.loadingOlder ? 'default' : 'pointer',
+            }}>{channel.loadingOlder ? '불러오는 중…' : '이전 대화 더 보기'}</button>
+          </div>
+        )}
         {channel.messages.length === 0 && !channel.isThinking && (
           <div style={{ textAlign: 'center', color: 'var(--ink-3)', fontSize: 13, marginTop: 60 }}>
             메시지를 보내 대화를 시작하세요

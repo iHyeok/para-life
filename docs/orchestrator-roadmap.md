@@ -350,6 +350,14 @@ python3 -m http.server 5174
 cd ~/para-life/multichat && bun run build
 ```
 
+### 채팅 기록 저장
+
+- 위치: `~/.claude/channels/para-life/` (저장소 밖, git에 안 올라감)
+  - `chat.db` — 최근 90일 (접속 시 최근 200건 재전송, 재시도·수정 조회)
+  - `chat-archive.db` — 90일 지난 메시지 (하루 한 번 자동 이동, "이전 대화 더 보기"로 이어서 조회)
+  - `inbox/`, `outbox/` — 채팅으로 주고받은 파일
+- SQLite(WAL) 파일이라 백업은 `sqlite3 chat.db ".backup chat-backup.db"` 또는 CC 종료 후 파일 복사
+
 ### 채널 서버 접근 제어
 
 - `127.0.0.1`에만 바인딩 (외부 접속은 Cloudflare Tunnel 경유)

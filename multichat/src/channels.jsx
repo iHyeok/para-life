@@ -9,7 +9,7 @@ const HELLO_FALLBACK = 1000;
 const CONNECT_TIMEOUT = 10000;
 
 class ChannelManager {
-  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onPermissionResolved, onError, onStatus, onSent, onHello }) {
+  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onPermissionResolved, onError, onStatus, onSent, onHello, onHistoryEnd, onHistoryPage }) {
     this.id = id;
     this.name = name;
     this.wsUrl = wsUrl;
@@ -22,6 +22,8 @@ class ChannelManager {
     this.onStatus = onStatus;
     this.onSent = onSent;
     this.onHello = onHello;
+    this.onHistoryEnd = onHistoryEnd;
+    this.onHistoryPage = onHistoryPage;
     this.ws = null;
     this.status = 'disconnected';
     this.features = [];
@@ -106,6 +108,9 @@ class ChannelManager {
         this._markReady();
       } else if (data.type === 'history_end') {
         this.replaying = false;
+        if (this.onHistoryEnd) this.onHistoryEnd(this.id, data);
+      } else if (data.type === 'history_page') {
+        if (this.onHistoryPage) this.onHistoryPage(this.id, data);
       } else if (data.type === 'msg' && this.onMessage) {
         this.onMessage(this.id, data, { replay: this.replaying, firstConnect: this.connectCount === 1 });
       } else if (data.type === 'edit' && this.onEdit) {
@@ -144,6 +149,13 @@ class ChannelManager {
       this.ws = null;
     }
     this.connect();
+  }
+
+  // Ask for messages older than `oldest` (the first one we show); answer comes as history_page
+  requestOlder(oldest, limit = 50) {
+    if (!this.ws || this.ws.readyState !== 1 || !this.features.includes('history_page')) return false;
+    this.ws.send(JSON.stringify({ type: 'history_before', before: { ts: oldest.ts, id: oldest.id }, limit }));
+    return true;
   }
 
   hasQueued(id) {
