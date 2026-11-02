@@ -58,7 +58,15 @@ const CF_TEAM_DOMAIN = process.env.CF_TEAM_DOMAIN ?? "";
 const CF_AUD = process.env.CF_AUDIENCE ?? "";
 const SKIP_AUTH = process.env.SKIP_AUTH === "1";
 
-const STATE_DIR = join(homedir(), ".claude", "channels", "para-life");
+// One server per chat session: the orchestrator is "para-life"; project sessions
+// (scripts/session.sh) get their own id, port, URL prefix and history DB.
+const CHANNEL_ID = process.env.PARA_CHANNEL_ID ?? "para-life";
+if (!/^[a-z0-9-]+$/.test(CHANNEL_ID)) throw new Error(`bad PARA_CHANNEL_ID: ${CHANNEL_ID}`);
+const CHANNEL_NAME = process.env.PARA_CHANNEL_NAME ?? "PARA Life";
+// Path prefix when the tunnel routes a sub-path to this server (e.g. /p/paper)
+const BASE_PATH = (process.env.PARA_CHANNEL_BASE ?? "").replace(/\/+$/, "");
+if (BASE_PATH && !/^(\/[a-z0-9-]+)+$/.test(BASE_PATH)) throw new Error(`bad PARA_CHANNEL_BASE: ${BASE_PATH}`);
+const STATE_DIR = join(homedir(), ".claude", "channels", CHANNEL_ID);
 const INBOX_DIR = join(STATE_DIR, "inbox");
 const OUTBOX_DIR = join(STATE_DIR, "outbox");
 
@@ -193,10 +201,12 @@ function isOriginAllowed(req: Request): boolean {
 
 // --- MCP Server ---
 const mcp = new Server(
-  { name: "para-life-channel", version: "0.1.0" },
+  { name: CHANNEL_ID === "para-life" ? "para-life-channel" : `para-${CHANNEL_ID}-channel`, version: "0.1.0" },
   {
     capabilities: { tools: {}, experimental: { "claude/channel": {}, "claude/channel/permission": {} } },
-    instructions: `The sender reads the para-life chat UI, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches the UI.\n\nMessages from the para-life chat arrive as <channel source="para-life" chat_id="web" message_id="...">. If the tag has a file_path attribute, Read that file — it is an upload from the UI. Reply with the reply tool.\n\nYou are the PARA Life orchestrator. Your cwd is ~/para-life. Refer to PARA-SPEC.md for data management rules. You can read other project directories for status checks but only write to ~/para-life.`,
+    instructions: CHANNEL_ID !== "para-life"
+      ? `The sender reads the "${CHANNEL_NAME}" chat in the para-life chat UI, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches the UI.\n\nMessages from that chat arrive as <channel ...> tags with chat_id "web". If the tag has a file_path attribute, Read that file — it is an upload from the UI. Reply with the reply tool.\n\nYou are a project session of the PARA Life system (session id "${CHANNEL_ID}"), not the orchestrator. Your cwd is ~/para-life. Follow the session brief appended to your system prompt, CLAUDE.md and PARA-SPEC.md.`
+      : `The sender reads the para-life chat UI, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches the UI.\n\nMessages from the para-life chat arrive as <channel source="para-life" chat_id="web" message_id="...">. If the tag has a file_path attribute, Read that file — it is an upload from the UI. Reply with the reply tool.\n\nYou are the PARA Life orchestrator. Your cwd is ~/para-life. Refer to PARA-SPEC.md for data management rules. You can read other project directories for status checks but only write to ~/para-life.`,
   }
 );
 
@@ -443,6 +453,9 @@ Bun.serve({
   hostname: HOST,
   async fetch(req, server) {
     const url = new URL(req.url);
+    if (BASE_PATH && (url.pathname === BASE_PATH || url.pathname.startsWith(`${BASE_PATH}/`))) {
+      url.pathname = url.pathname.slice(BASE_PATH.length) || "/";
+    }
     if (!ALLOWED_HOSTS.has(req.headers.get("host") ?? "")) {
       return new Response("Forbidden host", { status: 403 });
     }

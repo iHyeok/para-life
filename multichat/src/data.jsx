@@ -10,17 +10,50 @@ const DEFAULT_CHANNELS = [
     httpUrl: 'https://api.kyxi.net',
     color: '#60a5fa',
   },
+  // On-demand project session: `scripts/session.sh start paper` (or ask the PARA Life chat)
+  {
+    id: 'paper',
+    name: 'Paper',
+    wsUrl: 'wss://api.kyxi.net/p/paper/ws',
+    httpUrl: 'https://api.kyxi.net/p/paper',
+    color: '#c084fc',
+  },
 ];
+
+// Defaults added after a browser saved its list are appended once; a default the user
+// deleted stays deleted because its id is remembered here
+const SEEN_DEFAULTS_KEY = 'multichat-seen-defaults';
 
 function loadChannels() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) return withNewDefaults(parsed);
     }
   } catch {}
+  rememberDefaults();
   return DEFAULT_CHANNELS;
+}
+
+function rememberDefaults(seen = []) {
+  try {
+    localStorage.setItem(SEEN_DEFAULTS_KEY, JSON.stringify([...new Set([...seen, ...DEFAULT_CHANNELS.map(c => c.id)])]));
+  } catch {}
+}
+
+function withNewDefaults(channels) {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(SEEN_DEFAULTS_KEY) || '[]'); } catch {}
+  // Lists saved before this key existed already went through the original defaults
+  if (!Array.isArray(seen) || seen.length === 0) seen = ['para-life'];
+  const have = new Set(channels.map(c => c.id));
+  const added = DEFAULT_CHANNELS.filter(c => !seen.includes(c.id) && !have.has(c.id));
+  rememberDefaults(seen);
+  if (added.length === 0) return channels;
+  const merged = [...channels, ...added];
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch {}
+  return merged;
 }
 
 function saveChannels(channels) {
@@ -34,6 +67,12 @@ const QUICK_PROMPTS = {
     { label: '주간 브리핑', text: '이번 주 주간 브리핑 해줘. 이번 주 진행 내역과 다음 주에 할 일 위주로.' },
     { label: '마감·방치 점검', text: '마감이 임박했거나 오래 업데이트되지 않은 프로젝트를 알려줘.' },
     { label: '진행 기록', text: '오늘 진행한 내용을 기록하고 싶어. 어떤 프로젝트인지 물어봐줘.' },
+    { label: 'Paper 세션 열기', text: 'paper 세션 열어줘.' },
+  ],
+  paper: [
+    { label: '지금 어디까지', text: '논문 프로젝트 현재 상태를 정리해줘. Progress Log와 지식 노트 기준으로, 다음에 할 일까지.' },
+    { label: '연구 질문 다듬기', text: '지금까지 지식 노트를 바탕으로 연구 질문 후보를 같이 다듬자. 후보마다 근거 노트와 약점도 같이.' },
+    { label: '토론 내용 기록', text: '오늘 토론에서 나온 주장·반론·결정을 Progress Log에 정리해줘.' },
   ],
 };
 

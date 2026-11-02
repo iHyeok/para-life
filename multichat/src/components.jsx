@@ -499,7 +499,7 @@ function AuthHintBanner({ channel }) {
       background: 'var(--hover)', borderBottom: '1px solid var(--line)', color: 'var(--ink-2)',
       display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', flexShrink: 0,
     }}>
-      <span>연결이 계속 실패해요. 서버 쪽 Cloudflare Access 로그인이 만료됐을 수 있어요.</span>
+      <span>연결이 계속 실패해요. 세션이 꺼져 있거나, 서버 쪽 Cloudflare Access 로그인이 만료됐을 수 있어요.</span>
       <a href={loginUrl} target="_blank" rel="noopener noreferrer" className="focus-ring" style={{
         color: 'var(--ink)', fontWeight: 600, textDecoration: 'underline',
       }}>로그인 열기 ↗</a>

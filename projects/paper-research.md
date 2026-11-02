@@ -42,3 +42,4 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
 - 원 논문(arXiv 2604.07729) 정독 노트 작성, 기존 노트 수치 대조(대부분 일치, 3건 보정)
   - 가설을 받치는 근거 두 가지: 사후학습 뒤 playful·amused·enthusiastic 표상 감소(Fig 36), "표현되지 않은 감정" deflection 표상(부록 6.14)
   - 실험 후보: 오픈 모델의 base와 instruct 감정 표상을 비교하고 유머·함축 평가와의 상관을 본다. 기준값이 중간대인 과제로 설계한다
+- 전담 채팅 세션 마련: multichat "Paper" 채팅 ↔ 프로젝트 세션(필요할 때만 실행, `scripts/session.sh start paper`, 브리프 `sessions/paper/brief.md`). 토론은 이 세션에서 이어 가고, 맥락은 이 Progress Log와 지식 노트에 남긴다

@@ -524,3 +524,43 @@ describe("process lifecycle", () => {
     expect(c.frames[0].type).toBe("hello");
   }, 20000);
 });
+
+describe("project sessions (PARA_CHANNEL_ID / PARA_CHANNEL_BASE)", () => {
+  const env = { PARA_CHANNEL_ID: "paper", PARA_CHANNEL_NAME: "Paper", PARA_CHANNEL_BASE: "/p/paper" };
+
+  test("serves under the tunnel prefix and keeps its own history dir", async () => {
+    const home = tempHome();
+    cleanup.push(() => removeDir(home));
+    const srv = await startServer({ home, env });
+    const base = `http://127.0.0.1:${srv.port}/p/paper`;
+    const health = await fetch(`${base}/health`, { headers: { Origin: UI_ORIGIN } });
+    expect(health.status).toBe(200);
+    // Local access without the prefix still works
+    expect((await fetch(`http://127.0.0.1:${srv.port}/health`)).status).toBe(200);
+
+    const c = await connect(srv);
+    c.ws.close();
+    const viaPrefix = await Client.ready(`ws://127.0.0.1:${srv.port}/p/paper/ws`, { Origin: UI_ORIGIN });
+    cleanup.push(() => viaPrefix.close());
+    viaPrefix.send({ id: "p1", text: "paper only" });
+    await viaPrefix.next((f) => f.type === "msg" && f.id === "p1");
+
+    const dir = join(home, ".claude", "channels", "paper");
+    await waitFor(() => existsSync(join(dir, "chat.db")), 5000, "paper chat.db");
+    expect(existsSync(stateDir(home))).toBe(false);
+  });
+
+  test("announces itself as a project session, not the orchestrator", async () => {
+    const srv = await startServer({ env });
+    const init = await srv.response(1);
+    expect(init.result.serverInfo.name).toBe("para-paper-channel");
+    expect(init.result.instructions).toContain('"Paper"');
+    expect(init.result.instructions).not.toContain("You are the PARA Life orchestrator");
+  });
+
+  test("a prefix that only looks similar is not stripped", async () => {
+    const srv = await startServer({ env });
+    const res = await fetch(`http://127.0.0.1:${srv.port}/p/paperx/health`, { headers: { Origin: UI_ORIGIN } });
+    expect(res.status).not.toBe(200);
+  });
+});

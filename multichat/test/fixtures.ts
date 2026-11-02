@@ -197,6 +197,8 @@ export async function openChat(
         "multichat-channels",
         JSON.stringify([{ id: "para-life", name: "PARA Life", wsUrl, httpUrl, color: "#60a5fa" }]),
       );
+      // Keep built-in defaults (e.g. the Paper session) out of single-channel tests
+      localStorage.setItem("multichat-seen-defaults", JSON.stringify(["para-life", "paper"]));
     },
     { wsUrl: channel.wsUrl, httpUrl: channel.httpUrl },
   );

@@ -53,6 +53,11 @@
 - 답변에 근거로 쓴 노트를 `(노트: {id})`처럼 밝히고, 노트끼리 충돌하거나 근거가 약하면 그 점도 말한다
 - 토론에서 새로 나온 주장·반론·결정은 해당 프로젝트 Progress Log에, 특정 노트에 대한 새 해석은 그 노트의 `## 비판적 검토`/`## 논문 활용 포인트`에 덧붙인다
 
+### 프로젝트 세션 (필요할 때만)
+- 프로젝트별 전담 Claude Code 세션을 띄울 수 있다. 정의는 `sessions/{id}/`(`session.env`, `brief.md`), 지금은 `paper`(→ `paper-research`)
+- "paper 세션 열어줘/닫아줘/상태" 요청 → `scripts/session.sh start|stop|status paper` 실행 후 결과를 답한다. 시작하면 tmux `dev:paper` 창에서 같은 대화를 이어서(resume) 열고, multichat "Paper" 채팅(`wss://api.kyxi.net/p/paper/ws`)이 연결된다
+- 그 프로젝트 토론은 프로젝트 세션에서 하도록 안내한다. 세션이 저장소를 함께 쓰므로 오케스트레이터도 커밋 전에 `git pull --rebase`
+
 ### 파일 업로드
 - 채널에서 파일이 첨부되면 R2에 업로드: public 항목은 `para-life-assets`, limited/private 항목은 `para-life-private`
 - 경로·명령·링크 기록 형식은 PARA-SPEC.md "파일 업로드" 참조
