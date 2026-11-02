@@ -95,6 +95,19 @@
       "createdAt": "2026-11-02",
       "tags": ["llm", "interpretability", "emotion", "representation", "steering", "alignment", "thesis"],
       "relatedProjects": ["paper-research"]
+    },
+    {
+      "id": "emotion-concepts-llm-2026",
+      "title": "[논문] Emotion Concepts and their Function in a Large Language Model (Sofroniew et al., 2026)",
+      "topic": "LLM 해석가능성·감정 표상",
+      "kind": "knowledge",
+      "visibility": "private",
+      "area": "ai-study",
+      "source": "Anthropic Interpretability · arXiv 2604.07729v1",
+      "sourceUrl": "https://arxiv.org/abs/2604.07729",
+      "createdAt": "2026-11-02",
+      "tags": ["paper", "llm", "interpretability", "emotion", "representation", "steering", "alignment", "post-training"],
+      "relatedProjects": ["paper-research"]
     }
   ]
 }
