@@ -1,5 +1,6 @@
 ---
-import { detailHref, isLocked, type Resource, type View } from "../lib/data";
+import TagList from "./TagList.astro";
+import { detailHref, isLocked, searchAttrs, type Resource, type View } from "../lib/data";
 
 interface Props {
   resource: Resource;
@@ -8,26 +9,23 @@ interface Props {
 
 const { resource, view } = Astro.props;
 const href = detailHref("resources", resource, view);
+const search = searchAttrs("resources", resource, view);
 ---
 
 {isLocked(resource, view) ? (
-  <a href={href} class="card locked" style="--card-accent: var(--green)">
+  <a href={href} class="card locked" style="--card-accent: var(--green)" {...search}>
     <h3>{resource.title}</h3>
     <span class="lock">Limited</span>
   </a>
 ) : (
-  <a href={href} class="card" style="--card-accent: var(--green)">
-    <h3>{resource.title}</h3>
+  <article class="card" style="--card-accent: var(--green)" {...search}>
+    <h3><a href={href} class="card-link">{resource.title}</a></h3>
     <div class="meta">
       {resource.topic && <span class="topic">{resource.topic}</span>}
       {resource.source && <span>{resource.source}</span>}
     </div>
-    {resource.tags && resource.tags.length > 0 && (
-      <div class="tags">
-        {resource.tags.map((tag) => <span class="tag">#{tag}</span>)}
-      </div>
-    )}
-  </a>
+    <TagList tags={resource.tags} view={view} />
+  </article>
 )}
 
 <style>

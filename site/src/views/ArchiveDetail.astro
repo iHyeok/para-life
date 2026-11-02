@@ -1,5 +1,6 @@
 ---
 import DetailLayout from "./DetailLayout.astro";
+import TagList from "../components/TagList.astro";
 import { detailHref, getItem, listedArea, type View } from "../lib/data";
 
 interface Props {
@@ -28,9 +29,5 @@ const area = listedArea(archive.area, view);
     {archive.createdAt && <span>Created: {archive.createdAt}</span>}
   </div>
   {archive.goal && <p class="goal">{archive.goal}</p>}
-  {archive.tags && archive.tags.length > 0 && (
-    <div class="tags">
-      {archive.tags.map((t) => <span class="tag">#{t}</span>)}
-    </div>
-  )}
+  <TagList tags={archive.tags} view={view} />
 </DetailLayout>
