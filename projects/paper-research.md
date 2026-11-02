@@ -43,3 +43,9 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 가설을 받치는 근거 두 가지: 사후학습 뒤 playful·amused·enthusiastic 표상 감소(Fig 36), "표현되지 않은 감정" deflection 표상(부록 6.14)
   - 실험 후보: 오픈 모델의 base와 instruct 감정 표상을 비교하고 유머·함축 평가와의 상관을 본다. 기준값이 중간대인 과제로 설계한다
 - 전담 채팅 세션 마련: multichat "Paper" 채팅 ↔ 프로젝트 세션(필요할 때만 실행, `scripts/session.sh start paper`, 브리프 `sessions/paper/brief.md`). 토론은 이 세션에서 이어 가고, 맥락은 이 Progress Log와 지식 노트에 남긴다
+- 토론: "감정 벡터가 있어도 표출하려면 페르소나가 필요한가?" → MBTI×LLM 선행 연구 조사 (초록·검색 요약 수준, 본문 미확인)
+  - MBTI 측정·주입 연구: Huang 외 2023(ChatGPT ENFJ, 페르소나·기분 유도로도 잘 안 바뀜 — 프롬프트 페르소나의 반례), Machine Mindset(2312.12999), MBTI-in-Thoughts(2509.04343), InCharacter(ACL 2024)
+  - 더 가까운 축: Assistant Axis(Lu 외 2026, 2601.10387), Persona Vectors(Chen 외 2025), Big Five 스티어링(신경증은 잘 안 움직임), 리뷰(2510.04484): 감정 표현 연구는 적음
+  - 가설 재정식화(제안): "페르소나가 있어야 표출"이 아니라 "기본 Assistant 페르소나가 표출을 억제하고, 다른 페르소나로 옮기면 같은 표상이 표현으로 풀린다". 실험은 페르소나 전환 시 표상 불변·표현 변화(게이트) 대 표상 자체 변화(생성기)를 구분하고, 프롬프트 페르소나와 스티어링 페르소나를 함께 비교
+  - 측정 도구는 Big Five/persona vector 권장, MBTI는 페르소나 프롬프트 재료로만 쓰기를 권장 (심리측정 타당도 문제)
+  - 다음 후보: Assistant Axis, Persona Vectors, Huang 외를 지식 노트로 정독
