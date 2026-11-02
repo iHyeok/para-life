@@ -34,11 +34,7 @@
 
 ### 프로젝트 상태 전환
 - active → completed: **즉시 아카이브 처리** (completed 상태로 projects/에 남기지 않음)
-  1. projects/_index.json에서 제거
-  2. archives/_index.json에 추가 (originalType, area, archivedAt)
-  3. .md를 archives/로 이동
-  4. 관련 Area .md의 Related Projects에서 제거
-  5. 관련 Resource의 relatedProjects에서 제거
+  - 절차는 PARA-SPEC.md "항목 완료/아카이브" 참조
 - active → on-hold: status 변경, 사유 기록
 
 ### 레퍼런스 추가
@@ -48,9 +44,7 @@
 
 ### 파일 업로드
 - 채널에서 파일이 첨부되면 R2 버킷 `para-life-assets`에 업로드
-- 경로: `{category}/{id}/{filename}` (예: `projects/ai-study-prep/result.mp4`)
-- 명령: `npx wrangler r2 object put para-life-assets/{path} --file {local} --content-type {mime} --remote`
-- 업로드 후 해당 `.md`의 Resources에 `[설명](https://kyxi.net/{path})` 링크 기록
+- 경로·명령·링크 기록 형식은 PARA-SPEC.md "파일 업로드" 참조
 
 ### 일일/주간 브리핑
 - 전체 프로젝트 상태 요약
