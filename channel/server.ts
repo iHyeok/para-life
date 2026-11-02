@@ -21,9 +21,11 @@ import {
   mkdirSync,
   statSync,
   copyFileSync,
+  chmodSync,
 } from "node:fs";
 import { homedir } from "node:os";
 import { join, extname, basename } from "node:path";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { execSync } from "node:child_process";
 import type { ServerWebSocket } from "bun";
@@ -129,7 +131,17 @@ type Wire =
   | { type: "history_end"; hasMore?: boolean }
   | { type: "history_page"; messages: Wire[]; hasMore: boolean }
   | { type: "pong" }
-  | { type: "status"; connected: boolean };
+  | { type: "status"; connected: boolean }
+  | Activity;
+
+// What the Claude Code session is doing, reported by hooks (channel/hooks/activity.ts)
+type Activity = {
+  type: "activity";
+  state: "idle" | "working" | "waiting";
+  label?: string;
+  /** When the current working stretch began (ms) */
+  since: number;
+};
 
 type PendingPermission = {
   request: Extract<Wire, { type: "permission_request" }>;
@@ -160,6 +172,47 @@ function broadcast(m: Wire) {
   }
   const data = JSON.stringify(m);
   for (const ws of clients) if (ws.readyState === 1) ws.send(data);
+}
+
+// --- Session activity ---
+// Only hooks know when a turn ends, so nothing is announced until the first hook call
+let hooksSeen = false;
+let activity: Activity = { type: "activity", state: "idle", since: Date.now() };
+const ACTIVITY_TOKEN = randomBytes(24).toString("hex");
+
+function setActivity(state: Activity["state"], label?: string) {
+  if (!hooksSeen) return;
+  const since = activity.state === "idle" && state !== "idle" ? Date.now() : activity.since;
+  activity = { type: "activity", state, ...(label ? { label: label.slice(0, 120) } : {}), since };
+  broadcast(activity);
+}
+
+function onHook(event: string, label?: string) {
+  hooksSeen = true;
+  // A permission prompt comes after PreToolUse; any later hook means the turn moved on
+  // (the prompt may have been answered in the terminal)
+  if (event === "Stop") setActivity("idle");
+  else setActivity("working", label || "생각 중");
+}
+
+// The Claude Code process this server belongs to; hooks compare against it so other
+// sessions in the same folder don't report into this chat
+function ownerClaudePid(): number | null {
+  try {
+    let p = process.ppid;
+    for (let i = 0; i < 6 && p > 1; i++) {
+      const out = execSync(`ps -o ppid=,comm= -p ${p}`, { encoding: "utf-8" }).trim();
+      const [ppid, ...comm] = out.split(/\s+/);
+      if (basename(comm.join(" ")) === "claude") return p;
+      p = Number(ppid);
+    }
+  } catch {}
+  return null;
+}
+
+function tokenOk(got: string | null) {
+  if (!got || got.length !== ACTIVITY_TOKEN.length) return false;
+  return timingSafeEqual(Buffer.from(got), Buffer.from(ACTIVITY_TOKEN));
 }
 
 function mime(ext: string) {
@@ -322,6 +375,7 @@ function respondPermission(id: unknown, allowed: unknown) {
     params: { request_id: id, behavior },
   });
   broadcast({ type: "permission_resolved", id, behavior });
+  if (pendingPermissions.size === 0 && activity.state === "waiting") setActivity("working", "생각 중");
 }
 
 mcp.setNotificationHandler(
@@ -349,6 +403,7 @@ mcp.setNotificationHandler(
     }, PERMISSION_TTL_MS);
     pendingPermissions.set(request_id, { request, timeout });
     broadcast(request);
+    setActivity("waiting", `승인 대기 · ${tool_name}`);
   },
 );
 
@@ -371,6 +426,7 @@ function deliver(
   file?: { path: string; name: string }
 ): void {
   try {
+    if (activity.state === "idle") setActivity("working", "메시지 확인 중");
     const result = mcp.notification({
       method: "notifications/claude/channel",
       params: {
@@ -487,6 +543,22 @@ Bun.serve({
       );
     }
 
+    // Hook reports from the local Claude Code session (never through the tunnel)
+    if (url.pathname === "/activity" && req.method === "POST") {
+      const local = /^(127\.0\.0\.1|localhost):/.test(req.headers.get("host") ?? "") && !req.headers.get("cf-connecting-ip");
+      if (!local || !tokenOk(req.headers.get("x-activity-token"))) {
+        return new Response("Forbidden", { status: 403 });
+      }
+      try {
+        const body = (await req.json()) as { event?: unknown; label?: unknown };
+        if (typeof body.event !== "string") return new Response("bad request", { status: 400 });
+        onHook(body.event, typeof body.label === "string" ? body.label : undefined);
+        return new Response(null, { status: 204 });
+      } catch {
+        return new Response("bad request", { status: 400 });
+      }
+    }
+
     // Auth check for all other routes
     if (!SKIP_AUTH) {
       const token = extractToken(req);
@@ -569,13 +641,14 @@ Bun.serve({
       clients.add(ws);
       // Lets clients know user messages are echoed back (= delivery ack)
       ws.send(
-        JSON.stringify({ type: "hello", features: ["echo", "ping", "history_end", "history_page"] })
+        JSON.stringify({ type: "hello", features: ["echo", "ping", "history_end", "history_page", "activity"] })
       );
       // Send recent history, then still-open permission requests, to the new client
       const recent = store.recent(REPLAY_LIMIT);
       for (const m of recent.messages) ws.send(JSON.stringify(asWire(m)));
       for (const p of pendingPermissions.values()) ws.send(JSON.stringify(p.request));
       ws.send(JSON.stringify({ type: "history_end", hasMore: recent.hasMore }));
+      if (hooksSeen) ws.send(JSON.stringify(activity));
     },
     close: (ws) => {
       clients.delete(ws);
@@ -644,6 +717,14 @@ Bun.serve({
     },
   },
 });
+// Where hooks find this server: port, token and the owning Claude Code pid
+mkdirSync(STATE_DIR, { recursive: true });
+writeFileSync(
+  join(STATE_DIR, "activity.json"),
+  JSON.stringify({ port: PORT, token: ACTIVITY_TOKEN, claudePid: ownerClaudePid(), serverPid: process.pid }),
+  { mode: 0o600 },
+);
+chmodSync(join(STATE_DIR, "activity.json"), 0o600);
 process.stderr.write(`para-life-channel: http://${HOST}:${PORT}\n`);
 }
 } catch (e) {

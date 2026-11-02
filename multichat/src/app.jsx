@@ -8,6 +8,8 @@ const emptyChannelState = () => ({
   isThinking: false, pendingPermissions: [], echo: false,
   // Older history on the server: true / false / null (unknown, e.g. old server)
   hasMore: null, loadingOlder: false,
+  // What the Claude session is doing (server "activity" frames): { state, label, since } or null
+  activity: null,
 });
 
 // Insert keeping ts order (history replays and echoes can carry older server timestamps)
@@ -107,6 +109,8 @@ function channelReducer(state, action) {
           nextRetryAt: action.nextRetryAt,
           failedAttempts: action.failedAttempts || 0,
           isThinking: false,
+          // The server re-sends the current activity after (re)connecting
+          activity: null,
           // Messages stay (history replay merges by id); open permissions are re-sent by the server
           ...(connected ? { pendingPermissions: [], echo: false } : {}),
         };
@@ -130,6 +134,10 @@ function channelReducer(state, action) {
       });
     case 'HELLO':
       return updateChannel(state, action.channelId, () => ({ echo: action.features.includes('echo') }));
+    case 'ACTIVITY':
+      return updateChannel(state, action.channelId, () => ({
+        activity: { state: action.state, label: action.label || '', since: action.since || Date.now() },
+      }));
     case 'SET_THINKING':
       return updateChannel(state, action.channelId, () => ({ isThinking: action.value }));
     case 'RESET_UNREAD':
@@ -223,6 +231,9 @@ function App() {
         },
         onHistoryPage: (chId, data) => {
           dispatch({ type: 'HISTORY_PAGE', channelId: chId, messages: data.messages.map(({ type, ...m }) => m), hasMore: data.hasMore });
+        },
+        onActivity: (chId, data) => {
+          dispatch({ type: 'ACTIVITY', channelId: chId, state: data.state, label: data.label, since: data.since });
         },
         onHello: (chId, data) => {
           dispatch({ type: 'HELLO', channelId: chId, features: data.features || [] });

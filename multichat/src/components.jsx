@@ -310,7 +310,7 @@ function MessageStatus({ msg, connected, onRetry }) {
   return null;
 }
 
-function MessageBubble({ msg, isMe, showTime, grouped, httpUrl, connected, onRetry, onMediaLoad }) {
+function MessageBubble({ msg, isMe, showTime, grouped, httpUrl, connected, onRetry, onMediaLoad, delivered }) {
   const align = isMe ? 'flex-end' : 'flex-start';
   const bubbleStyle = {
     padding: '9px 13px', borderRadius: 14,
@@ -373,6 +373,9 @@ function MessageBubble({ msg, isMe, showTime, grouped, httpUrl, connected, onRet
         <div style={{ marginTop: 3 }}>
           <MessageStatus msg={msg} connected={connected} onRetry={onRetry} />
         </div>
+      )}
+      {delivered && (
+        <div style={{ marginTop: 3, fontSize: 11, color: 'var(--ink-3)' }}>전달됨</div>
       )}
     </div>
   );
@@ -437,7 +440,9 @@ function ConversationHeader({ channel, onBack, onRemove, onReconnect }) {
   const disconnected = channel.status === 'disconnected';
   const now = useNow(disconnected ? channel.nextRetryAt : null);
   const retryIn = channel.nextRetryAt ? Math.max(0, Math.ceil((channel.nextRetryAt - now) / 1000)) : null;
-  const statusText = channel.status === 'connected' ? '연결됨'
+  const act = channel.status === 'connected' && channel.activity ? channel.activity.state : null;
+  const statusText = channel.status === 'connected'
+    ? (act === 'working' ? '연결됨 · 작업 중' : act === 'waiting' ? '연결됨 · 승인 대기' : '연결됨')
     : channel.status === 'connecting' ? '연결 중…'
     : retryIn != null ? `연결 끊김 · ${retryIn}초 후 재시도` : '연결 끊김';
   const statusColor = channel.status === 'connected' ? '#22C55E' : channel.status === 'connecting' ? '#f59e0b' : '#ef4444';
@@ -504,6 +509,39 @@ function AuthHintBanner({ channel }) {
         color: 'var(--ink)', fontWeight: 600, textDecoration: 'underline',
       }}>로그인 열기 ↗</a>
       <span style={{ color: 'var(--ink-3)' }}>로그인 후 이 탭으로 돌아오면 바로 다시 연결해요.</span>
+    </div>
+  );
+}
+
+// What the Claude session is doing right now (from the server's hook-fed "activity" frames)
+function formatElapsed(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function ActivityRow({ activity }) {
+  const busy = activity && activity.state !== 'idle';
+  const now = useNow(busy);
+  if (!busy) return null;
+  const waiting = activity.state === 'waiting';
+  return (
+    <div className="msg-in" role="status" aria-live="polite" data-activity={activity.state}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+      <div style={{
+        padding: waiting ? '8px 12px' : '10px 14px', borderRadius: 14, flexShrink: 0,
+        background: 'var(--bubble-them)', border: '1px solid var(--line)', borderBottomLeftRadius: 4,
+      }}>
+        {waiting
+          ? <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
+          : <><span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" /></>}
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--ink-3)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span className="activity-label" style={{ color: 'var(--ink-2)' }}>
+          {waiting ? `${activity.label || '승인 대기'} — 위 카드에서 허용/거부` : (activity.label || '작업 중')}
+        </span>
+        {' · '}
+        <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{formatElapsed(now - activity.since)}</span>
+      </div>
     </div>
   );
 }
@@ -730,7 +768,7 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onLoadOlder, onS
     if (last && last.id !== lastIdRef.current && last.from === 'user' && last.status === 'pending') stickRef.current = true;
     lastIdRef.current = last ? last.id : null;
     toBottom();
-  }, [channel.id, channel.messages.length, channel.isThinking, channel.pendingPermissions.length]);
+  }, [channel.id, channel.messages.length, channel.isThinking, channel.pendingPermissions.length, channel.activity && channel.activity.state]);
 
   // Keyboard opening, composer growing, images loading, edits: stay pinned if we were
   useEffect(() => {
@@ -777,6 +815,9 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onLoadOlder, onS
 
   // Permission requests
   const permissions = channel.pendingPermissions || [];
+  // "전달됨" under the newest message while it still waits for an answer
+  const lastMsg = channel.messages[channel.messages.length - 1];
+  const deliveredId = lastMsg && lastMsg.from === 'user' && lastMsg.status === 'sent' ? lastMsg.id : null;
 
   return (
     <section className="conversation" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
@@ -812,13 +853,16 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onLoadOlder, onS
               connected={channel.status === 'connected'}
               onRetry={onRetry}
               onMediaLoad={toBottom}
+              delivered={isMe && m.id === deliveredId}
             />
           );
         })}
         {permissions.map(p => (
           <PermissionRequest key={p.id} perm={p} onRespond={onPermissionRespond} />
         ))}
-        {channel.isThinking && (
+        {channel.activity ? (
+          <ActivityRow activity={channel.status === 'connected' ? channel.activity : null} />
+        ) : channel.isThinking && (
           <div className="msg-in" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <div style={{
               padding: '10px 14px', borderRadius: 14,

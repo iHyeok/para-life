@@ -9,7 +9,7 @@ const HELLO_FALLBACK = 1000;
 const CONNECT_TIMEOUT = 10000;
 
 class ChannelManager {
-  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onPermissionResolved, onError, onStatus, onSent, onHello, onHistoryEnd, onHistoryPage }) {
+  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onPermissionResolved, onError, onStatus, onSent, onHello, onHistoryEnd, onHistoryPage, onActivity }) {
     this.id = id;
     this.name = name;
     this.wsUrl = wsUrl;
@@ -24,6 +24,7 @@ class ChannelManager {
     this.onHello = onHello;
     this.onHistoryEnd = onHistoryEnd;
     this.onHistoryPage = onHistoryPage;
+    this.onActivity = onActivity;
     this.ws = null;
     this.status = 'disconnected';
     this.features = [];
@@ -109,6 +110,8 @@ class ChannelManager {
       } else if (data.type === 'history_end') {
         this.replaying = false;
         if (this.onHistoryEnd) this.onHistoryEnd(this.id, data);
+      } else if (data.type === 'activity') {
+        if (this.onActivity) this.onActivity(this.id, data);
       } else if (data.type === 'history_page') {
         if (this.onHistoryPage) this.onHistoryPage(this.id, data);
       } else if (data.type === 'msg' && this.onMessage) {

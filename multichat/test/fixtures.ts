@@ -137,6 +137,17 @@ export class Channel {
     this.proc.stdin.write(`${JSON.stringify(msg)}\n`);
   }
 
+  /** Report a Claude Code hook event, as channel/hooks/activity.ts would. */
+  async hook(event: string, label?: string) {
+    const info = JSON.parse(fs.readFileSync(path.join(this.home, ".claude", "channels", "para-life", "activity.json"), "utf-8"));
+    const res = await fetch(`http://127.0.0.1:${this.port}/activity`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-activity-token": info.token },
+      body: JSON.stringify({ event, label }),
+    });
+    if (res.status !== 204) throw new Error(`hook ${event}: ${res.status}`);
+  }
+
   reply(text: string) {
     this.send({ jsonrpc: "2.0", id: this.nextId++, method: "tools/call", params: { name: "reply", arguments: { text } } });
   }

@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { execSync } from "node:child_process";
-import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ChatStore } from "../store";
 import {
@@ -147,7 +147,7 @@ describe("chat protocol", () => {
   test("hello lists the features, then history_end", async () => {
     const srv = await startServer();
     const c = await connect(srv);
-    expect(c.frames[0]).toEqual({ type: "hello", features: ["echo", "ping", "history_end", "history_page"] });
+    expect(c.frames[0]).toEqual({ type: "hello", features: ["echo", "ping", "history_end", "history_page", "activity"] });
     expect(c.frames.at(-1)).toEqual({ type: "history_end", hasMore: false });
   });
 
@@ -562,5 +562,76 @@ describe("project sessions (PARA_CHANNEL_ID / PARA_CHANNEL_BASE)", () => {
     const srv = await startServer({ env });
     const res = await fetch(`http://127.0.0.1:${srv.port}/p/paperx/health`, { headers: { Origin: UI_ORIGIN } });
     expect(res.status).not.toBe(200);
+  });
+});
+
+describe("session activity (hooks → chat)", () => {
+  async function post(srv: ChannelServer, body: object, opts: { token?: string; host?: string } = {}) {
+    const info = JSON.parse(readFileSync(join(stateDir(srv.home), "activity.json"), "utf-8"));
+    return rawRequest(srv.port, {
+      method: "POST",
+      path: "/activity",
+      headers: {
+        Host: opts.host ?? `127.0.0.1:${srv.port}`,
+        "Content-Type": "application/json",
+        "X-Activity-Token": opts.token ?? info.token,
+      },
+      body: JSON.stringify(body),
+    });
+  }
+
+  test("activity.json is private and names the port", async () => {
+    const srv = await startServer();
+    const file = join(stateDir(srv.home), "activity.json");
+    expect(statSync(file).mode & 0o777).toBe(0o600);
+    const info = JSON.parse(readFileSync(file, "utf-8"));
+    expect(info.port).toBe(srv.port);
+    expect(info.token).toMatch(/^[0-9a-f]{48}$/);
+  });
+
+  test("rejects reports without the token or arriving through the tunnel host", async () => {
+    const srv = await startServer();
+    expect((await post(srv, { event: "Stop" }, { token: "x".repeat(48) })).status).toBe(403);
+    expect((await post(srv, { event: "Stop" }, { host: "api.kyxi.net" })).status).toBe(403);
+    expect((await post(srv, { nope: 1 })).status).toBe(400);
+  });
+
+  test("hooks drive working → idle; deliveries and permissions update it; late joiners get the state", async () => {
+    const srv = await startServer();
+    const c = await connect(srv);
+    expect(c.frames[0].features).toContain("activity");
+    // Silent until a hook has been seen (a session without hooks would never go idle)
+    c.send({ id: "a0", text: "before hooks" });
+    await c.next((f) => f.type === "msg" && f.id === "a0");
+    expect(c.frames.some((f) => f.type === "activity")).toBe(false);
+
+    expect((await post(srv, { event: "PreToolUse", label: "파일 읽는 중 · a.md" })).status).toBe(204);
+    const w = await c.next((f) => f.type === "activity");
+    expect(w).toMatchObject({ state: "working", label: "파일 읽는 중 · a.md" });
+    await post(srv, { event: "PostToolUse", label: "생각 중" });
+    const w2 = await c.next((f) => f.type === "activity");
+    expect(w2).toMatchObject({ state: "working", label: "생각 중", since: w.since });
+
+    const late = await connect(srv);
+    expect(late.frames.at(-1)).toMatchObject({ type: "activity", state: "working", label: "생각 중" });
+
+    await post(srv, { event: "Stop" });
+    expect(await c.next((f) => f.type === "activity")).toMatchObject({ state: "idle" });
+
+    // A new message while idle starts a new working stretch right away
+    c.send({ id: "a1", text: "next" });
+    const d = await c.next((f) => f.type === "activity");
+    expect(d).toMatchObject({ state: "working", label: "메시지 확인 중" });
+    expect(d.since).toBeGreaterThanOrEqual(w.since);
+
+    // Permission prompt → waiting, answered → working
+    srv.send({
+      jsonrpc: "2.0",
+      method: "notifications/claude/channel/permission_request",
+      params: { request_id: "perm1", tool_name: "Bash", description: "run", input_preview: "ls" },
+    });
+    expect(await c.next((f) => f.type === "activity")).toMatchObject({ state: "waiting", label: "승인 대기 · Bash" });
+    c.send({ type: "permission_response", id: "perm1", allowed: true });
+    expect(await c.next((f) => f.type === "activity")).toMatchObject({ state: "working" });
   });
 });

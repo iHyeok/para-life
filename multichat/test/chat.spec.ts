@@ -140,3 +140,42 @@ test("a wide viewport shows the list and the conversation side by side", async (
   await expect.poll(() => sidebarVisible(page)).toBe(true);
   await expect(page.locator(".conversation")).toBeVisible();
 });
+
+test("activity: delivered mark, what Claude is doing with elapsed time, approval wait, then idle", async ({ page, server }) => {
+  const convo = page.locator(".conversation");
+  const row = page.locator("[data-activity]");
+  // Hooks report once → the server starts announcing activity
+  await server.hook("Stop");
+  await page.locator("textarea").fill("상태 보여줘");
+  await page.click(sendButton);
+  await server.waitDelivered((p) => p.content === "상태 보여줘");
+  await expect(convo).toContainText("전달됨");
+  await expect(row).toHaveAttribute("data-activity", "working");
+  await expect(row).toContainText("메시지 확인 중");
+  await expect(convo).toContainText("연결됨 · 작업 중");
+
+  await server.hook("PreToolUse", "파일 읽는 중 · paper-research.md");
+  await expect(row).toContainText("파일 읽는 중 · paper-research.md");
+  await expect(row).toContainText(/0:0[1-9]/, { timeout: 4000 });
+
+  // A reply mid-turn: the turn is still going, so the row stays; "전달됨" is gone
+  server.reply("중간 보고");
+  await expect(convo).toContainText("중간 보고");
+  await expect(convo).not.toContainText("전달됨");
+  await expect(row).toHaveAttribute("data-activity", "working");
+
+  server.requestPermission("perm-a", "ls");
+  await expect(row).toHaveAttribute("data-activity", "waiting");
+  await expect(row).toContainText("승인 대기 · Bash");
+  await page.getByRole("button", { name: "허용" }).click();
+  await expect(row).toHaveAttribute("data-activity", "working");
+
+  await server.hook("Stop");
+  await expect(row).toHaveCount(0);
+  await expect(convo).not.toContainText("작업 중");
+
+  // A reload mid-turn shows the current state again
+  await server.hook("PreToolUse", "명령 실행 · Run tests");
+  await page.reload();
+  await expect(row).toContainText("명령 실행 · Run tests");
+});
