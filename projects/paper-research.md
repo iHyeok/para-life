@@ -60,3 +60,12 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 언어: 기제는 영어로 확인 후 한국어 함축·유머 평가로 확장하는 순서 제안(차별점 후보)
   - 미확인: Qwen 3.8 flash next·muse glimmer의 구조(dense/MoE)와 base 공개 여부 — 사용자 답변 대기
 - 결정: 언어는 영어로 기제 확인 → 한국어로 함축·유머 평가. 모델 사양은 사용자가 모델을 구동한 다른 Claude 세션에 질문지(모델별 repo·구조·base 공개 여부·실행 방식·양자화·hook 가능 여부, 환경, 추천)로 확인하기로 함
+
+### 2026-11-03
+
+- 모델·환경 조사 결과 받음(사용자 박스의 다른 Claude 세션이 작성): 지금까지는 전부 GGUF(llama.cpp/Ollama) 추론이었고, transformers bf16 로드나 hook 경험은 없음. 해석 도구도 설치돼 있지 않음
+  - 환경: RTX 5090 32GB(WSL2 Ubuntu 24.04, RAM 118GB, SSD 여유 1.2TB). GPU를 ComfyUI와 함께 쓰므로 10분 넘는 추출은 리스(`POST /api/resource/lease`)를 먼저 받아야 함. nvcc 경로 주의(/usr/local/cuda-13.0)
+  - base·instruct 쌍이 있는 모델: Gemma 4 12B(5090 bf16은 빡빡함, 멀티모달 통합 클래스라 transformers 5.x 필요, SAE 없음), Llama-3-8B. Qwen3.8-27B와 Muse Glimmer 30B는 base 미공개, Qwen3.8-Flash-Next는 MoE(180B)
+  - Llama-3.1-8B는 HF 접근 403(승인 필요). Qwen2.5-7B는 접근 확인
+- 모델 배치 제안: 0 재현은 Qwen2.5-7B-Instruct → 1 base 대 instruct는 Qwen2.5-7B 주력에 Gemma 4 12B(최신 모델 확인) → 2 페르소나 전환은 base 불필요라 Qwen3.8-27B(dense, Apache-2.0)를 RunPod H100에서 bf16으로 추가. 연구용 venv 새로 만들기. 할 일: Llama-3.1-8B 접근 신청, Qwen3-8B-Base 공개 여부 확인
+- 실험 계획 문서 위치 확인 대기 (이 파일의 섹션 대 별도 파일)
