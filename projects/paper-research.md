@@ -53,3 +53,4 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - [① Persona Vectors (Chen 외 2025, arXiv 2507.21509)](/me/files/projects/paper-research/01-persona-vectors.mp4) 4:35 · [대본·근거표](/me/files/projects/paper-research/01-persona-vectors-script.md) — 본문 전체 기반
   - [② Big Five 스티어링 ("The Steerable Self", ICML 2026 MusIML 워크숍)](/me/files/projects/paper-research/02-big-five-steering.mp4) 3:27 · [대본·근거표](/me/files/projects/paper-research/02-big-five-steering-script.md) — 본문 미확보(OpenReview 차단), 초록 2개만 근거. 대비로 Hoppe 외(arXiv 2603.03326) 슬라이더 연구 포함
   - 확인된 사실: Big Five 논문은 본 학회가 아니라 워크숍 발표, 프롬프팅 비교는 초록에 없음, "약 25%"가 상대·절대 증가인지 불명. Hoppe 외는 신경성을 2.88→4.1로 올려 "신경성은 안 움직인다"와 충돌하지만 조건이 달라 직접 비교 불가
+- 토론: 스티어링 연구의 대상 모델 → 기제 실험(표상·스티어링·게이트 대 생성기, base 대 instruct)은 활성화 접근이 되는 오픈 모델(7~8B, 예: Qwen2.5-7B·Llama-3.1-8B, 24GB GPU 1장 수준)로 하고, 프론티어 모델은 API로 프롬프트 페르소나의 행동 수준 비교군으로 쓰는 2단 구성 제안. 한계: 소형 모델 결과의 일반화. 사용자 GPU 환경 확인 대기
