@@ -1,7 +1,7 @@
 // WebSocket channel connection manager
 
 class ChannelManager {
-  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onStatus }) {
+  constructor({ id, name, wsUrl, httpUrl, onMessage, onEdit, onPermission, onPermissionResolved, onError, onStatus }) {
     this.id = id;
     this.name = name;
     this.wsUrl = wsUrl;
@@ -9,6 +9,8 @@ class ChannelManager {
     this.onMessage = onMessage;
     this.onEdit = onEdit;
     this.onPermission = onPermission;
+    this.onPermissionResolved = onPermissionResolved;
+    this.onError = onError;
     this.onStatus = onStatus;
     this.ws = null;
     this.status = 'disconnected';
@@ -47,6 +49,10 @@ class ChannelManager {
           this.onEdit(this.id, data);
         } else if (data.type === 'permission_request' && this.onPermission) {
           this.onPermission(this.id, data);
+        } else if (data.type === 'permission_resolved' && this.onPermissionResolved) {
+          this.onPermissionResolved(this.id, data);
+        } else if (data.type === 'error' && this.onError) {
+          this.onError(this.id, data);
         }
       } catch {}
     };

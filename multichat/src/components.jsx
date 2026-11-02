@@ -319,6 +319,14 @@ function PermissionRequest({ perm, onRespond }) {
         <span style={{ fontWeight: 600 }}>🔐 {perm.tool}</span>
         <span style={{ color: 'var(--ink-2)', marginLeft: 8 }}>{perm.description}</span>
       </div>
+      {perm.input_preview && (
+        <pre style={{
+          margin: '0 0 10px', padding: '8px 10px', borderRadius: 8, maxHeight: 160, overflow: 'auto',
+          background: 'oklch(0.2 0.01 60)', color: 'oklch(0.92 0.01 80)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 11.5, lineHeight: 1.5,
+          whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+        }}>{perm.input_preview}</pre>
+      )}
       {responded ? (
         <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>응답 완료</div>
       ) : (
@@ -426,7 +434,12 @@ function Composer({ onSend, disabled }) {
   }, [text]);
 
   const addFiles = (newFiles) => {
-    const arr = Array.from(newFiles).map(f => {
+    const all = Array.from(newFiles);
+    const tooBig = all.filter(f => f.size > window.MAX_UPLOAD_BYTES);
+    if (tooBig.length) {
+      window.alert(`파일이 너무 큽니다 (최대 ${window.MAX_UPLOAD_BYTES / 1024 / 1024}MB): ${tooBig.map(f => f.name).join(', ')}`);
+    }
+    const arr = all.filter(f => f.size <= window.MAX_UPLOAD_BYTES).map(f => {
       const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
       if (isImage) f._preview = URL.createObjectURL(f);
       return f;

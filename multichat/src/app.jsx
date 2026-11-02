@@ -53,7 +53,8 @@ function channelReducer(state, action) {
         ...state,
         [action.channelId]: {
           ...ch,
-          pendingPermissions: [...ch.pendingPermissions, action.perm],
+          // Server replays open requests on reconnect
+          pendingPermissions: [...ch.pendingPermissions.filter(p => p.id !== action.perm.id), action.perm],
         },
       };
     }
@@ -71,11 +72,17 @@ function channelReducer(state, action) {
     case 'STATUS': {
       const ch = state[action.channelId];
       if (!ch) return state;
-      // Clear messages on reconnect to avoid duplicates from history replay
-      const messages = action.status === 'connected' ? [] : ch.messages;
+      // Clear on reconnect: the server replays history and still-open permission requests
+      const reset = action.status === 'connected';
       return {
         ...state,
-        [action.channelId]: { ...ch, status: action.status, messages, isThinking: false },
+        [action.channelId]: {
+          ...ch,
+          status: action.status,
+          messages: reset ? [] : ch.messages,
+          pendingPermissions: reset ? [] : ch.pendingPermissions,
+          isThinking: false,
+        },
       };
     }
     case 'SET_THINKING': {
@@ -130,6 +137,13 @@ function App() {
         },
         onPermission: (chId, data) => {
           dispatch({ type: 'PERMISSION', channelId: chId, perm: data });
+        },
+        onPermissionResolved: (chId, data) => {
+          dispatch({ type: 'PERMISSION_RESPONDED', channelId: chId, permId: data.id });
+        },
+        onError: (chId, data) => {
+          dispatch({ type: 'SET_THINKING', channelId: chId, value: false });
+          window.alert(`[${ch.name}] ${data.message}`);
         },
         onStatus: (chId, status) => {
           dispatch({ type: 'STATUS', channelId: chId, status });

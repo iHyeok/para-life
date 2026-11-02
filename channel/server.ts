@@ -31,6 +31,29 @@ import type { ServerWebSocket } from "bun";
 
 // --- Config ---
 const PORT = Number(process.env.PARA_CHANNEL_PORT ?? 3847);
+// Loopback only: remote access goes through Cloudflare Tunnel (-> localhost:PORT)
+const HOST = process.env.PARA_CHANNEL_HOST ?? "127.0.0.1";
+// Browser origins allowed to talk to this server (same-origin is always allowed)
+const ALLOWED_ORIGINS = new Set(
+  (process.env.PARA_ALLOWED_ORIGINS ??
+    "https://main.kyxi.net,http://localhost:5174,http://127.0.0.1:5174")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
+// Host headers we answer to; anything else (e.g. a DNS-rebinding page) is rejected
+const ALLOWED_HOSTS = new Set(
+  [
+    "api.kyxi.net",
+    `localhost:${PORT}`,
+    `127.0.0.1:${PORT}`,
+    ...(process.env.PARA_ALLOWED_HOSTS ?? "").split(","),
+  ]
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+const PERMISSION_TTL_MS = 10 * 60 * 1000;
 const CF_TEAM_DOMAIN = process.env.CF_TEAM_DOMAIN ?? "";
 const CF_AUD = process.env.CF_AUDIENCE ?? "";
 const SKIP_AUTH = process.env.SKIP_AUTH === "1";
@@ -84,17 +107,25 @@ type Msg = {
 type Wire =
   | ({ type: "msg" } & Msg)
   | { type: "edit"; id: string; text: string }
-  | { type: "permission_request"; id: string; tool: string; description: string }
+  | {
+      type: "permission_request";
+      id: string;
+      tool: string;
+      description: string;
+      input_preview?: string;
+    }
+  | { type: "permission_resolved"; id: string; behavior: "allow" | "deny" | "expired" }
+  | { type: "error"; id?: string; message: string }
   | { type: "status"; connected: boolean };
 
-type PermissionWaiter = {
-  resolve: (allowed: boolean) => void;
+type PendingPermission = {
+  request: Extract<Wire, { type: "permission_request" }>;
   timeout: ReturnType<typeof setTimeout>;
 };
 
 // --- State ---
 const clients = new Set<ServerWebSocket<unknown>>();
-const pendingPermissions = new Map<string, PermissionWaiter>();
+const pendingPermissions = new Map<string, PendingPermission>();
 const history: Wire[] = [];
 const MAX_HISTORY = 200;
 let seq = 0;
@@ -120,10 +151,33 @@ function mime(ext: string) {
     ".gif": "image/gif",
     ".webp": "image/webp",
     ".svg": "image/svg+xml",
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
+    ".mp3": "audio/mpeg",
     ".pdf": "application/pdf",
-    ".txt": "text/plain",
+    ".txt": "text/plain; charset=utf-8",
+    ".md": "text/plain; charset=utf-8",
+    ".json": "application/json",
   };
   return m[ext] ?? "application/octet-stream";
+}
+
+function uniqueName(fileName: string) {
+  const ext = extname(fileName).toLowerCase().replace(/[^a-z0-9.]/g, "").slice(0, 10);
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext || ".bin"}`;
+}
+
+// Call only after the Host header passed ALLOWED_HOSTS, so same-origin can't be forged
+function isOriginAllowed(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  if (!origin) return true; // non-browser client (curl, cloudflared health checks)
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    return new URL(origin).host === req.headers.get("host"); // built-in UI at "/"
+  } catch {
+    return false;
+  }
 }
 
 // --- MCP Server ---
@@ -228,6 +282,21 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 await mcp.connect(new StdioServerTransport());
 
 // --- Permission relay: CC → WebSocket → User → WebSocket → CC ---
+// No auto-deny: if nobody answers in the UI, the terminal prompt stays usable.
+function respondPermission(id: unknown, allowed: unknown) {
+  if (typeof id !== "string") return;
+  const pending = pendingPermissions.get(id);
+  if (!pending) return;
+  clearTimeout(pending.timeout);
+  pendingPermissions.delete(id);
+  const behavior = allowed === true ? "allow" : "deny";
+  void mcp.notification({
+    method: "notifications/claude/channel/permission",
+    params: { request_id: id, behavior },
+  });
+  broadcast({ type: "permission_resolved", id, behavior });
+}
+
 mcp.setNotificationHandler(
   z.object({
     method: z.literal("notifications/claude/channel/permission_request"),
@@ -239,26 +308,20 @@ mcp.setNotificationHandler(
     }),
   }),
   async ({ params }) => {
-    const { request_id, tool_name, description } = params;
-    broadcast({
-      type: "permission_request",
+    const { request_id, tool_name, description, input_preview } = params;
+    const request = {
+      type: "permission_request" as const,
       id: request_id,
       tool: tool_name,
       description,
-    });
-
-    const allowed = await new Promise<boolean>((resolve) => {
-      const timeout = setTimeout(() => {
-        pendingPermissions.delete(request_id);
-        resolve(false);
-      }, 60000);
-      pendingPermissions.set(request_id, { resolve, timeout });
-    });
-
-    void mcp.notification({
-      method: "notifications/claude/channel/permission",
-      params: { request_id, behavior: allowed ? "allow" : "deny" },
-    });
+      input_preview,
+    };
+    const timeout = setTimeout(() => {
+      pendingPermissions.delete(request_id);
+      broadcast({ type: "permission_resolved", id: request_id, behavior: "expired" });
+    }, PERMISSION_TTL_MS);
+    pendingPermissions.set(request_id, { request, timeout });
+    broadcast(request);
   },
 );
 
@@ -278,7 +341,7 @@ function deliver(
           message_id: id,
           user: "web",
           ts: new Date().toISOString(),
-          ...(file ? { file_path: file.path } : {}),
+          ...(file ? { file_path: file.path, file_name: file.name } : {}),
         },
       },
     });
@@ -298,30 +361,76 @@ process.on("unhandledRejection", (err) => {
   process.stderr.write(`unhandled rejection: ${err}\n`);
 });
 
-// --- Kill stale process on our port ---
+// Exit with the Claude Code session that spawned us, so we never linger as a stale server
+process.stdin.on("end", () => process.exit(0));
+process.stdin.on("close", () => process.exit(0));
+
+// --- Free our port only from an orphaned channel server ---
+// A listener whose Claude Code session is gone (bun wrappers up to pid 1) is stale.
+// A listener owned by a live session is left alone; we then run without the web channel.
+function procInfo(pid: number) {
+  const out = execSync(`ps -o ppid=,comm= -p ${pid}`, { encoding: "utf-8" }).trim();
+  const [ppid, ...comm] = out.split(/\s+/);
+  return { ppid: Number(ppid), comm: basename(comm.join(" ")) };
+}
+
+function isOrphanedChannelServer(pid: number): boolean {
+  const args = execSync(`ps -o args= -p ${pid}`, { encoding: "utf-8" });
+  if (!args.includes("server.ts")) return false;
+  let p = pid;
+  for (let i = 0; i < 5; i++) {
+    const { ppid } = procInfo(p);
+    if (ppid <= 1) return true;
+    if (procInfo(ppid).comm !== "bun") return false;
+    p = ppid;
+  }
+  return false;
+}
+
+let portHeldByLive = false;
 try {
-  const pid = execSync(`lsof -ti :${PORT}`, { encoding: "utf-8" }).trim();
-  if (pid) {
-    process.stderr.write(`killing stale process on port ${PORT}: pid ${pid}\n`);
-    execSync(`kill ${pid}`);
-    Bun.sleepSync(500);
+  const pids = execSync(`lsof -nP -ti tcp:${PORT} -sTCP:LISTEN`, { encoding: "utf-8" })
+    .split("\n")
+    .map(Number)
+    .filter((pid) => pid > 0 && pid !== process.pid);
+  for (const pid of pids) {
+    if (isOrphanedChannelServer(pid)) {
+      process.stderr.write(`killing orphaned channel server on port ${PORT}: pid ${pid}\n`);
+      process.kill(pid);
+      Bun.sleepSync(500);
+    } else {
+      // Don't rely on bind failing: macOS lets 127.0.0.1:PORT bind next to *:PORT
+      portHeldByLive = true;
+      process.stderr.write(`port ${PORT} is held by live pid ${pid}; web channel disabled\n`);
+    }
   }
 } catch {}
 
 // --- HTTP + WebSocket Server ---
 try {
+if (!portHeldByLive) {
 Bun.serve({
   port: PORT,
-  hostname: "0.0.0.0", // Accept tunnel connections
+  hostname: HOST,
   async fetch(req, server) {
     const url = new URL(req.url);
-    const origin = req.headers.get("origin") || "*";
-    const cors: Record<string, string> = {
-      "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Credentials": "true",
-    };
+    if (!ALLOWED_HOSTS.has(req.headers.get("host") ?? "")) {
+      return new Response("Forbidden host", { status: 403 });
+    }
+    const origin = req.headers.get("origin");
+    const originOk = isOriginAllowed(req);
+    const cors: Record<string, string> = { Vary: "Origin" };
+    if (origin && originOk) {
+      cors["Access-Control-Allow-Origin"] = origin;
+      cors["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+      cors["Access-Control-Allow-Headers"] = "Content-Type";
+      cors["Access-Control-Allow-Credentials"] = "true";
+    }
+
+    // Block cross-site pages (other *.kyxi.net apps, random sites hitting localhost)
+    if (!originOk) {
+      return new Response("Forbidden origin", { status: 403, headers: cors });
+    }
 
     // CORS preflight
     if (req.method === "OPTIONS") {
@@ -357,7 +466,14 @@ Bun.serve({
         return new Response("bad", { status: 400 });
       try {
         return new Response(readFileSync(join(OUTBOX_DIR, f)), {
-          headers: { ...cors, "content-type": mime(extname(f).toLowerCase()) },
+          headers: {
+            ...cors,
+            "content-type": mime(extname(f).toLowerCase()),
+            "x-content-type-options": "nosniff",
+            // Opened directly (e.g. an SVG), the file can't run scripts
+            "content-security-policy":
+              "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox",
+          },
         });
       } catch {
         return new Response("404", { status: 404, headers: cors });
@@ -372,10 +488,11 @@ Bun.serve({
       const f = form.get("file");
       if (!id) return new Response("missing id", { status: 400 });
       let file: { path: string; name: string } | undefined;
+      if (f instanceof File && f.size > MAX_UPLOAD_BYTES)
+        return new Response("file too large", { status: 413, headers: cors });
       if (f instanceof File && f.size > 0) {
         mkdirSync(INBOX_DIR, { recursive: true });
-        const ext = extname(f.name).toLowerCase() || ".bin";
-        const path = join(INBOX_DIR, `${Date.now()}${ext}`);
+        const path = join(INBOX_DIR, uniqueName(f.name));
         writeFileSync(path, Buffer.from(await f.arrayBuffer()));
         file = { path, name: f.name };
       }
@@ -385,13 +502,8 @@ Bun.serve({
 
     // Permission response from UI
     if (url.pathname === "/permission" && req.method === "POST") {
-      const body = (await req.json()) as { id: string; allowed: boolean };
-      const waiter = pendingPermissions.get(body.id);
-      if (waiter) {
-        clearTimeout(waiter.timeout);
-        waiter.resolve(body.allowed);
-        pendingPermissions.delete(body.id);
-      }
+      const body = (await req.json()) as { id: unknown; allowed: unknown };
+      respondPermission(body.id, body.allowed);
       return new Response(null, { status: 204, headers: cors });
     }
 
@@ -405,35 +517,42 @@ Bun.serve({
     return new Response("404", { status: 404 });
   },
   websocket: {
+    // base64 inflates uploads by 4/3; leave room for the JSON envelope
+    maxPayloadLength: Math.ceil((MAX_UPLOAD_BYTES * 4) / 3) + 64 * 1024,
     open: (ws) => {
       clients.add(ws);
-      // Send history to newly connected client
+      // Send history, then still-open permission requests, to the new client
       for (const m of history) ws.send(JSON.stringify(m));
+      for (const p of pendingPermissions.values()) ws.send(JSON.stringify(p.request));
     },
     close: (ws) => {
       clients.delete(ws);
     },
-    message: (_, raw) => {
+    message: (ws, raw) => {
       try {
         const data = JSON.parse(String(raw));
         if (data.type === "permission_response") {
-          const waiter = pendingPermissions.get(data.id);
-          if (waiter) {
-            clearTimeout(waiter.timeout);
-            waiter.resolve(data.allowed);
-            pendingPermissions.delete(data.id);
-          }
+          respondPermission(data.id, data.allowed);
           return;
         }
         // File upload via WebSocket (base64 encoded)
         if (data.type === "file_upload") {
           const { id, text, fileName, fileData } = data;
-          if (id && fileName && fileData) {
+          if (
+            typeof id === "string" &&
+            typeof fileName === "string" &&
+            typeof fileData === "string" &&
+            fileData
+          ) {
+            const buf = Buffer.from(fileData, "base64");
+            if (buf.byteLength > MAX_UPLOAD_BYTES) {
+              ws.send(JSON.stringify({ type: "error", id, message: "file too large" }));
+              return;
+            }
             mkdirSync(INBOX_DIR, { recursive: true });
-            const ext = extname(fileName).toLowerCase() || ".bin";
-            const path = join(INBOX_DIR, `${Date.now()}${ext}`);
-            writeFileSync(path, Buffer.from(fileData, "base64"));
-            deliver(id, text || "", { path, name: fileName });
+            const path = join(INBOX_DIR, uniqueName(fileName));
+            writeFileSync(path, buf);
+            deliver(id, typeof text === "string" ? text : "", { path, name: fileName });
           }
           return;
         }
@@ -448,11 +567,11 @@ Bun.serve({
     },
   },
 });
-} catch (e) {
-  process.stderr.write(`server start error: ${e}\n`);
+process.stderr.write(`para-life-channel: http://${HOST}:${PORT}\n`);
 }
-
-process.stderr.write(`para-life-channel: http://localhost:${PORT}\n`);
+} catch (e) {
+  process.stderr.write(`server start error (web channel disabled): ${e}\n`);
+}
 
 // --- Chat UI HTML ---
 const CHAT_HTML = `<!doctype html>
@@ -560,6 +679,17 @@ header h1 { font-size: 1rem; font-weight: 700; }
   margin: 0.5rem 0;
 }
 .permission p { font-size: 0.85rem; margin-bottom: 0.5rem; }
+.permission pre {
+  font-size: 0.75rem;
+  background: #000;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  max-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
 .permission .btns { display: flex; gap: 0.5rem; }
 .permission button {
   padding: 0.3rem 0.8rem;
@@ -641,6 +771,7 @@ const statusEl = document.getElementById('status');
 const fileInput = document.getElementById('file-input');
 const fileChip = document.getElementById('file-chip');
 const msgMap = {};
+const permCards = {};
 let uid = 0;
 let ws;
 
@@ -653,6 +784,10 @@ function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(proto + '//' + location.host + '/ws');
   ws.onopen = () => {
+    // Server replays history and open permission requests on connect
+    msgs.innerHTML = '';
+    for (const k in permCards) delete permCards[k];
+    thinkingEl = null;
     statusEl.textContent = 'connected';
     statusEl.className = 'connected';
   };
@@ -669,6 +804,10 @@ function connect() {
       if (el) el.querySelector('.body').textContent = m.text + ' (edited)';
     }
     if (m.type === 'permission_request') showPermission(m);
+    if (m.type === 'permission_resolved' && permCards[m.id]) {
+      permCards[m.id].remove();
+      delete permCards[m.id];
+    }
   };
 }
 connect();
@@ -693,11 +832,16 @@ function addMsg(m) {
 }
 
 function showPermission(m) {
+  if (permCards[m.id]) return;
   const div = document.createElement('div');
   div.className = 'permission';
-  div.innerHTML = '<p>🔐 <b>' + esc(m.tool) + '</b>: ' + esc(m.description) + '</p><div class="btns"><button class="allow">Allow</button><button class="deny">Deny</button></div>';
-  div.querySelector('.allow').onclick = () => { respondPermission(m.id, true); div.remove(); };
-  div.querySelector('.deny').onclick = () => { respondPermission(m.id, false); div.remove(); };
+  div.innerHTML = '<p>🔐 <b>' + esc(m.tool) + '</b>: ' + esc(m.description) + '</p>'
+    + (m.input_preview ? '<pre>' + esc(m.input_preview) + '</pre>' : '')
+    + '<div class="btns"><button class="allow">Allow</button><button class="deny">Deny</button></div>';
+  const done = () => { div.remove(); delete permCards[m.id]; };
+  div.querySelector('.allow').onclick = () => { respondPermission(m.id, true); done(); };
+  div.querySelector('.deny').onclick = () => { respondPermission(m.id, false); done(); };
+  permCards[m.id] = div;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }

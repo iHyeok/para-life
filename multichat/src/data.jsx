@@ -27,6 +27,9 @@ function saveChannels(channels) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(channels));
 }
 
+// Must match MAX_UPLOAD_BYTES in channel/server.ts
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
 let _msgSeq = 0;
 function generateMsgId() {
   return 'u' + Date.now() + '-' + (++_msgSeq);
@@ -46,3 +49,4 @@ window.saveChannels = saveChannels;
 window.generateMsgId = generateMsgId;
 window.pickColor = pickColor;
 window.DEFAULT_CHANNELS = DEFAULT_CHANNELS;
+window.MAX_UPLOAD_BYTES = MAX_UPLOAD_BYTES;
