@@ -19,7 +19,7 @@ Anima Preview 2 모델의 프롬프팅 특성 정리. NAI처럼 퀄리티 태그
 ### 아니마 프리뷰2 작가태그 파시는 분들 참고용 프롬프트
 - 링크: https://arca.live/b/aiart/166401322?mode=best&p=1
 - 요약: 퀄리티 태그·네거티브 프롬프트 민감도가 높으며, 아티스트 태그만으로도 품질 조절 가능
-- 샘플: [메이드 예시](https://kyxi.net/resources/anima-prompting/sample-maid.png)
+- 샘플: [메이드 예시](/me/files/resources/anima-prompting/sample-maid.png)
 - 예시 긍정 프롬프트:
   ```
   newest, year2024, (masterpiece, best quality, score_8), highres, absurdres, general, safe, (@yukie \(kusaka shi\):1.15), 1girl, solo, looking at viewer, maid headdress, apron, dress, maid, maid apron, cowboy shot, (black hair, purple eyes, messy hair, long hair:0.75), location, window, indoors, musk, chiaroscuro, (muted color, sketchy, oekaki, crosshatching, scribble, sketch, watercolor \(medium\), airbrush \(medium\), cel rendering:0.7), perspective, (dynamic facial expressions with after image), (highly aesthetic Pixiv style illustration, clean composition, high-quality digital art.:0.7)

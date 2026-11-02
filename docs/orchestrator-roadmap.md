@@ -370,6 +370,7 @@ cd ~/para-life/multichat && bun run build
 | 파일 | 용도 |
 |------|------|
 | `channel/server.ts` | MCP 채널 서버 (CC ↔ WebSocket 브릿지) |
+| `functions/` | Pages Functions: `/me` 미리보기 호스트 차단, `/me/files/*` 비공개 첨부(R2 `para-life-private`) |
 | `multichat/` | 다중 채널 채팅 UI (React, `bun run build` → `build/main.js`) |
 | `CLAUDE.md` | 오케스트레이터 동작 규칙 |
 | `PARA-SPEC.md` | 데이터 스키마 및 운영 규칙 |

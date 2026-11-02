@@ -146,11 +146,13 @@ export function checkDist({ dist, root }) {
     if (rel === "" || rel.endsWith("/")) return fileSet.has(`${rel}index.html`);
     return fileSet.has(rel) || fileSet.has(`${rel}/index.html`);
   };
+  // Served at request time by Pages Functions (functions/), not files in dist
+  const dynamic = (p) => p.startsWith("/me/files/");
   const broken = new Set();
   for (const f of htmlFiles) {
     const html = fs.readFileSync(path.join(dist, f), "utf-8");
     for (const [, url] of html.matchAll(/\b(?:href|src)="(\/(?!\/)[^"#?]*)/g)) {
-      if (!exists(unescapeHtml(url))) broken.add(`/${f} -> ${url}`);
+      if (!dynamic(url) && !exists(unescapeHtml(url))) broken.add(`/${f} -> ${url}`);
     }
   }
   for (const b of [...broken].sort()) problems.push(`broken internal link: ${b}`);

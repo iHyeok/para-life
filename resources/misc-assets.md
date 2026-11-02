@@ -17,6 +17,6 @@ relatedProjects: []
 ## 참고자료
 
 ### 슬랙봇 아바타 (메이드 + 그림 그릴 줄 앎)
-- 파일: [slackbot-avatar.png](https://kyxi.net/resources/misc-assets/slackbot-avatar.png)
+- 파일: [slackbot-avatar.png](/me/files/resources/misc-assets/slackbot-avatar.png)
 - 업로드: 2026-04-22
 - 메모: 새 슬랙봇 프로필 이미지. "그림 그릴 줄 앎" 문구 포함

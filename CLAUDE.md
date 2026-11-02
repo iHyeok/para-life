@@ -43,7 +43,7 @@
 - visibility 미지정 시 사용자에게 물어볼 것
 
 ### 파일 업로드
-- 채널에서 파일이 첨부되면 R2 버킷 `para-life-assets`에 업로드
+- 채널에서 파일이 첨부되면 R2에 업로드: public 항목은 `para-life-assets`, limited/private 항목은 `para-life-private`
 - 경로·명령·링크 기록 형식은 PARA-SPEC.md "파일 업로드" 참조
 
 ### 일일/주간 브리핑

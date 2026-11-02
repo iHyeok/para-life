@@ -151,28 +151,42 @@ id / title / topic / visibility / area / source / createdAt / tags / relatedProj
 
 ## 파일 업로드 (Cloudflare R2)
 
-파일 첨부가 필요한 경우 Cloudflare R2 버킷 `para-life-assets`에 업로드한다.
+파일 첨부가 필요한 경우, **항목의 visibility에 따라 버킷을 나눠** 업로드한다.
+
+| 항목 visibility | 버킷 | 링크 (`.md`에 기록) | 접근 |
+|---|---|---|---|
+| public | `para-life-assets` | `https://kyxi.net/{path}` | 누구나 |
+| limited / private | `para-life-private` | `/me/files/{path}` | `/me` 로그인(Cloudflare Access) 필요 |
+
+`para-life-private`는 공개 도메인이 없는 버킷이다. 파일은 Pages Function(`functions/me/files/[[path]].ts`)이 `/me/files/*` 경로로만 내보낸다.
 
 ### 업로드 방법
 ```bash
+# public 항목
 npx wrangler r2 object put para-life-assets/{category}/{id}/{filename} \
-  --file {로컬파일경로} \
-  --content-type {MIME타입} \
-  --remote
+  --file {로컬파일경로} --content-type {MIME타입} --remote
+
+# limited / private 항목
+npx wrangler r2 object put para-life-private/{category}/{id}/{filename} \
+  --file {로컬파일경로} --content-type {MIME타입} --remote
 ```
 
-### 경로 규칙
+### 경로 규칙 (두 버킷 공통)
 - 프로젝트 결과물: `projects/{project-id}/{filename}`
 - 리소스 첨부: `resources/{resource-id}/{filename}`
 - 영역 관련: `areas/{area-id}/{filename}`
 
-### 공개 URL
-- 커스텀 도메인: `https://kyxi.net/{path}`
-- 예시: `https://kyxi.net/projects/ai-study-prep/result.mp4`
-
 ### 기록 방법
-- 해당 `.md` 파일의 Resources 섹션에 마크다운 링크로 기록
-- 형식: `[파일 설명](https://kyxi.net/{category}/{id}/{filename})`
+- 해당 `.md` 파일의 Resources(참고자료) 섹션에 마크다운 링크로 기록
+- public: `[파일 설명](https://kyxi.net/{category}/{id}/{filename})`
+- limited / private: `[파일 설명](/me/files/{category}/{id}/{filename})` (상대 경로, `/me` 화면에서만 열림)
+
+### visibility가 바뀔 때
+첨부 파일도 버킷을 옮기고 링크를 바꾼다. 공개로 바꿀 때는 private → assets, 비공개로 바꿀 때는 반대 방향.
+1. `npx wrangler r2 object get {원래버킷}/{path} --file /tmp/x --remote`
+2. `npx wrangler r2 object put {새버킷}/{path} --file /tmp/x --content-type {MIME} --remote`
+3. `.md` 링크 수정 → 커밋·푸시 → 새 링크로 열리는지 확인
+4. `npx wrangler r2 object delete {원래버킷}/{path} --remote`
 
 ## Commit Convention
 

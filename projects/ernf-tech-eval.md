@@ -8,7 +8,7 @@ area: "ernf"
 goal: "새로운 AI 이미지 생성 기술의 성능 비교 기준/방법 수립 및 자동 반복 평가 파이프라인 구축"
 deadline: ""
 createdAt: "2026-04-02"
-updatedAt: "2026-04-02"
+updatedAt: "2026-11-02"
 tags: ["ernf", "evaluation", "benchmark", "automation"]
 relatedResources: []
 ---
@@ -28,7 +28,7 @@ relatedResources: []
 
 ## Resources
 
-- [모델 비교 샘플](https://kyxi.net/projects/ernf-tech-eval/model-comparison-sample.webp) — 8개 모델 동일 프롬프트 비교
+- [모델 비교 샘플](/me/files/projects/ernf-tech-eval/model-comparison-sample.webp) — 8개 모델 동일 프롬프트 비교
 
 ## Progress Log
 

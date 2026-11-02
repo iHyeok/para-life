@@ -8,7 +8,7 @@ area: "ernf"
 goal: "ERNF 관련 기술 학습 및 도구 배포"
 deadline: ""
 createdAt: "2026-03-23"
-updatedAt: "2026-04-22"
+updatedAt: "2026-11-02"
 tags: ["ernf", "learning"]
 relatedResources: ["lora-character-training", "anima-prompting"]
 ---
@@ -29,10 +29,10 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 
 ## Resources
 
-- [LoftA 포즈 탐구 레퍼런스](https://kyxi.net/projects/ernf-learning/lofta_pose_exploration.png)
-- [Anima Preview 2 프롬프팅](https://kyxi.net/resources/anima-prompting/sample-maid.png) — 퀄리티 태그 민감도, 아티스트 태그 활용 팁
-- [see-through 테스트 결과](https://kyxi.net/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
-- anima 케릭터 LoRA 2차 결과물 — [레퍼런스](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-reference.png), [00115](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00115.png), [00116](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00116.png), [00117](https://kyxi.net/projects/ernf-learning/anima-lora-char-2nd-00117.png)
+- [LoftA 포즈 탐구 레퍼런스](/me/files/projects/ernf-learning/lofta_pose_exploration.png)
+- [Anima Preview 2 프롬프팅](/me/files/resources/anima-prompting/sample-maid.png) — 퀄리티 태그 민감도, 아티스트 태그 활용 팁
+- [see-through 테스트 결과](/me/files/projects/ernf-learning/see-through-test-results.png) — depth map 기반 see-through 효과 ([repo](https://github.com/shitagaki-lab/see-through))
+- anima 케릭터 LoRA 2차 결과물 — [레퍼런스](/me/files/projects/ernf-learning/anima-lora-char-2nd-reference.png), [00115](/me/files/projects/ernf-learning/anima-lora-char-2nd-00115.png), [00116](/me/files/projects/ernf-learning/anima-lora-char-2nd-00116.png), [00117](/me/files/projects/ernf-learning/anima-lora-char-2nd-00117.png)
 
 ## Progress Log
 
@@ -41,7 +41,7 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 - **anima 케릭터 LoRA 2차 학습 결과물 공유** — 레퍼런스 캐릭터(FANTYPIE 워터마크) 기반 테스트 샘플 3장 (00115/00116/00117). 선글라스·초커·오픈 재킷·헤테로크로미아 등 핵심 디테일 재현 확인
   - 1차 대비 파라미터 변경: learning rate 0.0005 → 0.0001 (1/5로 감소), rank 2배, alpha 2배
 
-- **see-through serverless 연동 완료!** ([워커 현황](https://kyxi.net/projects/ernf-learning/see-through-serverless-workers.png))
+- **see-through serverless 연동 완료!** ([워커 현황](/me/files/projects/ernf-learning/see-through-serverless-workers.png))
   - RunPod serverless (Queue based) 엔드포인트 구동 확인
   - RTX 5090 워커 5대 (US 3, IS 1, NO 1) initializing/throttled 상태
   - network volume 제약 → 컨테이너 이미지 베이킹 방식으로 전환하여 해결한 것으로 보임
@@ -49,7 +49,7 @@ ERNF 관련 학습 및 도구 개발/배포 프로젝트.
 ### 2026-04-13
 
 - **see-through serverless — network volume 제약 확인**
-  - RunPod serverless에서 대부분 GPU 티어가 Unavailable 상태 ([스크린샷](https://kyxi.net/projects/ernf-learning/runpod-serverless-gpu-availability.png))
+  - RunPod serverless에서 대부분 GPU 티어가 Unavailable 상태 ([스크린샷](/me/files/projects/ernf-learning/runpod-serverless-gpu-availability.png))
   - 24GB PRO만 사용 가능, 48GB PRO는 Low Supply, 나머지 전부 Unavailable
   - network volume은 특정 데이터센터/GPU에 종속되어, 가용 GPU가 없으면 워커 스케일업 불가
   - 결론: network volume 방식은 현실적 제약이 큼 → 모델을 컨테이너 이미지에 직접 베이킹하는 방향 검토 필요
