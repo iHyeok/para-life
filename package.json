@@ -1,0 +1,12 @@
+{
+  "name": "para-life-tooling",
+  "private": true,
+  "description": "Repo-wide dev tooling (lint). The apps live in site/, multichat/ and channel/.",
+  "scripts": {
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4"
+  }
+}
