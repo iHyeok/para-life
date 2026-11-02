@@ -1,0 +1,13 @@
+{
+  "name": "multichat",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/main.js --production --target=browser --format=iife --outdir=build"
+  },
+  "dependencies": {
+    "dompurify": "3.4.17",
+    "marked": "18.1.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

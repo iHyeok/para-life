@@ -338,21 +338,31 @@ tmux attach -t dev
 # 윈도우 전환: Ctrl+B → 0(orchestrator), 1(multichat)
 
 # CC 재시작 (orchestrator 윈도우에서)
+# 채널 서버는 CC 세션이 끝나면 같이 종료되고, 남은 고아 프로세스는 다음 시작 때 정리됨
 exit
-pkill -f "bun.*server.ts"
 claude --dangerously-load-development-channels server:para-life-channel
 
 # multichat 서버 재시작 (multichat 윈도우에서)
 # Ctrl+C로 중단 후
 python3 -m http.server 5174
+
+# multichat/src 수정 후에는 번들을 다시 빌드 (build/main.js 커밋)
+cd ~/para-life/multichat && bun run build
 ```
+
+### 채널 서버 접근 제어
+
+- `127.0.0.1`에만 바인딩 (외부 접속은 Cloudflare Tunnel 경유)
+- 허용 Origin: `https://main.kyxi.net`, `http://localhost:5174` — 추가는 `PARA_ALLOWED_ORIGINS`(콤마 구분)
+- 허용 Host: `api.kyxi.net`, `localhost:3847`, `127.0.0.1:3847` — 추가는 `PARA_ALLOWED_HOSTS`
+- 바인딩 주소 변경: `PARA_CHANNEL_HOST`
 
 ### 핵심 파일
 
 | 파일 | 용도 |
 |------|------|
 | `channel/server.ts` | MCP 채널 서버 (CC ↔ WebSocket 브릿지) |
-| `multichat/` | 다중 채널 채팅 UI (React, CDN) |
+| `multichat/` | 다중 채널 채팅 UI (React, `bun run build` → `build/main.js`) |
 | `CLAUDE.md` | 오케스트레이터 동작 규칙 |
 | `PARA-SPEC.md` | 데이터 스키마 및 운영 규칙 |
 | `.mcp.json` | 채널 서버 MCP 등록 |

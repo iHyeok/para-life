@@ -17,7 +17,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import {
-  readFileSync,
   writeFileSync,
   mkdirSync,
   statSync,
@@ -490,8 +489,10 @@ Bun.serve({
       if (f.includes("..") || f.includes("/"))
         return new Response("bad", { status: 400 });
       const dir = fileRoute[1] === "files" ? OUTBOX_DIR : INBOX_DIR;
-      try {
-        return new Response(readFileSync(join(dir, f)), {
+      const file = Bun.file(join(dir, f));
+      if (await file.exists()) {
+        // Streamed from disk instead of buffering the whole file in memory
+        return new Response(file, {
           headers: {
             ...cors,
             "content-type": mime(extname(f).toLowerCase()),
@@ -501,9 +502,8 @@ Bun.serve({
               "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox",
           },
         });
-      } catch {
-        return new Response("404", { status: 404, headers: cors });
       }
+      return new Response("404", { status: 404, headers: cors });
     }
 
     // File upload
