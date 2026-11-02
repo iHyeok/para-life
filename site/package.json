@@ -4,11 +4,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "vitest run",
+    "check:dist": "node scripts/check-dist.mjs"
   },
   "dependencies": {
     "astro": "^6.0.8",
     "gray-matter": "^4.0.3",
     "marked": "^18.1.2"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
   }
 }
