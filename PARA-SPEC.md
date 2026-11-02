@@ -179,7 +179,7 @@ npx wrangler r2 object put para-life-assets/{category}/{id}/{filename} \
 ```
 {동작} {대상} ({세부사항})
 
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+{하네스가 제공하는 Co-Authored-By 트레일러}
 ```
 
 예시:

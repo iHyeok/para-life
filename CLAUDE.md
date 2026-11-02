@@ -13,12 +13,12 @@
 ## 쓰기 권한
 
 - `~/para-life/` → 쓰기 가능 (PARA 데이터 관리)
-- `~/projects/` 하위 디렉토리 → **읽기만** (상태 확인용, 절대 수정 금지)
+- 그 외 다른 프로젝트 디렉토리 (`~/projects/` 하위, `~/llm_novel` 같은 홈 디렉토리의 다른 저장소) → **읽기만** (상태 확인용, 절대 수정 금지)
 
 ## 크로스 프로젝트 참조
 
 다른 프로젝트의 상태를 확인할 때:
-1. `~/projects/{프로젝트명}/` 디렉토리의 CLAUDE.md, README.md, git log 등을 읽기
+1. 해당 프로젝트 디렉토리 (`~/projects/{프로젝트명}/` 또는 `~/{프로젝트명}/`)의 CLAUDE.md, README.md, git log 등을 읽기
 2. 요약하여 사용자에게 보고
 3. 필요 시 `~/para-life/projects/{id}.md`의 Progress Log에 반영
 
