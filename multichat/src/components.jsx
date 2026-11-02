@@ -32,6 +32,46 @@ function formatRelativeTs(ts) {
   return `${Math.floor(mins / 1440)}일 전`;
 }
 
+// ---- Markdown (assistant replies) ----
+// Claude's text can echo prompt-injected content, so only plain markdown output survives:
+// raw HTML is shown as text, and remote images become links (no auto-loading tracking pixels)
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+const md = window.marked ? new window.marked.Marked({
+  gfm: true,
+  breaks: true,
+  renderer: {
+    html({ text }) { return escapeHtml(text); },
+    image({ href, text }) { return `<a href="${escapeHtml(href)}">🖼 ${escapeHtml(text || href)}</a>`; },
+  },
+}) : null;
+
+const MD_SANITIZE = {
+  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'del', 'code', 'pre', 'blockquote', 'ul', 'ol', 'li', 'a',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'input'],
+  ALLOWED_ATTR: ['href', 'title', 'align', 'type', 'checked', 'disabled'],
+  ALLOWED_URI_REGEXP: /^(?:https?:|mailto:)/i,
+};
+
+if (window.DOMPurify) {
+  window.DOMPurify.addHook('afterSanitizeAttributes', node => {
+    if (node.tagName === 'A' && node.getAttribute('href')) {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+    // GFM task-list checkboxes only
+    if (node.tagName === 'INPUT' && node.getAttribute('type') !== 'checkbox') node.remove();
+    if (node.tagName === 'INPUT') node.setAttribute('disabled', '');
+  });
+}
+
+function renderMarkdown(text) {
+  if (!md || !window.DOMPurify) return null;
+  return window.DOMPurify.sanitize(md.parse(text), MD_SANITIZE);
+}
+
 // ---- Channel Avatar ----
 function ChannelAvatar({ name, color, size = 40, status }) {
   const initial = (name || '?').trim().charAt(0);
@@ -103,6 +143,12 @@ function ChannelListItem({ channel, active, onClick, density }) {
           }}>
             {last ? (last.from === 'user' ? '나: ' : '') + last.text : channel.status === 'connected' ? '연결됨' : '연결 안됨'}
           </div>
+          {channel.pendingPermissions.length > 0 && (
+            <span style={{
+              background: 'var(--warn-bg)', color: 'var(--warn-ink)', border: '1px solid var(--warn-line)',
+              fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 10, whiteSpace: 'nowrap',
+            }}>🔐 승인 대기</span>
+          )}
           {channel.unreadCount > 0 && (
             <span style={{
               background: 'var(--accent)', color: 'var(--accent-ink)',
@@ -130,7 +176,8 @@ function AddChannelDialog({ onAdd, onClose }) {
     e.preventDefault();
     if (!name.trim() || !wsUrl.trim()) return;
     onAdd({
-      id: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      // Names can be Korean or repeat: ids must not depend on them
+      id: 'ch-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name: name.trim(),
       wsUrl: wsUrl.trim(),
       httpUrl: httpUrl.trim(),
@@ -151,7 +198,7 @@ function AddChannelDialog({ onAdd, onClose }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
     }} onClick={onClose}>
       <form onSubmit={submit} onClick={e => e.stopPropagation()} style={{
-        width: 340, background: 'var(--panel)', border: '1px solid var(--line)',
+        width: 'min(340px, calc(100vw - 32px))', background: 'var(--panel)', border: '1px solid var(--line)',
         borderRadius: 16, padding: 20,
         boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
       }}>
@@ -186,13 +233,13 @@ function AddChannelDialog({ onAdd, onClose }) {
 }
 
 // ---- Sidebar ----
-function Sidebar({ channels, activeId, onSelect, onAdd, onRemove, density }) {
+function Sidebar({ channels, activeId, onSelect, onAdd, density }) {
   const [showAdd, setShowAdd] = useState(false);
 
   return (
-    <aside style={{
-      width: 340, borderRight: '1px solid var(--line)',
-      background: 'var(--panel)', display: 'flex', flexDirection: 'column', flexShrink: 0,
+    <aside className="sidebar" style={{
+      borderRight: '1px solid var(--line)',
+      background: 'var(--panel)', display: 'flex', flexDirection: 'column',
     }}>
       {/* Header */}
       <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)' }}>
@@ -206,8 +253,8 @@ function Sidebar({ channels, activeId, onSelect, onAdd, onRemove, density }) {
             }}>채</div>
             <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>채널</span>
           </div>
-          <button onClick={() => setShowAdd(true)} className="focus-ring" title="채널 추가" style={{
-            width: 30, height: 30, borderRadius: 8,
+          <button onClick={() => setShowAdd(true)} className="focus-ring" title="채널 추가" aria-label="채널 추가" style={{
+            width: 36, height: 36, borderRadius: 8,
             background: 'transparent', border: '1px solid var(--line-2)',
             color: 'var(--ink-2)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -244,17 +291,37 @@ function isImageFile(name) {
   return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name || '');
 }
 
-function MessageBubble({ msg, isMe, showTime, grouped, httpUrl }) {
+function MessageStatus({ msg, connected, onRetry }) {
+  if (msg.status === 'failed') {
+    return (
+      <button onClick={() => onRetry(msg.id)} style={{
+        border: 'none', background: 'transparent', padding: 0, cursor: 'pointer',
+        fontSize: 11, color: 'var(--danger)', fontWeight: 500,
+      }}>전송 실패 · 다시 보내기</button>
+    );
+  }
+  if (msg.status === 'pending') {
+    return (
+      <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>
+        {connected ? '전송 중…' : '연결되면 전송됩니다'}
+      </span>
+    );
+  }
+  return null;
+}
+
+function MessageBubble({ msg, isMe, showTime, grouped, httpUrl, connected, onRetry, onMediaLoad }) {
   const align = isMe ? 'flex-end' : 'flex-start';
   const bubbleStyle = {
     padding: '9px 13px', borderRadius: 14,
-    maxWidth: 540, fontSize: 14, lineHeight: 1.45,
-    wordBreak: 'break-word', whiteSpace: 'pre-wrap',
+    maxWidth: 'min(540px, 85%)', fontSize: 14, lineHeight: 1.45,
+    wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', minWidth: 0,
   };
   if (isMe) {
     Object.assign(bubbleStyle, {
       background: 'var(--accent)', color: 'var(--accent-ink)',
       borderBottomRightRadius: grouped ? 14 : 4,
+      opacity: msg.status === 'pending' ? 0.7 : 1,
     });
   } else {
     Object.assign(bubbleStyle, {
@@ -265,23 +332,28 @@ function MessageBubble({ msg, isMe, showTime, grouped, httpUrl }) {
   }
 
   const file = msg.file;
-  const fileUrl = file ? (file.url.startsWith('http') ? file.url : (httpUrl || '') + file.url) : null;
+  const fileUrl = file && file.url
+    ? (/^(https?:|blob:)/.test(file.url) ? file.url : (httpUrl || '') + file.url)
+    : null;
   const fileIsImage = file && isImageFile(file.name);
+  const html = !isMe && msg.text ? renderMarkdown(msg.text) : null;
 
   return (
     <div className="msg-in" style={{ display: 'flex', flexDirection: 'column', alignItems: align, marginTop: grouped ? 3 : 10 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, flexDirection: isMe ? 'row-reverse' : 'row' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, flexDirection: isMe ? 'row-reverse' : 'row', maxWidth: '100%' }}>
         <div style={bubbleStyle}>
-          {msg.text && <div>{msg.text}</div>}
-          {file && fileIsImage && (
+          {msg.text && (html != null
+            ? <div className="md" dangerouslySetInnerHTML={{ __html: html }} />
+            : <div>{msg.text}</div>)}
+          {file && fileIsImage && fileUrl && (
             <a href={fileUrl} target="_blank" rel="noopener" style={{ display: 'block', marginTop: msg.text ? 6 : 0 }}>
-              <img src={fileUrl} alt={file.name} style={{
-                maxWidth: 300, maxHeight: 240, borderRadius: 8, display: 'block',
+              <img src={fileUrl} alt={file.name} onLoad={onMediaLoad} style={{
+                maxWidth: 'min(300px, 100%)', maxHeight: 240, borderRadius: 8, display: 'block',
               }} />
             </a>
           )}
-          {file && !fileIsImage && (
-            <a href={fileUrl} download={file.name} target="_blank" rel="noopener" style={{
+          {file && (!fileIsImage || !fileUrl) && (
+            <a href={fileUrl || undefined} download={file.name} target="_blank" rel="noopener" style={{
               display: 'flex', alignItems: 'center', gap: 6, marginTop: msg.text ? 6 : 0,
               fontSize: 13, color: isMe ? 'var(--accent-ink)' : 'var(--accent)',
               textDecoration: 'underline',
@@ -292,32 +364,35 @@ function MessageBubble({ msg, isMe, showTime, grouped, httpUrl }) {
           )}
         </div>
         {showTime && (
-          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontFamily: 'JetBrains Mono, monospace', marginBottom: 2, whiteSpace: 'nowrap' }}>
-            {formatClock(msg.ts)}
+          <div style={{ fontSize: 10.5, color: 'var(--ink-3)', fontFamily: 'JetBrains Mono, monospace', marginBottom: 2, whiteSpace: 'nowrap' }}>
+            {msg.edited && '수정됨 · '}{formatClock(msg.ts)}
           </div>
         )}
       </div>
+      {isMe && msg.status && msg.status !== 'sent' && (
+        <div style={{ marginTop: 3 }}>
+          <MessageStatus msg={msg} connected={connected} onRetry={onRetry} />
+        </div>
+      )}
     </div>
   );
 }
 
 // ---- Permission request ----
 function PermissionRequest({ perm, onRespond }) {
-  const [responded, setResponded] = useState(false);
-
-  const handle = (allowed) => {
-    setResponded(true);
-    onRespond(perm.id, allowed);
-  };
+  const btn = (bg) => ({
+    padding: '8px 16px', borderRadius: 8, border: 'none',
+    background: bg, color: '#111', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+  });
 
   return (
-    <div className="msg-in" style={{
-      background: 'oklch(0.3 0.04 60)', border: '1px solid oklch(0.6 0.15 85)',
-      borderRadius: 12, padding: '12px 14px', margin: '10px 0', maxWidth: 540,
+    <div className="msg-in" role="alert" style={{
+      background: 'var(--warn-bg)', color: 'var(--warn-ink)', border: '1px solid var(--warn-line)',
+      borderRadius: 12, padding: '12px 14px', margin: '10px 0', maxWidth: 'min(540px, 100%)',
     }}>
       <div style={{ fontSize: 13, marginBottom: 8 }}>
-        <span style={{ fontWeight: 600 }}>🔐 {perm.tool}</span>
-        <span style={{ color: 'var(--ink-2)', marginLeft: 8 }}>{perm.description}</span>
+        <div style={{ fontWeight: 700 }}>🔐 권한 요청 · {perm.tool}</div>
+        {perm.description && <div style={{ marginTop: 2 }}>{perm.description}</div>}
       </div>
       {perm.input_preview && (
         <pre style={{
@@ -327,20 +402,10 @@ function PermissionRequest({ perm, onRespond }) {
           whiteSpace: 'pre-wrap', wordBreak: 'break-all',
         }}>{perm.input_preview}</pre>
       )}
-      {responded ? (
-        <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>응답 완료</div>
-      ) : (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => handle(true)} style={{
-            padding: '6px 14px', borderRadius: 6, border: 'none',
-            background: '#22C55E', color: '#000', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
-          }}>Allow</button>
-          <button onClick={() => handle(false)} style={{
-            padding: '6px 14px', borderRadius: 6, border: 'none',
-            background: '#ef4444', color: '#000', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
-          }}>Deny</button>
-        </div>
-      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={() => onRespond(perm.id, true)} style={btn('var(--ok)')}>허용</button>
+        <button onClick={() => onRespond(perm.id, false)} style={btn('var(--danger)')}>거부</button>
+      </div>
     </div>
   );
 }
@@ -357,31 +422,57 @@ function DayDivider({ label }) {
 }
 
 // ---- Conversation header ----
-function ConversationHeader({ channel, onRemove }) {
-  const statusText = channel.status === 'connected' ? '연결됨' : channel.status === 'connecting' ? '연결 중...' : '연결 안됨';
+function useNow(active) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!active) return;
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(t);
+  }, [active]);
+  return now;
+}
+
+function ConversationHeader({ channel, onBack, onRemove, onReconnect }) {
+  const disconnected = channel.status === 'disconnected';
+  const now = useNow(disconnected ? channel.nextRetryAt : null);
+  const retryIn = channel.nextRetryAt ? Math.max(0, Math.ceil((channel.nextRetryAt - now) / 1000)) : null;
+  const statusText = channel.status === 'connected' ? '연결됨'
+    : channel.status === 'connecting' ? '연결 중…'
+    : retryIn != null ? `연결 끊김 · ${retryIn}초 후 재시도` : '연결 끊김';
   const statusColor = channel.status === 'connected' ? '#22C55E' : channel.status === 'connecting' ? '#f59e0b' : '#ef4444';
+  const iconBtn = {
+    width: 36, height: 36, border: 'none', background: 'transparent',
+    color: 'var(--ink-3)', cursor: 'pointer', borderRadius: 8, flexShrink: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  };
 
   return (
-    <div style={{
-      padding: '14px 24px', borderBottom: '1px solid var(--line)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    <div className="pad-x" style={{
+      paddingTop: 12, paddingBottom: 12, borderBottom: '1px solid var(--line)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       background: 'var(--panel)', flexShrink: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <ChannelAvatar name={channel.name} color={channel.color} size={38} status={channel.status} />
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>{channel.name}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <button onClick={onBack} className="mobile-only focus-ring" title="채널 목록" aria-label="채널 목록" style={{ ...iconBtn, marginLeft: -6 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <ChannelAvatar name={channel.name} color={channel.color} size={36} status={channel.status} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{channel.name}</div>
           <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
             {statusText}
+            {disconnected && (
+              <button onClick={onReconnect} style={{
+                border: 'none', background: 'transparent', padding: 0, marginLeft: 4,
+                color: 'var(--ink-2)', textDecoration: 'underline', cursor: 'pointer', fontSize: 12,
+              }}>지금 연결</button>
+            )}
           </div>
         </div>
       </div>
-      <button onClick={onRemove} className="focus-ring" title="채널 제거" style={{
-        width: 34, height: 34, border: 'none', background: 'transparent',
-        color: 'var(--ink-3)', cursor: 'pointer', borderRadius: 8,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}
+      <button onClick={onRemove} className="focus-ring" title="채널 삭제" aria-label="채널 삭제" style={iconBtn}
         onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover)'; e.currentTarget.style.color = 'var(--danger)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ink-3)'; }}
       >
@@ -418,7 +509,10 @@ function FileChip({ file, onRemove }) {
 }
 
 // ---- Composer ----
-function Composer({ onSend, disabled }) {
+// Touch keyboards have no Shift+Enter: there Enter is a newline and the button sends
+const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+function Composer({ onSend, offline }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
   const [composing, setComposing] = useState(false);
@@ -461,7 +555,7 @@ function Composer({ onSend, disabled }) {
     if (!v && files.length === 0) return;
     onSend(v, files);
     setText('');
-    files.forEach(f => { if (f._preview) URL.revokeObjectURL(f._preview); });
+    // Previews stay alive: the sent bubble shows them until the server URL arrives
     setFiles([]);
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -476,8 +570,9 @@ function Composer({ onSend, disabled }) {
 
   return (
     <div
+      className="composer pad-x"
       style={{
-        padding: '14px 24px 18px', background: 'var(--panel)',
+        paddingTop: 14, background: 'var(--panel)',
         borderTop: '1px solid var(--line)', flexShrink: 0,
       }}
       onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -502,10 +597,10 @@ function Composer({ onSend, disabled }) {
       >
         <input ref={fileRef} type="file" multiple style={{ display: 'none' }}
           onChange={e => { if (e.target.files.length > 0) addFiles(e.target.files); }} />
-        <button onClick={() => fileRef.current?.click()} title="파일 첨부" style={{
-          width: 28, height: 28, border: 'none', background: 'transparent',
+        <button onClick={() => fileRef.current?.click()} title="파일 첨부" aria-label="파일 첨부" style={{
+          width: 32, height: 32, border: 'none', background: 'transparent',
           color: 'var(--ink-3)', cursor: 'pointer', borderRadius: 6,
-          marginBottom: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: 1, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
         </button>
@@ -516,18 +611,20 @@ function Composer({ onSend, disabled }) {
           onCompositionStart={() => setComposing(true)}
           onCompositionEnd={() => setComposing(false)}
           onKeyDown={e => {
-            if (e.key === 'Enter' && !e.shiftKey && !composing) {
+            // nativeEvent.isComposing/229 catch IME Enter even when React state lags (Safari)
+            const imeActive = composing || e.nativeEvent.isComposing || e.keyCode === 229;
+            if (e.key === 'Enter' && !e.shiftKey && !imeActive && !coarsePointer) {
               e.preventDefault();
               submit();
             }
           }}
-          placeholder={dragOver ? '여기에 파일을 놓으세요' : '메시지 입력…'}
-          disabled={disabled}
+          aria-label="메시지"
+          placeholder={dragOver ? '여기에 파일을 놓으세요' : offline ? '연결 끊김 — 연결되면 전송됩니다' : '메시지 입력…'}
           rows={1}
           style={{
             flex: 1, border: 'none', outline: 'none',
             background: 'transparent', resize: 'none',
-            fontFamily: 'inherit', fontSize: 14, color: 'var(--ink)',
+            fontFamily: 'inherit', fontSize: 16, color: 'var(--ink)',
             padding: '6px 0', lineHeight: 1.45,
             minHeight: 22, maxHeight: 160,
           }}
@@ -535,7 +632,8 @@ function Composer({ onSend, disabled }) {
         <button
           onClick={submit}
           disabled={!hasContent}
-          title="전송 (Enter)"
+          title="전송"
+          aria-label="전송"
           style={{
             width: 32, height: 32, border: 'none',
             cursor: hasContent ? 'pointer' : 'default',
@@ -548,22 +646,49 @@ function Composer({ onSend, disabled }) {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>
         </button>
       </div>
-      <div style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 6, paddingLeft: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.02em' }}>
-        Enter 전송 · Shift+Enter 줄바꿈 · 파일 드래그앤드롭
-      </div>
+      {!coarsePointer && (
+        <div style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 6, paddingLeft: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.02em' }}>
+          Enter 전송 · Shift+Enter 줄바꿈 · 파일 드래그앤드롭
+        </div>
+      )}
     </div>
   );
 }
 
 // ---- Conversation body ----
-function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) {
+function Conversation({ channel, onBack, onRemove, onReconnect, onSend, onRetry, onPermissionRespond, showTimestamps }) {
   const scrollRef = useRef(null);
+  const contentRef = useRef(null);
+  // Follow new messages only while the reader is at the bottom
+  const stickRef = useRef(true);
+  const lastIdRef = useRef(null);
+  const last = channel.messages[channel.messages.length - 1];
 
+  const toBottom = () => {
+    const el = scrollRef.current;
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight;
+  };
+
+  useLayoutEffect(() => {
+    // Sending a new message always jumps back down
+    if (last && last.id !== lastIdRef.current && last.from === 'user' && last.status === 'pending') stickRef.current = true;
+    lastIdRef.current = last ? last.id : null;
+    toBottom();
+  }, [channel.id, channel.messages.length, channel.isThinking, channel.pendingPermissions.length]);
+
+  // Keyboard opening, composer growing, images loading, edits: stay pinned if we were
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [channel.id, channel.messages.length, channel.isThinking]);
+    if (!window.ResizeObserver) return;
+    const ro = new ResizeObserver(toBottom);
+    if (scrollRef.current) ro.observe(scrollRef.current);
+    if (contentRef.current) ro.observe(contentRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const onScroll = () => {
+    const el = scrollRef.current;
+    stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
 
   // Group consecutive by sender; insert day dividers
   const groups = useMemo(() => {
@@ -594,9 +719,10 @@ function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) 
   const permissions = channel.pendingPermissions || [];
 
   return (
-    <section style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: 'var(--bg)' }}>
-      <ConversationHeader channel={channel} onRemove={channel.onRemove} />
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 24px 20px' }}>
+    <section className="conversation" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+      <ConversationHeader channel={channel} onBack={onBack} onRemove={onRemove} onReconnect={onReconnect} />
+      <div ref={scrollRef} onScroll={onScroll} className="pad-x" style={{ flex: 1, overflowY: 'auto', paddingTop: 8, paddingBottom: 20 }}>
+        <div ref={contentRef}>
         {channel.messages.length === 0 && !channel.isThinking && (
           <div style={{ textAlign: 'center', color: 'var(--ink-3)', fontSize: 13, marginTop: 60 }}>
             메시지를 보내 대화를 시작하세요
@@ -614,6 +740,9 @@ function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) 
               showTime={showTimestamps && g.showTime}
               grouped={g.grouped}
               httpUrl={channel.httpUrl}
+              connected={channel.status === 'connected'}
+              onRetry={onRetry}
+              onMediaLoad={toBottom}
             />
           );
         })}
@@ -631,8 +760,9 @@ function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) 
             </div>
           </div>
         )}
+        </div>
       </div>
-      <Composer onSend={onSend} disabled={channel.status !== 'connected'} />
+      <Composer onSend={onSend} offline={channel.status !== 'connected'} />
     </section>
   );
 }
@@ -640,7 +770,7 @@ function Conversation({ channel, onSend, onPermissionRespond, showTimestamps }) 
 // ---- Empty state ----
 function EmptyConversation() {
   return (
-    <section style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+    <section className="conversation" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
       <div style={{ textAlign: 'center', color: 'var(--ink-3)' }}>
         <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
         <div style={{ fontSize: 14 }}>채널을 선택하거나 추가하세요</div>
@@ -651,7 +781,7 @@ function EmptyConversation() {
 
 Object.assign(window, {
   ChannelAvatar, ChannelListItem, AddChannelDialog, Sidebar,
-  MessageBubble, PermissionRequest, DayDivider,
+  MessageBubble, MessageStatus, PermissionRequest, DayDivider,
   ConversationHeader, Composer, Conversation, EmptyConversation,
   formatClock, formatDay, formatRelativeTs,
 });

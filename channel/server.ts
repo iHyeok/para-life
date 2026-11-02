@@ -116,6 +116,9 @@ type Wire =
     }
   | { type: "permission_resolved"; id: string; behavior: "allow" | "deny" | "expired" }
   | { type: "error"; id?: string; message: string }
+  | { type: "hello"; features: string[] }
+  | { type: "history_end" }
+  | { type: "pong" }
   | { type: "status"; connected: boolean };
 
 type PendingPermission = {
@@ -138,6 +141,10 @@ function broadcast(m: Wire) {
   if (m.type === "msg") {
     history.push(m);
     if (history.length > MAX_HISTORY) history.shift();
+  } else if (m.type === "edit") {
+    // Keep history in sync so reconnecting clients see the edited text
+    const h = history.find((x) => x.type === "msg" && x.id === m.id);
+    if (h && h.type === "msg") h.text = m.text;
   }
   const data = JSON.stringify(m);
   for (const ws of clients) if (ws.readyState === 1) ws.send(data);
@@ -253,6 +260,11 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         return { content: [{ type: "text", text: `sent (${id})` }] };
       }
       case "edit_message": {
+        // Only Claude's own replies can be edited
+        const target = history.find((m) => m.type === "msg" && m.id === args.message_id);
+        if (!target || target.type !== "msg" || target.from !== "assistant") {
+          throw new Error(`no assistant message ${args.message_id}`);
+        }
         broadcast({
           type: "edit",
           id: args.message_id as string,
@@ -324,6 +336,18 @@ mcp.setNotificationHandler(
     broadcast(request);
   },
 );
+
+// Record a user message and echo it to every client: other devices see it, the sender gets its ack
+function echoUser(id: string, text: string, file?: { path: string; name: string }) {
+  broadcast({
+    type: "msg",
+    id,
+    from: "user",
+    text,
+    ts: Date.now(),
+    ...(file ? { file: { url: `/inbox/${basename(file.path)}`, name: file.name } } : {}),
+  });
+}
 
 // --- Deliver message to Claude Code ---
 function deliver(
@@ -459,13 +483,15 @@ Bun.serve({
       return new Response("upgrade failed", { status: 400 });
     }
 
-    // Serve outbox files
-    if (url.pathname.startsWith("/files/")) {
-      const f = url.pathname.slice(7);
+    // Serve outbox (Claude -> UI) and inbox (UI uploads) files
+    const fileRoute = url.pathname.match(/^\/(files|inbox)\/(.+)$/);
+    if (fileRoute) {
+      const f = fileRoute[2];
       if (f.includes("..") || f.includes("/"))
         return new Response("bad", { status: 400 });
+      const dir = fileRoute[1] === "files" ? OUTBOX_DIR : INBOX_DIR;
       try {
-        return new Response(readFileSync(join(OUTBOX_DIR, f)), {
+        return new Response(readFileSync(join(dir, f)), {
           headers: {
             ...cors,
             "content-type": mime(extname(f).toLowerCase()),
@@ -496,6 +522,7 @@ Bun.serve({
         writeFileSync(path, Buffer.from(await f.arrayBuffer()));
         file = { path, name: f.name };
       }
+      echoUser(id, text, file);
       deliver(id, text, file);
       return new Response(null, { status: 204, headers: cors });
     }
@@ -521,9 +548,12 @@ Bun.serve({
     maxPayloadLength: Math.ceil((MAX_UPLOAD_BYTES * 4) / 3) + 64 * 1024,
     open: (ws) => {
       clients.add(ws);
+      // Lets clients know user messages are echoed back (= delivery ack)
+      ws.send(JSON.stringify({ type: "hello", features: ["echo", "ping", "history_end"] }));
       // Send history, then still-open permission requests, to the new client
       for (const m of history) ws.send(JSON.stringify(m));
       for (const p of pendingPermissions.values()) ws.send(JSON.stringify(p.request));
+      ws.send(JSON.stringify({ type: "history_end" }));
     },
     close: (ws) => {
       clients.delete(ws);
@@ -531,6 +561,10 @@ Bun.serve({
     message: (ws, raw) => {
       try {
         const data = JSON.parse(String(raw));
+        if (data.type === "ping") {
+          ws.send(JSON.stringify({ type: "pong" }));
+          return;
+        }
         if (data.type === "permission_response") {
           respondPermission(data.id, data.allowed);
           return;
@@ -544,6 +578,11 @@ Bun.serve({
             typeof fileData === "string" &&
             fileData
           ) {
+            const seen = history.find((m) => m.type === "msg" && m.id === id);
+            if (seen) {
+              ws.send(JSON.stringify(seen));
+              return;
+            }
             const buf = Buffer.from(fileData, "base64");
             if (buf.byteLength > MAX_UPLOAD_BYTES) {
               ws.send(JSON.stringify({ type: "error", id, message: "file too large" }));
@@ -552,15 +591,22 @@ Bun.serve({
             mkdirSync(INBOX_DIR, { recursive: true });
             const path = join(INBOX_DIR, uniqueName(fileName));
             writeFileSync(path, buf);
-            deliver(id, typeof text === "string" ? text : "", { path, name: fileName });
+            const t = typeof text === "string" ? text : "";
+            echoUser(id, t, { path, name: fileName });
+            deliver(id, t, { path, name: fileName });
           }
           return;
         }
 
-        const { id, text } = data as { id: string; text: string };
-        if (id && text?.trim()) {
-          history.push({ type: "msg", id, from: "user", text: text.trim(), ts: Date.now() });
-          if (history.length > MAX_HISTORY) history.shift();
+        const { id, text } = data as { id: unknown; text: unknown };
+        if (typeof id === "string" && typeof text === "string" && text.trim()) {
+          // A retry of an already-delivered message only needs the ack again
+          if (history.some((m) => m.type === "msg" && m.id === id)) {
+            const m = history.find((m) => m.type === "msg" && m.id === id)!;
+            ws.send(JSON.stringify(m));
+            return;
+          }
+          echoUser(id, text.trim());
           deliver(id, text.trim());
         }
       } catch {}
@@ -798,10 +844,10 @@ function connect() {
   };
   ws.onmessage = (e) => {
     const m = JSON.parse(e.data);
-    if (m.type === 'msg') { hideThinking(); addMsg(m); }
+    if (m.type === 'msg') { if (m.from === 'assistant') hideThinking(); addMsg(m); }
     if (m.type === 'edit') {
       const el = msgMap[m.id];
-      if (el) el.querySelector('.body').textContent = m.text + ' (edited)';
+      if (el) el.querySelector('.body').textContent = m.text;
     }
     if (m.type === 'permission_request') showPermission(m);
     if (m.type === 'permission_resolved' && permCards[m.id]) {
@@ -813,6 +859,7 @@ function connect() {
 connect();
 
 function addMsg(m) {
+  if (msgMap[m.id]) return;
   const div = document.createElement('div');
   div.className = 'msg ' + m.from;
   let html = '';
