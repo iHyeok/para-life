@@ -1,7 +1,16 @@
 ---
 import StatusBadge from "./StatusBadge.astro";
 import PriorityDot from "./PriorityDot.astro";
-import { detailHref, isLocked, listedArea, taskProgress, type Project, type View } from "../lib/data";
+import TagList from "./TagList.astro";
+import {
+  detailHref,
+  isLocked,
+  listedArea,
+  searchAttrs,
+  taskProgress,
+  type Project,
+  type View,
+} from "../lib/data";
 
 interface Props {
   project: Project;
@@ -13,10 +22,11 @@ const locked = isLocked(project, view);
 const href = detailHref("projects", project, view);
 const tasks = taskProgress(project.body);
 const areaTitle = listedArea(project.area, view)?.title;
+const search = searchAttrs("projects", project, view);
 ---
 
 {locked ? (
-  <a href={href} class="card locked" style="--card-accent: var(--accent)">
+  <a href={href} class="card locked" style="--card-accent: var(--accent)" {...search}>
     <div class="title-row">
       <PriorityDot priority={project.priority} />
       <h3>{project.title}</h3>
@@ -24,11 +34,11 @@ const areaTitle = listedArea(project.area, view)?.title;
     <span class="lock">Limited</span>
   </a>
 ) : (
-  <a href={href} class="card" style="--card-accent: var(--accent)">
+  <article class="card" style="--card-accent: var(--accent)" {...search}>
     <div class="card-header">
       <div class="title-row">
         <PriorityDot priority={project.priority} />
-        <h3>{project.title}</h3>
+        <h3><a href={href} class="card-link">{project.title}</a></h3>
       </div>
       <StatusBadge status={project.status} />
     </div>
@@ -61,7 +71,8 @@ const areaTitle = listedArea(project.area, view)?.title;
         </span>
       )}
     </div>
-  </a>
+    <TagList tags={project.tags} view={view} />
+  </article>
 )}
 
 <style>
@@ -120,5 +131,9 @@ const areaTitle = listedArea(project.area, view)?.title;
     gap: 0.25rem 1rem;
     font-size: 0.8rem;
     color: var(--text-muted);
+  }
+
+  .meta + :global(.tags) {
+    margin-top: 0.5rem;
   }
 </style>

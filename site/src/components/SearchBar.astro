@@ -1,0 +1,508 @@
+---
+import type { View } from "../lib/data";
+
+interface Props {
+  view: View;
+}
+
+// Filters the dashboard's [data-search] cards/rows (see searchAttrs in lib/data.ts).
+// Rendered `hidden` and revealed by the script, so without JS the dashboard is unchanged.
+// Only /me gets a full-text index (/me/search-index.json, behind Cloudflare Access).
+const { view } = Astro.props;
+const indexUrl = view === "me" ? "/me/search-index.json" : undefined;
+const placeholder = view === "me" ? "검색 — 제목, 태그, 영역, 본문" : "검색 — 제목, 태그, 영역, 목표";
+---
+
+<form class="search" role="search" data-search-root data-index={indexUrl} hidden>
+  <div class="search-box">
+    <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
+      <path d="m13 13 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+    </svg>
+    <input
+      type="search"
+      name="q"
+      placeholder={placeholder}
+      aria-label="대시보드 검색"
+      aria-describedby="search-status"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+    />
+    <kbd class="search-kbd" aria-hidden="true" title="/ 또는 Ctrl+K">/</kbd>
+    <button type="button" class="search-clear" data-search-clear aria-label="검색어 지우기" hidden>
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path d="m6 6 8 8M14 6l-8 8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+      </svg>
+    </button>
+  </div>
+  <div class="search-status" id="search-status" aria-live="polite" data-search-status hidden>
+    <span class="filter-chip" data-tag-chip hidden>
+      <span data-tag-chip-label></span>
+      <button type="button" aria-label="태그 필터 해제" data-tag-chip-remove>
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="m6.5 6.5 7 7M13.5 6.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </span>
+    <span data-search-count></span>
+  </div>
+  <div class="search-empty" data-search-empty hidden>
+    <p>일치하는 항목이 없습니다.</p>
+    <button type="button" data-search-reset>검색 초기화</button>
+  </div>
+</form>
+
+<script>
+  interface BodyEntry {
+    lines: string[];
+    norm: string[];
+    all: string;
+  }
+
+  interface Entry {
+    el: HTMLElement;
+    text: string;
+    tags: string[];
+    key: string;
+    snippet?: HTMLElement;
+  }
+
+  interface State {
+    q: string;
+    tag: string;
+  }
+
+  interface Hit {
+    line: string;
+    at: number;
+    len: number;
+  }
+
+  // Same normalization as searchNormalize() in lib/data.ts
+  const norm = (s: string) => s.normalize("NFKC").toLowerCase();
+
+  function parseTags(raw: string | undefined): string[] {
+    try {
+      const tags = JSON.parse(raw || "[]");
+      return Array.isArray(tags) ? tags.map((t) => norm(String(t))) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function readState(): State {
+    const p = new URLSearchParams(location.search);
+    return { q: p.get("q") ?? "", tag: p.get("tag") ?? "" };
+  }
+
+  /** Canonical URL for a state: ?q=...&tag=..., other params kept after them. */
+  function stateUrl({ q, tag }: State) {
+    const p = new URLSearchParams();
+    if (q.trim()) p.set("q", q.trim());
+    if (tag) p.set("tag", tag);
+    for (const [k, v] of new URLSearchParams(location.search)) if (k !== "q" && k !== "tag") p.append(k, v);
+    const qs = p.toString();
+    return location.pathname + (qs ? `?${qs}` : "");
+  }
+
+  function init(root: HTMLElement) {
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const input = $<HTMLInputElement>("input");
+    const clearBtn = $<HTMLButtonElement>("[data-search-clear]");
+    const status = $("[data-search-status]");
+    const chip = $("[data-tag-chip]");
+    const chipLabel = $("[data-tag-chip-label]");
+    const count = $("[data-search-count]");
+    const empty = $("[data-search-empty]");
+
+    const entries: Entry[] = [...document.querySelectorAll<HTMLElement>("[data-search]")].map((el) => ({
+      el,
+      text: el.dataset.search ?? "",
+      tags: parseTags(el.dataset.tags),
+      key: el.dataset.key ?? "",
+    }));
+    const groups = [...document.querySelectorAll<HTMLElement>("[data-filter-group]")];
+    const extras = [...document.querySelectorAll<HTMLElement>("[data-filter-hide]")];
+
+    const indexUrl = root.dataset.index;
+    let bodies: Map<string, BodyEntry> | null = null;
+    let indexState: "idle" | "loading" | "ready" | "off" = indexUrl ? "idle" : "off";
+
+    let current = readState();
+    let urlTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function loadIndex() {
+      if (indexState !== "idle") return;
+      indexState = "loading";
+      fetch(indexUrl!, { credentials: "same-origin" })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+        .then((data: Record<string, string[]>) => {
+          bodies = new Map(
+            Object.entries(data).map(([key, lines]) => {
+              const normed = lines.map(norm);
+              return [key, { lines, norm: normed, all: normed.join("\n") }];
+            }),
+          );
+          indexState = "ready";
+        })
+        .catch(() => {
+          indexState = "off"; // e.g. Access session expired: fall back to card fields only
+        })
+        .finally(apply);
+    }
+
+    function bodyHit(body: BodyEntry, term: string): Hit {
+      const i = body.norm.findIndex((l) => l.includes(term));
+      const line = body.lines[i];
+      // Offsets only line up when normalization kept the length; otherwise show the line unmarked
+      const at = body.norm[i].length === line.length ? body.norm[i].indexOf(term) : -1;
+      return { line, at, len: term.length };
+    }
+
+    function setSnippet(entry: Entry, hit: Hit | null) {
+      if (!hit) {
+        entry.snippet?.remove();
+        entry.snippet = undefined;
+        return;
+      }
+      if (!entry.snippet) {
+        entry.snippet = document.createElement("p");
+        entry.snippet.className = "search-snippet";
+        entry.el.append(entry.snippet);
+      }
+      const { line, at, len } = hit;
+      if (at < 0) {
+        entry.snippet.textContent = line.length > 90 ? `${line.slice(0, 90)}…` : line;
+        return;
+      }
+      const start = Math.max(0, at - 30);
+      const end = Math.min(line.length, at + len + 60);
+      const mark = document.createElement("mark");
+      mark.textContent = line.slice(at, at + len);
+      entry.snippet.replaceChildren(
+        (start > 0 ? "…" : "") + line.slice(start, at),
+        mark,
+        line.slice(at + len, end) + (end < line.length ? "…" : ""),
+      );
+    }
+
+    function apply() {
+      const { q, tag } = current;
+      const terms = norm(q)
+        .split(/\s+/)
+        .map((t) => t.replace(/^#/, ""))
+        .filter(Boolean);
+      const wantTag = norm(tag);
+      const active = terms.length > 0 || wantTag !== "";
+      if (terms.length) loadIndex();
+
+      let shown = 0;
+      for (const entry of entries) {
+        let ok = !wantTag || entry.tags.includes(wantTag);
+        let hit: Hit | null = null;
+        if (ok && terms.length) {
+          const missing = terms.filter((t) => !entry.text.includes(t));
+          if (missing.length) {
+            const body = bodies?.get(entry.key);
+            ok = !!body && missing.every((t) => body.all.includes(t));
+            if (ok) hit = bodyHit(body!, missing[0]);
+          }
+        }
+        entry.el.hidden = !ok;
+        setSnippet(entry, ok ? hit : null);
+        if (ok) shown++;
+      }
+      for (const g of groups) g.hidden = active && !g.querySelector("[data-search]:not([hidden])");
+      for (const x of extras) x.hidden = active;
+
+      clearBtn.hidden = q === "";
+      status.hidden = !active;
+      chip.hidden = !wantTag;
+      chipLabel.textContent = `#${tag}`;
+      const searching = terms.length > 0 && indexState === "loading";
+      count.textContent = active ? `${shown}개 항목${searching ? " · 본문 검색 중…" : ""}` : "";
+      empty.hidden = !active || shown > 0 || searching;
+    }
+
+    /** push: a discrete step worth a history entry; replace: typing (URL updated after a pause). */
+    function commit(next: State, mode: "push" | "replace") {
+      current = next;
+      apply();
+      clearTimeout(urlTimer);
+      if (mode === "push") {
+        const target = stateUrl(next);
+        if (target !== location.pathname + location.search) history.pushState(null, "", target);
+      } else {
+        urlTimer = setTimeout(() => history.replaceState(null, "", stateUrl(current)), 300);
+      }
+    }
+
+    function setQuery(q: string, mode: "push" | "replace") {
+      input.value = q;
+      commit({ ...current, q }, mode);
+    }
+
+    function showResults() {
+      if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: "start" });
+    }
+
+    input.addEventListener("input", () => {
+      // Starting a new search gets its own history entry; further keystrokes refine it in place
+      const starting = current.q.trim() === "" && input.value.trim() !== "";
+      commit({ ...current, q: input.value }, starting ? "push" : "replace");
+    });
+
+    input.addEventListener("focus", loadIndex, { once: true });
+
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key !== "Escape" || ev.isComposing) return;
+      if (input.value) {
+        ev.preventDefault();
+        setQuery("", "push");
+      } else {
+        input.blur();
+      }
+    });
+
+    root.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      commit(current, "push");
+      if (matchMedia("(pointer: coarse)").matches) input.blur(); // close the phone keyboard
+    });
+
+    clearBtn.addEventListener("click", () => {
+      setQuery("", "push");
+      input.focus();
+    });
+
+    $("[data-tag-chip-remove]").addEventListener("click", () => commit({ ...current, tag: "" }, "push"));
+
+    $("[data-search-reset]").addEventListener("click", () => {
+      input.value = "";
+      commit({ q: "", tag: "" }, "push");
+      input.focus();
+    });
+
+    // Tag links (cards here, same URL as the link's href) filter in place instead of reloading
+    document.addEventListener("click", (ev) => {
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      const link = (ev.target as Element).closest?.<HTMLAnchorElement>("a[data-tag]");
+      if (!link || link.pathname !== location.pathname) return;
+      ev.preventDefault();
+      input.value = "";
+      commit({ q: "", tag: link.dataset.tag ?? "" }, "push");
+      showResults();
+    });
+
+    // "/" or Ctrl/Cmd+K focuses the search box
+    document.addEventListener("keydown", (ev) => {
+      if (ev.defaultPrevented || ev.isComposing || ev.altKey) return;
+      const target = ev.target as Element | null;
+      const typing = !!target?.closest?.("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
+      const slash = ev.key === "/" && !ev.ctrlKey && !ev.metaKey && !typing;
+      const ctrlK = ev.key.toLowerCase() === "k" && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey;
+      if (!slash && !ctrlK) return;
+      ev.preventDefault();
+      input.focus();
+      input.select();
+    });
+
+    window.addEventListener("popstate", () => {
+      clearTimeout(urlTimer);
+      current = readState();
+      input.value = current.q;
+      apply();
+    });
+
+    root.hidden = false;
+    input.value = current.q;
+    apply();
+  }
+
+  const root = document.querySelector<HTMLElement>("[data-search-root]");
+  if (root) init(root);
+</script>
+
+<style>
+  .search {
+    margin-top: 1.75rem;
+    scroll-margin-top: 1rem;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .search-icon {
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-left: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.7rem 0.75rem;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem; /* >= 16px so iOS doesn't zoom on focus */
+    appearance: none;
+  }
+
+  input:focus,
+  input:focus-visible {
+    outline: none;
+  }
+
+  input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  input::-webkit-search-cancel-button {
+    appearance: none;
+    display: none;
+  }
+
+  .search-kbd {
+    flex-shrink: 0;
+    margin-right: 0.85rem;
+    padding: 0 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font: 0.75rem/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* Shortcut hint only for keyboards, and only while the box is empty */
+  input:focus ~ .search-kbd,
+  input:not(:placeholder-shown) ~ .search-kbd {
+    display: none;
+  }
+
+  @media (pointer: coarse), (max-width: 640px) {
+    .search-kbd {
+      display: none;
+    }
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .search-clear {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    align-self: stretch;
+    color: var(--text-muted);
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  .search-clear:hover {
+    color: var(--text);
+  }
+
+  .search-clear svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .search-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding-left: 0.65rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  .filter-chip button {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+  }
+
+  .filter-chip button:hover {
+    color: var(--text);
+  }
+
+  .filter-chip svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .search-empty {
+    margin-top: 1.5rem;
+    padding: 1.5rem 1rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .search-empty button {
+    margin-top: 0.5rem;
+    color: var(--accent);
+    font-size: 0.85rem;
+  }
+
+  .search-empty button:hover {
+    text-decoration: underline;
+  }
+
+  /* Added by the script under cards/rows that matched only in their body text (/me) */
+  :global(.search-snippet) {
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  :global(.archive-list .search-snippet) {
+    margin: -0.2rem 0 0.6rem;
+  }
+
+  :global(.search-snippet mark) {
+    background: color-mix(in srgb, var(--yellow) 30%, transparent);
+    color: var(--text);
+    border-radius: 2px;
+    padding: 0 0.1em;
+  }
+</style>

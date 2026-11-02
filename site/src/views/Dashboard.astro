@@ -5,6 +5,7 @@ import AreaCard from "../components/AreaCard.astro";
 import ResourceCard from "../components/ResourceCard.astro";
 import FocusList from "../components/FocusList.astro";
 import ActivityFeed from "../components/ActivityFeed.astro";
+import SearchBar from "../components/SearchBar.astro";
 import {
   detailHref,
   getArchives,
@@ -13,6 +14,7 @@ import {
   getResources,
   isListed,
   isLocked,
+  searchAttrs,
   type Project,
   type View,
 } from "../lib/data";
@@ -71,19 +73,21 @@ const focusProjects = activeProjects.filter((p) => !isLocked(p, view));
     </div>
   </div>
 
+  <SearchBar view={view} />
+
   {focusProjects.length > 0 && (
-    <section id="focus">
+    <section id="focus" data-filter-hide>
       <h2>Focus <span class="hint">다음 할 일 · 마감 · 마지막 업데이트</span></h2>
       <FocusList projects={focusProjects} view={view} />
     </section>
   )}
 
-  <section id="activity">
+  <section id="activity" data-filter-hide>
     <h2>Recent Activity</h2>
     <ActivityFeed projects={openProjects} view={view} />
   </section>
 
-  <section id="projects">
+  <section id="projects" data-filter-group>
     <h2>Projects</h2>
     {activeProjects.length > 0 && (
       <div class="grid">
@@ -91,17 +95,17 @@ const focusProjects = activeProjects.filter((p) => !isLocked(p, view));
       </div>
     )}
     {holdProjects.length > 0 && (
-      <>
+      <div data-filter-group>
         <h3 class="subsection">On Hold</h3>
         <div class="grid">
           {holdProjects.map((p) => <ProjectCard project={p} view={view} />)}
         </div>
-      </>
+      </div>
     )}
     {projects.length === 0 && <p class="empty">No projects yet.</p>}
   </section>
 
-  <section id="areas">
+  <section id="areas" data-filter-group>
     <h2>Areas</h2>
     {areas.length > 0 ? (
       <div class="grid">
@@ -112,7 +116,7 @@ const focusProjects = activeProjects.filter((p) => !isLocked(p, view));
     )}
   </section>
 
-  <section id="resources">
+  <section id="resources" data-filter-group>
     <h2>Resources</h2>
     {resources.length > 0 ? (
       <div class="grid">
@@ -123,12 +127,12 @@ const focusProjects = activeProjects.filter((p) => !isLocked(p, view));
     )}
   </section>
 
-  <section id="archives">
+  <section id="archives" data-filter-group>
     <h2>Archives</h2>
     {archives.length > 0 ? (
       <ul class="archive-list">
         {archives.map((a) => (
-          <li>
+          <li {...searchAttrs("archives", a, view)}>
             <a href={detailHref("archives", a, view)} class="archive-link">
               {a.originalType && <span class="archive-type">{a.originalType}</span>}
               <span class="archive-title">{a.title}</span>

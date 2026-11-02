@@ -68,9 +68,15 @@ a:hover {
   border-radius: 4px;
 }
 
+/* Elements toggled by scripts (search filter) must stay hidden over any display rule */
+[hidden] {
+  display: none !important;
+}
+
 /* --- Cards (Project/Area/Resource) --- */
 
 .card {
+  position: relative;
   display: block;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -89,6 +95,37 @@ a:hover {
 .card h3 {
   font-size: 1rem;
   font-weight: 600;
+}
+
+/* The title link covers the whole card, so it stays clickable while tag links sit on top */
+.card-link {
+  color: inherit;
+}
+
+.card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.card-link:hover {
+  text-decoration: none;
+}
+
+.card-link:focus-visible {
+  outline: none;
+}
+
+.card-link:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+.card .tag {
+  position: relative;
+  z-index: 1;
 }
 
 .card.locked {
@@ -118,6 +155,11 @@ a:hover {
 .tag {
   font-size: 0.75rem;
   color: var(--card-accent, var(--accent));
+}
+
+a.tag:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .grid {

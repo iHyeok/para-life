@@ -1,5 +1,6 @@
 ---
-import { detailHref, isLocked, type Area, type View } from "../lib/data";
+import TagList from "./TagList.astro";
+import { detailHref, isLocked, searchAttrs, type Area, type View } from "../lib/data";
 
 interface Props {
   area: Area;
@@ -8,23 +9,20 @@ interface Props {
 
 const { area, view } = Astro.props;
 const href = detailHref("areas", area, view);
+const search = searchAttrs("areas", area, view);
 ---
 
 {isLocked(area, view) ? (
-  <a href={href} class="card locked" style="--card-accent: var(--purple)">
+  <a href={href} class="card locked" style="--card-accent: var(--purple)" {...search}>
     <h3>{area.title}</h3>
     <span class="lock">Limited</span>
   </a>
 ) : (
-  <a href={href} class="card" style="--card-accent: var(--purple)">
-    <h3>{area.title}</h3>
+  <article class="card" style="--card-accent: var(--purple)" {...search}>
+    <h3><a href={href} class="card-link">{area.title}</a></h3>
     {area.description && <p class="desc">{area.description}</p>}
-    {area.tags && area.tags.length > 0 && (
-      <div class="tags">
-        {area.tags.map((tag) => <span class="tag">#{tag}</span>)}
-      </div>
-    )}
-  </a>
+    <TagList tags={area.tags} view={view} />
+  </article>
 )}
 
 <style>

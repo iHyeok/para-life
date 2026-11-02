@@ -1,0 +1,19 @@
+---
+import { tagHref, type View } from "../lib/data";
+
+interface Props {
+  tags?: string[];
+  view: View;
+}
+
+// Each tag links to this view's dashboard filtered by it (?tag=...)
+const { tags = [], view } = Astro.props;
+---
+
+{tags.length > 0 && (
+  <div class="tags">
+    {tags.map((tag) => (
+      <a class="tag" href={tagHref(tag, view)} data-tag={tag}>#{tag}</a>
+    ))}
+  </div>
+)}

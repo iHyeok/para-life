@@ -1,5 +1,6 @@
 ---
 import DetailLayout from "./DetailLayout.astro";
+import TagList from "../components/TagList.astro";
 import { getItem, type View } from "../lib/data";
 
 interface Props {
@@ -16,9 +17,5 @@ const area = getItem("areas", id);
     <h1>{area.title}</h1>
   </div>
   {area.description && <p class="goal">{area.description}</p>}
-  {area.tags && area.tags.length > 0 && (
-    <div class="tags">
-      {area.tags.map((t) => <span class="tag">#{t}</span>)}
-    </div>
-  )}
+  <TagList tags={area.tags} view={view} />
 </DetailLayout>

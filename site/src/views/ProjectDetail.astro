@@ -2,6 +2,7 @@
 import DetailLayout from "./DetailLayout.astro";
 import StatusBadge from "../components/StatusBadge.astro";
 import PriorityDot from "../components/PriorityDot.astro";
+import TagList from "../components/TagList.astro";
 import { detailHref, getItem, listedArea, type View } from "../lib/data";
 
 interface Props {
@@ -35,9 +36,5 @@ const area = listedArea(project.area, view);
     {project.updatedAt && <span>Updated: {project.updatedAt}</span>}
   </div>
   {project.goal && <p class="goal">{project.goal}</p>}
-  {project.tags && project.tags.length > 0 && (
-    <div class="tags">
-      {project.tags.map((t) => <span class="tag">#{t}</span>)}
-    </div>
-  )}
+  <TagList tags={project.tags} view={view} />
 </DetailLayout>

@@ -256,3 +256,82 @@ export function progressLog(body: string): LogEntry[] {
   }
   return entries.filter((e) => e.items.length > 0);
 }
+
+// --- Search / tag filter (read by the script in components/SearchBar.astro) ---
+
+/** Dashboard of this view, filtered to one tag. */
+export function tagHref(tag: string, view: View) {
+  return `${homeHref(view)}?tag=${encodeURIComponent(tag)}`;
+}
+
+/** Lowercased, NFKC-normalized text; the client normalizes queries the same way. */
+function searchNormalize(s: string) {
+  return s.normalize("NFKC").toLowerCase();
+}
+
+type Searchable = BaseItem & {
+  goal?: string;
+  description?: string;
+  topic?: string;
+  source?: string;
+  originalType?: string;
+};
+
+/**
+ * data-* attributes the dashboard filter reads off each card / archive row. Built only from
+ * fields this view already renders for the item; a locked item contributes its title alone,
+ * exactly like its locked card.
+ */
+export function searchAttrs(category: Category, item: Searchable, view: View) {
+  // Key into /me/search-index.json; the public view has no body index, so no key either
+  const key = view === "me" ? detailHref(category, item, view) : undefined;
+  if (isLocked(item, view)) {
+    return { "data-search": searchNormalize(item.title), "data-tags": "[]", "data-key": key };
+  }
+  const tags = item.tags ?? [];
+  const fields = [
+    item.title,
+    item.goal,
+    item.description,
+    item.topic,
+    item.source,
+    item.originalType,
+    listedArea(item.area, view)?.title,
+    ...tags,
+  ];
+  return {
+    "data-search": searchNormalize(fields.filter(Boolean).join(" ")),
+    "data-tags": JSON.stringify(tags),
+    "data-key": key,
+  };
+}
+
+/** Markdown body -> plain-text lines (heading/list/checkbox/quote markers dropped). */
+function bodyLines(body: string): string[] {
+  return body
+    .split("\n")
+    .filter((l) => !/^\s*(```|~~~|\|?\s*:?-{3,}|-{3,}\s*$)/.test(l))
+    .map((l) =>
+      plainText(
+        l
+          .replace(/^\s*(#{1,6}\s+|>\s*|[-*+]\s+(\[[ xX]\]\s+)?|\d+[.)]\s+)/, "")
+          .replace(/<[^>]+>/g, ""),
+      ),
+    )
+    .filter(Boolean);
+}
+
+/**
+ * Full-text index for the /me dashboard: detail URL -> body lines, for every item.
+ * Emitted only as /me/search-index.json (behind Cloudflare Access); never use it for the public view.
+ */
+export function meBodyIndex(): Record<string, string[]> {
+  const index: Record<string, string[]> = {};
+  for (const category of CATEGORIES) {
+    for (const item of load(category)) {
+      const lines = bodyLines(item.body);
+      if (lines.length) index[detailHref(category, item, "me")] = lines;
+    }
+  }
+  return index;
+}
