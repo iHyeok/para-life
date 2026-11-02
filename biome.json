@@ -8,6 +8,7 @@
 	"files": {
 		"includes": [
 			"channel/**/*.ts",
+			"functions/**/*.ts",
 			"multichat/src/**",
 			"multichat/test/**",
 			"multichat/playwright.config.ts",
