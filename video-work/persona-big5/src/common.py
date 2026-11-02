@@ -3,8 +3,11 @@
 Timing rule (per scene):
     audio/{video}/{scene_id}.mp3 exists -> target = audio length + AUDIO_PAD
     otherwise                           -> target = narration chars (no spaces) / CHARS_PER_SEC + AUDIO_PAD
-The scene lasts max(animation time, target): holds between beats are stretched
-to fill the target, never shortened below a minimum readable hold.
+The scene lasts max(animation time, target, reading floor, MIN_T): holds between
+beats are stretched to fill the target, never shortened below a minimum hold.
+Reading floor = Hangul characters shown in the scene / READ_CPS (6 per second),
+so text-heavy scenes stay on screen long enough even if the voice is shorter.
+Each render prints a "[timing]" line with all of these numbers.
 """
 import json
 import re
@@ -154,9 +157,14 @@ def card(title, body, color=TEAL, width=4.0, title_size=28, body_size=24, height
     return VGroup(r, inner)
 
 
-def cloud(center, n, spread, color, seed, radius=0.055, opacity=0.85):
+def cloud(center, n, spread, color, seed, radius=0.055, opacity=0.85, clip=None, margin=0.3):
     rng = np.random.default_rng(seed)
     pts = rng.normal(size=(n, 2)) * spread
+    if clip is not None:
+        cx, cy = clip.get_center()[:2]
+        hw, hh = clip.width / 2 - margin, clip.height / 2 - margin
+        pts = [(x, y) for x, y in pts
+               if abs(center[0] + x - cx) < hw and abs(center[1] + y - cy) < hh - 0.25]
     dots = VGroup(*[Dot(np.array([center[0] + x, center[1] + y, 0]), radius=radius,
                         color=color, fill_opacity=opacity) for x, y in pts])
     return dots
@@ -197,7 +205,7 @@ class BeatScene(Scene):
             fn()
             if i < len(beats) - 1:
                 self.wait(max(MIN_HOLD * min(w, 1.0) if w > 0 else 0.3, extra * w / W))
-        rem = self.target - self.renderer.time - FADE_OUT
+        rem = self.target - self.time - FADE_OUT
         self.wait(max(MIN_HOLD, rem))
         if self.mobjects:
             self.play(*[FadeOut(m) for m in self.mobjects], run_time=FADE_OUT)

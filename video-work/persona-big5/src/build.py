@@ -57,12 +57,17 @@ def frames(path):
     return int(r.stdout.strip())
 
 
+def scene_mp4(video, sid):
+    # one media dir per scene: parallel Manim processes must not share the Text SVG cache
+    return WORK / "media" / video / sid / "videos" / MODULES[video].stem / f"1080p{FPS}" / f"{sid}.mp4"
+
+
 def render(video, sid, cls):
-    media = WORK / "media"
+    media = WORK / "media" / video / sid
     r = run([MANIM, "render", "-r", "1920,1080", "--fps", str(FPS), "--disable_caching",
              "--media_dir", str(media), "-o", sid, str(MODULES[video]), cls])
     timing = [l for l in r.stdout.splitlines() if "[timing]" in l]
-    mp4 = media / "videos" / MODULES[video].stem / f"1080p{FPS}" / f"{sid}.mp4"
+    mp4 = scene_mp4(video, sid)
     if not mp4.exists():
         raise SystemExit(f"missing output {mp4}")
     return mp4, (timing[0].strip() if timing else "")
@@ -106,13 +111,12 @@ def main():
     if a.no_final:
         return
 
-    media_dir = WORK / "media" / "videos" / MODULES[a.video].stem / f"1080p{FPS}"
     seg_dir = WORK / "segments" / a.video
     seg_dir.mkdir(parents=True, exist_ok=True)
     vlist, alist, info = [], [], []
     t = 0.0
     for s in order:
-        mp4 = media_dir / f"{s}.mp4"
+        mp4 = scene_mp4(a.video, s)
         n = frames(mp4)
         dur = n / FPS
         wav = seg_dir / f"{s}.wav"

@@ -118,14 +118,14 @@ class S04Direction(BeatScene):
         lab = txt("활성화 공간 (activation space)", size=22, color=TEAL)
         lab.next_to(box.get_corner(UL), DR, buff=0.18)
         c = box.get_center() + P(-0.2, -0.3)
-        pts = cloud(c, 46, 0.85, DIM, seed=3, radius=0.05, opacity=0.6)
+        pts = cloud(c, 46, 0.8, DIM, seed=3, radius=0.05, opacity=0.6, clip=box)
         u = np.array([0.86, 0.5, 0.0])
         u = u / np.linalg.norm(u)
         axis = DashedLine(c - u * 2.6, c + u * 2.6, color=FAINT, dash_length=0.08)
         v = Arrow(c, c + u * 2.0, buff=0, color=TEAL, stroke_width=7, max_tip_length_to_length_ratio=0.14)
-        vlab = txt("v (페르소나 벡터)", size=22, color=TEAL)
-        vlab.next_to(v.get_end(), UP, buff=0.12).shift(LEFT * 0.3)
-        hp = c + P(0.55, 1.35)
+        vlab = txt("v", size=30, color=TEAL, weight=BOLD)
+        vlab.next_to(v.get_end(), RIGHT, buff=0.15)
+        hp = c + P(0.2, 1.7)
         h = Dot(hp, radius=0.1, color=AMBER)
         hlab = txt("어떤 순간의 활성화", size=20, color=AMBER)
         hlab.next_to(h, UP, buff=0.12)
@@ -133,14 +133,14 @@ class S04Direction(BeatScene):
         perp = DashedLine(hp, foot, color=AMBER, dash_length=0.06, stroke_width=2)
         proj = Line(c, foot, color=AMBER, stroke_width=9)
         plab = txt("사영 (projection)", size=20, color=AMBER)
-        plab.next_to(proj.get_center(), DR, buff=0.12)
+        plab.next_to(proj.get_center(), DR, buff=0.2).shift(DOWN * 0.1)
 
         right = bullets([
             "모델의 각 층 = 숫자 벡터 (활성화)",
-            "특성 ≈ 그 공간의 한 방향 (direction)",
+            "특성 ≈ 그 공간의 한 방향 (direction)\n= 페르소나 벡터 v",
             "활성화를 그 방향에 사영 →\n특성이 얼마나 켜져 있나 = 숫자 하나",
         ], size=25, dot_colors=[DIM, TEAL, AMBER], buff=0.45, maxw=5.6)
-        right.move_to(P(3.6, -0.5)).align_to(P(1.0, 0, 0), LEFT)
+        right.move_to(P(3.6, -0.5)).align_to(P(1.0, 0), LEFT)
         note = footnote("개념도 (2차원 단순화, 실제 데이터 아님)")
         src = source("§1 · §7 Related work")
 
@@ -234,7 +234,7 @@ class S06Extract(BeatScene):
         mv = Circle(radius=0.16, color=FG, stroke_width=4).move_to(cv)
         arr = Arrow(cv, ca, buff=0.18, color=TEAL, stroke_width=8, max_tip_length_to_length_ratio=0.12)
         alab = txt("v = 평균 차이\n(difference in means)", size=20, color=TEAL)
-        alab.next_to(arr.get_center(), RIGHT, buff=0.35)
+        alab.next_to(arr.get_center(), UL, buff=0.2).shift(LEFT * 0.2)
         note = footnote("오른쪽은 개념도 (실제 데이터 아님)")
         src = source("§2.2 · 그림 2 · 부록 A.3")
 
@@ -374,7 +374,7 @@ class S09Steer(BeatScene):
             "sycophancy → 과한 동의·칭찬",
             "hallucination → 정교하게 지어낸 내용",
         ], size=26, dot_colors=[AMBER] * 3, buff=0.38, maxw=5.6)
-        res.move_to(P(3.2, -1.25)).align_to(P(0.9, 0, 0), LEFT)
+        res.move_to(P(3.2, -1.25)).align_to(P(0.9, 0), LEFT)
         up = txt("α를 키울수록 특성 점수 ↑ (그림 3)", size=22, color=AMBER)
         up.next_to(res, DOWN, buff=0.35).align_to(res, LEFT)
         src = source("§3.2 · 그림 3")
