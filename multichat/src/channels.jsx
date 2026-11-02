@@ -271,7 +271,8 @@ class ChannelManager {
 
   _setStatus(s) {
     this.status = s;
-    if (this.onStatus) this.onStatus(this.id, s, this.nextRetryAt);
+    // attempt = consecutive tries that never opened a socket (reset in onopen)
+    if (this.onStatus) this.onStatus(this.id, s, this.nextRetryAt, this.attempt);
   }
 
   _scheduleReconnect() {

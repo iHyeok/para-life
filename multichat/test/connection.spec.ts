@@ -121,3 +121,35 @@ test("@slow a slow upload is not marked failed while it is still being sent", as
   await expect(convo).not.toContainText("전송 실패");
   await expect(convo.getByRole("link", { name: "big.bin" })).toBeVisible();
 });
+
+test("repeated failed handshakes on an https channel offer an Access login link, cleared on connect", async ({ page, ui, server }) => {
+  test.setTimeout(30_000);
+  await server.start();
+  // A remote (https) API host: the only kind that sits behind Cloudflare Access
+  await openChat(page, ui, { wsUrl: server.wsUrl, httpUrl: "https://api.example.test/" });
+  const login = page.getByRole("link", { name: "로그인 열기 ↗" });
+  await expect(login).toHaveCount(0);
+
+  await server.stop();
+  // One or two misses are ordinary blips: no banner yet
+  await expect.poll(() => connectionStatus(page)).toMatch(/^연결 끊김/);
+  await expect(login).toHaveCount(0);
+  await expect(login).toBeVisible({ timeout: 10_000 });
+  expect(await login.getAttribute("href")).toBe("https://api.example.test/health");
+  expect(await login.getAttribute("target")).toBe("_blank");
+
+  await server.start();
+  await page.getByRole("button", { name: "지금 연결" }).click();
+  await expect.poll(() => connectionStatus(page)).toBe("연결됨");
+  await expect(login).toHaveCount(0);
+});
+
+test("local http channels never show the Access login hint", async ({ page, ui, server }) => {
+  test.setTimeout(30_000);
+  await server.start();
+  await openChat(page, ui, server);
+  await server.stop();
+  // Past the third failed try (1s + 2s + 4s)
+  await page.waitForTimeout(8_000);
+  await expect(page.getByRole("link", { name: "로그인 열기 ↗" })).toHaveCount(0);
+});

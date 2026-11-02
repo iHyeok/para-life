@@ -4,7 +4,7 @@ const { useState: uS, useEffect: uE, useMemo: uM, useRef: uR, useReducer } = Rea
 const SEND_ACK_TIMEOUT = 20000;
 
 const emptyChannelState = () => ({
-  messages: [], status: 'disconnected', nextRetryAt: null, unreadCount: 0,
+  messages: [], status: 'disconnected', nextRetryAt: null, failedAttempts: 0, unreadCount: 0,
   isThinking: false, pendingPermissions: [], echo: false,
   // Older history on the server: true / false / null (unknown, e.g. old server)
   hasMore: null, loadingOlder: false,
@@ -105,6 +105,7 @@ function channelReducer(state, action) {
         return {
           status: action.status,
           nextRetryAt: action.nextRetryAt,
+          failedAttempts: action.failedAttempts || 0,
           isThinking: false,
           // Messages stay (history replay merges by id); open permissions are re-sent by the server
           ...(connected ? { pendingPermissions: [], echo: false } : {}),
@@ -214,8 +215,8 @@ function App() {
           else dispatch({ type: 'SET_THINKING', channelId: chId, value: false });
           window.alert(`[${ch.name}] ${data.message}`);
         },
-        onStatus: (chId, status, nextRetryAt) => {
-          dispatch({ type: 'STATUS', channelId: chId, status, nextRetryAt });
+        onStatus: (chId, status, nextRetryAt, failedAttempts) => {
+          dispatch({ type: 'STATUS', channelId: chId, status, nextRetryAt, failedAttempts });
         },
         onHistoryEnd: (chId, data) => {
           dispatch({ type: 'HISTORY_END', channelId: chId, hasMore: data.hasMore });

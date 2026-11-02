@@ -484,6 +484,30 @@ function ConversationHeader({ channel, onBack, onRemove, onReconnect }) {
   );
 }
 
+// The socket never opens when Cloudflare Access answers the upgrade with a login redirect
+// (the API host has its own Access session). Browsers hide the reason, so after a few
+// failed handshakes offer a link that runs the login in a normal tab.
+const AUTH_HINT_AFTER = 3;
+
+function AuthHintBanner({ channel }) {
+  if (channel.status === 'connected' || (channel.failedAttempts || 0) < AUTH_HINT_AFTER) return null;
+  if (!/^https:\/\//.test(channel.httpUrl || '')) return null;
+  const loginUrl = channel.httpUrl.replace(/\/+$/, '') + '/health';
+  return (
+    <div role="status" className="pad-x" style={{
+      paddingTop: 8, paddingBottom: 8, fontSize: 12, lineHeight: 1.5,
+      background: 'var(--hover)', borderBottom: '1px solid var(--line)', color: 'var(--ink-2)',
+      display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', flexShrink: 0,
+    }}>
+      <span>연결이 계속 실패해요. 서버 쪽 Cloudflare Access 로그인이 만료됐을 수 있어요.</span>
+      <a href={loginUrl} target="_blank" rel="noopener noreferrer" className="focus-ring" style={{
+        color: 'var(--ink)', fontWeight: 600, textDecoration: 'underline',
+      }}>로그인 열기 ↗</a>
+      <span style={{ color: 'var(--ink-3)' }}>로그인 후 이 탭으로 돌아오면 바로 다시 연결해요.</span>
+    </div>
+  );
+}
+
 // ---- File chip ----
 function FileChip({ file, onRemove }) {
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
@@ -757,6 +781,7 @@ function Conversation({ channel, onBack, onRemove, onReconnect, onLoadOlder, onS
   return (
     <section className="conversation" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       <ConversationHeader channel={channel} onBack={onBack} onRemove={onRemove} onReconnect={onReconnect} />
+      <AuthHintBanner channel={channel} />
       <div ref={scrollRef} onScroll={onScroll} className="pad-x" style={{ flex: 1, overflowY: 'auto', paddingTop: 8, paddingBottom: 20 }}>
         <div ref={contentRef}>
         {canLoadOlder && channel.hasMore !== null && (
