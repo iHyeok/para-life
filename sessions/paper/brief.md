@@ -16,6 +16,7 @@
 - 특정 노트에 대한 새 해석 → 그 노트의 `## 비판적 검토` / `## 논문 활용 포인트`.
 - 새 링크·논문 → `clip-link` 스킬 절차로 지식 노트를 만들고 이 프로젝트에 연결.
 - 원고 초안·개요를 파일로 남길 위치는 처음 필요할 때 사용자와 정한다.
+- 결과물 파일(영상·대본 등)은 R2 `para-life-private/projects/paper-research/…`에 둔다. 채팅으로 줄 링크는 `https://para-life.pages.dev/me/files/{path}`이고, `.md`에는 `/me/files/{path}`로 적는다. `kyxi.net/me/files/…`는 404가 나는 틀린 주소다(PARA-SPEC "채팅으로 링크를 줄 때").
 
 ## 쓰기 범위와 커밋
 - 고치는 파일: `projects/paper-research.md`, 이 프로젝트의 지식 노트, `_index.json`의 **이 프로젝트·이 노트 항목만**(updatedAt, 새 노트 항목 추가). 다른 프로젝트·영역은 건드리지 않는다.

@@ -195,6 +195,11 @@ npx wrangler r2 object put para-life-private/{category}/{id}/{filename} \
 - public: `[파일 설명](https://kyxi.net/{category}/{id}/{filename})`
 - limited / private: `[파일 설명](/me/files/{category}/{id}/{filename})` (상대 경로, `/me` 화면에서만 열림)
 
+### 채팅으로 링크를 줄 때 (절대 주소)
+- public: `https://kyxi.net/{path}`
+- limited / private: **`https://para-life.pages.dev/me/files/{path}`**
+- `https://kyxi.net/me/files/…`는 틀린 주소다. `kyxi.net`은 공개 버킷(`para-life-assets`) 도메인이라 비공개 파일이 없어서 R2의 "Object not found" 404가 뜬다.
+
 ### visibility가 바뀔 때
 첨부 파일도 버킷을 옮기고 링크를 바꾼다. 공개로 바꿀 때는 private → assets, 비공개로 바꿀 때는 반대 방향.
 1. `npx wrangler r2 object get {원래버킷}/{path} --file /tmp/x --remote`

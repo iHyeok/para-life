@@ -61,6 +61,7 @@
 ### 파일 업로드
 - 채널에서 파일이 첨부되면 R2에 업로드: public 항목은 `para-life-assets`, limited/private 항목은 `para-life-private`
 - 경로·명령·링크 기록 형식은 PARA-SPEC.md "파일 업로드" 참조
+- 채팅으로 비공개 파일 링크를 줄 때는 `https://para-life.pages.dev/me/files/{path}`를 쓴다. `kyxi.net/me/files/…`는 공개 버킷 도메인이라 404가 난다
 
 ### 일일/주간 브리핑
 - 전체 프로젝트 상태 요약
