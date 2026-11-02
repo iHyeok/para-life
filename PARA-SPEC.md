@@ -92,6 +92,20 @@ id / title / status / priority / visibility / area / goal / deadline / createdAt
 }
 ```
 
+### Knowledge 노트 (Resource의 한 종류)
+링크·논문을 분석해 만든 노트는 Resource로 저장하되 아래 필드를 더한다. 작성 절차는 `.claude/skills/clip-link/SKILL.md`.
+```json
+{
+  "kind": "knowledge",
+  "sourceUrl": "원문 URL",
+  "sourceDate": "YYYY-MM-DD (원문 작성일)",
+  "relatedProjects": ["토론·논문에 쓰는 project-id"]
+}
+```
+- 기본 visibility: `private`
+- 본문 섹션: 한 줄 요약 / 핵심 주장 / 논증 흐름 (본문 + 그림 연계) / 그림 분석 요약 / 개념·용어 / 비판적 검토 / 논문 활용 포인트 / 출처
+- 원문 스냅샷은 git이 아니라 R2 `para-life-private/clips/{id}/source.md`에 두고 `/me/files/clips/{id}/source.md`로 링크
+
 ### Resource (.md) - 참고자료 구조
 ```markdown
 ---

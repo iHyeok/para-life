@@ -15,10 +15,15 @@ const resource = getItem("resources", id);
 <DetailLayout title={resource.title} view={view} body={resource.body} accent="var(--green)">
   <div class="title-row">
     <h1>{resource.title}</h1>
+    {resource.kind === "knowledge" && <span class="badge" style="--badge-color: var(--green)">Knowledge</span>}
   </div>
   <div class="meta">
     {resource.topic && <span class="topic">{resource.topic}</span>}
     {resource.source && <span>Source: {resource.source}</span>}
+    {resource.sourceUrl && /^https?:\/\//.test(resource.sourceUrl) && (
+      <span><a href={resource.sourceUrl} target="_blank" rel="noopener">원문 보기 ↗</a></span>
+    )}
+    {resource.sourceDate && <span>원문 작성: {resource.sourceDate}</span>}
     {resource.createdAt && <span>Created: {resource.createdAt}</span>}
   </div>
   <TagList tags={resource.tags} view={view} />

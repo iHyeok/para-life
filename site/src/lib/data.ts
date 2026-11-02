@@ -37,6 +37,10 @@ export interface Resource extends BaseItem {
   topic?: string;
   source?: string;
   relatedProjects?: string[];
+  /** "knowledge" = analysis note made from a link (see .claude/skills/clip-link) */
+  kind?: string;
+  sourceUrl?: string;
+  sourceDate?: string;
 }
 
 export interface Archive extends BaseItem {

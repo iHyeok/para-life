@@ -42,6 +42,17 @@
 - 새 주제면 resource .md 새로 생성 + _index.json에 추가
 - visibility 미지정 시 사용자에게 물어볼 것
 
+### 링크 → 지식 노트
+- 링크를 받아 읽고 저장해 달라는 요청(또는 채팅에 링크만 온 경우)은 `clip-link` 스킬 절차를 따른다
+- 글과 그림을 함께 분석해 `resources/{id}.md`(`kind: "knowledge"`, 기본 visibility `private`)로 저장, 원문 스냅샷은 R2 `para-life-private/clips/{id}/`
+- 봇 차단 페이지는 우회하지 말고 사용자 Chrome(Claude in Chrome)으로 읽거나, 텍스트·스크린샷을 받아서 분석
+
+### 지식 참고 (토론·논문 작업)
+- 프로젝트 관련 토론, 특히 `paper-research`에서는 답하기 전에 관련 지식 노트를 먼저 찾아 읽는다
+  - 찾는 법: `resources/_index.json`에서 `kind: "knowledge"` 항목의 `relatedProjects`·`tags`·`topic`, 또는 `grep -ril "키워드" resources/`
+- 답변에 근거로 쓴 노트를 `(노트: {id})`처럼 밝히고, 노트끼리 충돌하거나 근거가 약하면 그 점도 말한다
+- 토론에서 새로 나온 주장·반론·결정은 해당 프로젝트 Progress Log에, 특정 노트에 대한 새 해석은 그 노트의 `## 비판적 검토`/`## 논문 활용 포인트`에 덧붙인다
+
 ### 파일 업로드
 - 채널에서 파일이 첨부되면 R2에 업로드: public 항목은 `para-life-assets`, limited/private 항목은 `para-life-private`
 - 경로·명령·링크 기록 형식은 PARA-SPEC.md "파일 업로드" 참조

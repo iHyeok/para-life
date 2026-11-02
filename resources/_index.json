@@ -69,6 +69,19 @@
       "createdAt": "2026-04-22",
       "tags": ["misc", "assets", "storage"],
       "relatedProjects": []
+    },
+    {
+      "id": "llm-speech-implicature",
+      "title": "LLM의 말은 왜 재미가 없을까 — 함축·감정·'중간' 논지",
+      "topic": "LLM 화법·글쓰기",
+      "kind": "knowledge",
+      "visibility": "private",
+      "area": "ai-study",
+      "source": "arca.live AI 채팅 채널 · 작성자 Daydric",
+      "sourceUrl": "https://arca.live/b/characterai/187742315",
+      "createdAt": "2026-11-02",
+      "tags": ["llm", "writing", "humor", "implicature", "pragmatics", "creative-writing"],
+      "relatedProjects": ["paper-research"]
     }
   ]
 }
