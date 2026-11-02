@@ -82,6 +82,19 @@
       "createdAt": "2026-11-02",
       "tags": ["llm", "writing", "humor", "implicature", "pragmatics", "creative-writing"],
       "relatedProjects": ["paper-research"]
+    },
+    {
+      "id": "llm-functional-emotions",
+      "title": "LLM의 기능적 감정 (Anthropic, 2026) — 감정 표상·스티어링·학위 주제 정리",
+      "topic": "LLM 해석가능성·감정 표상",
+      "kind": "knowledge",
+      "visibility": "private",
+      "area": "ai-study",
+      "source": "Claude 대화 (사용자 본인) · 원 논문 Anthropic transformer-circuits",
+      "sourceUrl": "https://transformer-circuits.pub/2026/emotions/index.html",
+      "createdAt": "2026-11-02",
+      "tags": ["llm", "interpretability", "emotion", "representation", "steering", "alignment", "thesis"],
+      "relatedProjects": ["paper-research"]
     }
   ]
 }
