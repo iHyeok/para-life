@@ -4,24 +4,24 @@
 - **본문 미확보.** OpenReview는 브라우저 확인(Cloudflare) 페이지에 막혀 PDF를 열지 못했고, arXiv 판은 검색되지 않았다. 이 영상의 주 논문 관련 내용은 **ICML 페이지의 두 초록**(포스터 초록 = "A1", 구두 발표 초록 = "A2")만 근거로 한다.
 - 대비 장면(t09): Hoppe, Khachaturov, Mullins, Meng (2026). *Controllable and explainable personality sliders for LLMs at inference time.* arXiv:2603.03326v1 — HTML 전문을 읽음.
 - 배경 장면(t02, t03)의 심리학 일반 지식은 출처를 화면에 표시(Goldberg 1990은 Hoppe et al.이 인용한 문헌).
-- 내레이션은 `narration/02-big-five-steering.json`과 같은 내용(`src/gen_script.py`가 채움). 길이: 내레이션 글자 수로 추정한 길이(초, 렌더 전).
+- 내레이션은 `narration/02-big-five-steering.json`과 같은 내용(`src/gen_script.py`가 채움). 길이: 오디오가 있으면 max(애니메이션, 오디오 + 0.6 s)(음성은 장면 시작 0.3 s 뒤), 아래 "길이"와 "시작"은 렌더된 실제 길이(초) · 오디오 반영.
 - 색 규칙(01과 공통): 청록 = 활성화 공간·방향, 주황 = 높음/+α/증폭, 보라 = 낮음/−α/억제·제거, 회색 = 기준선·주석.
 
-| # | scene_id | 길이 |
-|---|---|---|
-| 1 | t01_title | 15.9 s |
-| 2 | t02_ocean | 22.2 s |
-| 3 | t03_measure | 24.0 s |
-| 4 | t04_methods | 27.0 s |
-| 5 | t05_setup | 20.3 s |
-| 6 | t06_results | 19.7 s |
-| 7 | t07_traits | 18.7 s |
-| 8 | t08_meaning | 19.2 s |
-| 9 | t09_sliders | 27.7 s |
-| 10 | t10_limits | 13.2 s |
-| 11 | t11_research | 24.5 s |
-| 12 | t12_end | 3.3 s |
-| | **합계** | **235.8 s (3분 56초)** |
+| # | scene_id | 시작 | 길이 |
+|---|---|---|---|
+| 1 | t01_title | 0:00.00 | 13.3 s |
+| 2 | t02_ocean | 0:13.27 | 20.1 s |
+| 3 | t03_measure | 0:33.40 | 20.9 s |
+| 4 | t04_methods | 0:54.27 | 23.3 s |
+| 5 | t05_setup | 1:17.57 | 17.1 s |
+| 6 | t06_results | 1:34.67 | 16.9 s |
+| 7 | t07_traits | 1:51.57 | 16.1 s |
+| 8 | t08_meaning | 2:07.63 | 16.1 s |
+| 9 | t09_sliders | 2:23.73 | 23.6 s |
+| 10 | t10_limits | 2:47.37 | 10.5 s |
+| 11 | t11_research | 2:57.90 | 19.9 s |
+| 12 | t12_end | 3:17.83 | 9.0 s |
+| | **합계** | | **206.8 s (3분 27초)** |
 
 ---
 
@@ -47,7 +47,7 @@
   > 언어 모델의 성격은 어떻게 잴까요? 하나는 자기보고 설문입니다. 나는 파티의 중심이다, 같은 문항에 얼마나 동의하는지 답하게 하죠. 하지만 스스로 말하는 성격과, 실제 글에서 드러나는 성격은 다를 수 있습니다. 다른 하나는 행동 판정입니다. 모델이 쓴 글을 다른 엘엘엠이 읽고 점수를 매깁니다. 행동에 더 가깝지만, 판정자의 기준과 편향을 탑니다. 이번 연구는 판정자 점수를 썼습니다.
 
 ## t04_methods — 2장: 세 가지 개입
-- 화면: 장 제목 "2 · 세 가지 활성화 개입"; 세 패널(개념도) "활성화 덧셈 (activation addition): h ← h + α·v (α > 0 높임, α < 0 낮춤)" | "프로브 스티어링 (probe steering): 높음/낮음을 가르는 선형 분류기(프로브) 방향으로 밀기" | "방향 제거 (directional ablation): h ← h − (h·v̂) v̂ · 그 방향 성분을 0으로"; 위 "공통 방향: 높음/낮음 응답의 평균 차이 (difference-in-means) — A1·A2"; 각주 "각 방법의 일반적 정의. 논문 속 구현·계수·프롬프팅 비교 여부는 본문 확인 필요"
+- 화면: 장 제목 "2 · 세 가지 활성화 개입"; 세 패널(개념도) "활성화 덧셈 (activation addition): h ← h + α·v (α > 0 높임, α < 0 낮춤)" | "프로브 스티어링 (probe steering): 높음/낮음을 가르는 선형 분류기(프로브) 방향으로 밀기" | "방향 제거 (directional ablation): h ← h − (h·u) u (u: v 방향 단위벡터) · 그 방향 성분을 0으로"; 위 "공통 방향: 높음/낮음 응답의 평균 차이 (difference-in-means) — A1·A2"; 각주 "각 방법의 일반적 정의. 논문 속 구현·계수·프롬프팅 비교 여부는 본문 확인 필요"
 - 근거: A1("activation addition", "Probe steering and directional ablation", "difference-in-means"), A2("despite sharing the same geometric direction")
 - 내레이션: 
 

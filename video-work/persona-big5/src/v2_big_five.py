@@ -67,7 +67,7 @@ class T02Ocean(BeatScene):
             l = txt(L, size=44, color=TEAL, weight=BOLD).move_to(P(-6.0, y))
             n = txt(nm, size=27, weight=BOLD, maxw=4.6).move_to(P(-5.45, y), aligned_edge=LEFT)
             d = txt(ds, size=23, color=DIM, maxw=4.3).move_to(P(-0.85, y), aligned_edge=LEFT)
-            ln = Line(P(3.9, y), P(6.0, y), stroke_width=7).set_color([VIOLET, AMBER])
+            ln = Line(P(3.9, y), P(6.0, y), stroke_width=7).set_color([AMBER, VIOLET])
             lo = txt("낮음", size=18, color=VIOLET).next_to(ln, LEFT, buff=0.15)
             hi = txt("높음", size=18, color=AMBER).next_to(ln, RIGHT, buff=0.12)
             rows.add(VGroup(l, n, d, VGroup(lo, ln, hi)))
@@ -152,12 +152,12 @@ class T04Methods(BeatScene):
         g1 = VGroup(minus, plus, v1, d1)
 
         # panel 2: probe hyperplane + normal
-        c2 = panels[1].get_center() + P(0, 0.05)
+        c2 = panels[1].get_center() + P(0, 0.4)
         hi = cloud(c2 + P(0.75, 0.25), 9, 0.2, AMBER, seed=21, radius=0.05)
         lo = cloud(c2 + P(-0.75, -0.25), 9, 0.2, VIOLET, seed=22, radius=0.05)
         sep = DashedLine(c2 + P(-0.35, 0.75), c2 + P(0.35, -0.75), color=FG, dash_length=0.07)
         nrm = Arrow(c2, c2 + P(0.85, 0.4), buff=0, color=TEAL, stroke_width=5)
-        f2 = txt("프로브 = 높음/낮음을 가르는\n선형 분류기", size=19).next_to(c2, DOWN, buff=0.55)
+        f2 = txt("프로브 = 높음/낮음을 가르는\n선형 분류기", size=19).next_to(c2, DOWN, buff=0.9)
         e2 = txt("그 분류 방향으로 활성화를 밂", size=19, color=FG).next_to(f2, DOWN, buff=0.15)
         g2 = VGroup(hi, lo, sep, nrm)
 
@@ -168,8 +168,8 @@ class T04Methods(BeatScene):
         comp = Line(c3, c3 + P(1.2, 0), color=VIOLET, stroke_width=8)
         after = Arrow(c3, c3 + P(0, 0.85), buff=0, color=FG, stroke_width=4)
         drop = DashedLine(c3 + P(1.2, 0.85), c3 + P(1.2, 0), color=DIM, dash_length=0.05)
-        f3 = mono("h ← h − (h·v̂) v̂", size=22, t2c={"v̂": TEAL}).next_to(panels[2].get_center(), DOWN, buff=0.5)
-        e3 = txt("v 방향 성분을 0으로 (지우기만)", size=19, color=FG, t2c={"0으로": VIOLET}).next_to(f3, DOWN, buff=0.2)
+        f3 = mono("h ← h − (h·u) u", size=22, t2c={"u": TEAL}).next_to(panels[2].get_center(), DOWN, buff=0.5)
+        e3 = txt("u: v 방향 단위벡터\nv 방향 성분을 0으로 (지우기만)", size=19, color=FG, t2c={"0으로": VIOLET}).next_to(f3, DOWN, buff=0.2)
 
         note = footnote("각 방법의 일반적 정의. 논문 속 구현·계수·프롬프팅 비교 여부는 본문 확인 필요")
         src = source("A1 포스터 초록 · A2 구두 발표 초록")
@@ -243,14 +243,14 @@ class T06Results(BeatScene):
         aa_hi = Line(mid, mid + P(1.9, 1.25), color=AMBER, stroke_width=6)
         other = DashedLine(mid + P(-1.9, -0.3), mid + P(1.9, 0.35), color=DIM, dash_length=0.1, stroke_width=4)
         lab_aa = txt("활성화 덧셈", size=20, color=AMBER).next_to(aa_hi.get_end(), LEFT, buff=0.1).shift(UP * 0.25)
-        lab_ot = txt("프로브 · 제거: 부분적", size=18, color=DIM).next_to(other.get_end(), DOWN, buff=0.2).shift(LEFT * 0.9)
+        lab_ot = txt("프로브 · 제거: 부분적", size=18, color=DIM).move_to(mid + P(1.15, -1.0))
         sch = txt("개념도 (실제 데이터 아님)", size=16, color=DIM).next_to(ya, UP, buff=0.12).align_to(ya, LEFT)
 
         c1 = card("활성화 덧셈 (activation addition)",
                   "가장 일관된 양방향 용량-반응 (dose-response)\n최적 층에서 평균 판정 점수 약 25% ↑\n다섯 특성 모두 높이기·낮추기가 안정적인\n유일한 방법",
                   color=AMBER, width=6.9, title_size=26, body_size=22)
         c2 = card("프로브 스티어링 · 방향 제거",
-                  "기껏해야 부분적 조절\n일관된 양방향 효과 실패 — 최고 효과 층은 같았는데도",
+                  "기껏해야 부분적 조절\n일관된 양방향 효과 실패\n(최고 효과 층은 같았는데도)",
                   color=DIM, width=6.9, title_size=26, body_size=22)
         cs = VGroup(c1, c2).arrange(DOWN, buff=0.3, aligned_edge=LEFT).move_to(P(2.9, -0.55))
         fn = txt("'약 25%'는 초록 표현 그대로 (상대 증가인지 점수 차이인지 미상)", size=17, color=DIM)

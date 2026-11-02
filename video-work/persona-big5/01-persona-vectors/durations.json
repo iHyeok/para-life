@@ -1,0 +1,122 @@
+[
+ {
+  "scene_id": "s01_title",
+  "start": 0.0,
+  "duration": 8.2,
+  "audio": true
+ },
+ {
+  "scene_id": "s02_assistant",
+  "start": 8.2,
+  "duration": 15.967,
+  "audio": true
+ },
+ {
+  "scene_id": "s03_traits",
+  "start": 24.167,
+  "duration": 13.633,
+  "audio": true
+ },
+ {
+  "scene_id": "s04_direction",
+  "start": 37.8,
+  "duration": 16.3,
+  "audio": true
+ },
+ {
+  "scene_id": "s05_pipeline",
+  "start": 54.1,
+  "duration": 15.2,
+  "audio": true
+ },
+ {
+  "scene_id": "s06_extract",
+  "start": 69.3,
+  "duration": 15.267,
+  "audio": true
+ },
+ {
+  "scene_id": "s07_layer",
+  "start": 84.567,
+  "duration": 14.7,
+  "audio": true
+ },
+ {
+  "scene_id": "s08_judge",
+  "start": 99.267,
+  "duration": 12.733,
+  "audio": true
+ },
+ {
+  "scene_id": "s09_steer",
+  "start": 112.0,
+  "duration": 15.933,
+  "audio": true
+ },
+ {
+  "scene_id": "s10_monitor",
+  "start": 127.933,
+  "duration": 15.233,
+  "audio": true
+ },
+ {
+  "scene_id": "s11_caveat",
+  "start": 143.167,
+  "duration": 9.7,
+  "audio": true
+ },
+ {
+  "scene_id": "s12_ft_datasets",
+  "start": 152.867,
+  "duration": 16.267,
+  "audio": true
+ },
+ {
+  "scene_id": "s13_ft_shift",
+  "start": 169.133,
+  "duration": 14.7,
+  "audio": true
+ },
+ {
+  "scene_id": "s14_mitigate",
+  "start": 183.833,
+  "duration": 15.767,
+  "audio": true
+ },
+ {
+  "scene_id": "s15_details",
+  "start": 199.6,
+  "duration": 10.633,
+  "audio": true
+ },
+ {
+  "scene_id": "s16_data",
+  "start": 210.233,
+  "duration": 13.533,
+  "audio": true
+ },
+ {
+  "scene_id": "s17_lmsys",
+  "start": 223.767,
+  "duration": 15.833,
+  "audio": true
+ },
+ {
+  "scene_id": "s18_limits",
+  "start": 239.6,
+  "duration": 11.367,
+  "audio": true
+ },
+ {
+  "scene_id": "s19_research",
+  "start": 250.967,
+  "duration": 15.3,
+  "audio": true
+ },
+ {
+  "scene_id": "s20_end",
+  "start": 266.267,
+  "duration": 8.967,
+  "audio": true
+ }
+]

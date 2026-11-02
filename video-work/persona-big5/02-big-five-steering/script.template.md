@@ -4,11 +4,11 @@
 - **본문 미확보.** OpenReview는 브라우저 확인(Cloudflare) 페이지에 막혀 PDF를 열지 못했고, arXiv 판은 검색되지 않았다. 이 영상의 주 논문 관련 내용은 **ICML 페이지의 두 초록**(포스터 초록 = "A1", 구두 발표 초록 = "A2")만 근거로 한다.
 - 대비 장면(t09): Hoppe, Khachaturov, Mullins, Meng (2026). *Controllable and explainable personality sliders for LLMs at inference time.* arXiv:2603.03326v1 — HTML 전문을 읽음.
 - 배경 장면(t02, t03)의 심리학 일반 지식은 출처를 화면에 표시(Goldberg 1990은 Hoppe et al.이 인용한 문헌).
-- 내레이션은 `narration/02-big-five-steering.json`과 같은 내용(`src/gen_script.py`가 채움). 길이: {{DURATION_MODE}}.
+- 내레이션은 `narration/02-big-five-steering.json`과 같은 내용(`src/gen_script.py`가 채움). 길이: 오디오가 있으면 max(애니메이션, 오디오 + 0.6 s)(음성은 장면 시작 0.3 s 뒤), 아래 "길이"와 "시작"은 {{DURATION_MODE}}.
 - 색 규칙(01과 공통): 청록 = 활성화 공간·방향, 주황 = 높음/+α/증폭, 보라 = 낮음/−α/억제·제거, 회색 = 기준선·주석.
 
-| # | scene_id | 길이 |
-|---|---|---|
+| # | scene_id | 시작 | 길이 |
+|---|---|---|---|
 {{TABLE}}
 
 ---
@@ -29,7 +29,7 @@
 - 내레이션: {{N:t03_measure}}
 
 ## t04_methods — 2장: 세 가지 개입
-- 화면: 장 제목 "2 · 세 가지 활성화 개입"; 세 패널(개념도) "활성화 덧셈 (activation addition): h ← h + α·v (α > 0 높임, α < 0 낮춤)" | "프로브 스티어링 (probe steering): 높음/낮음을 가르는 선형 분류기(프로브) 방향으로 밀기" | "방향 제거 (directional ablation): h ← h − (h·v̂) v̂ · 그 방향 성분을 0으로"; 위 "공통 방향: 높음/낮음 응답의 평균 차이 (difference-in-means) — A1·A2"; 각주 "각 방법의 일반적 정의. 논문 속 구현·계수·프롬프팅 비교 여부는 본문 확인 필요"
+- 화면: 장 제목 "2 · 세 가지 활성화 개입"; 세 패널(개념도) "활성화 덧셈 (activation addition): h ← h + α·v (α > 0 높임, α < 0 낮춤)" | "프로브 스티어링 (probe steering): 높음/낮음을 가르는 선형 분류기(프로브) 방향으로 밀기" | "방향 제거 (directional ablation): h ← h − (h·u) u (u: v 방향 단위벡터) · 그 방향 성분을 0으로"; 위 "공통 방향: 높음/낮음 응답의 평균 차이 (difference-in-means) — A1·A2"; 각주 "각 방법의 일반적 정의. 논문 속 구현·계수·프롬프팅 비교 여부는 본문 확인 필요"
 - 근거: A1("activation addition", "Probe steering and directional ablation", "difference-in-means"), A2("despite sharing the same geometric direction")
 - 내레이션: {{N:t04_methods}}
 

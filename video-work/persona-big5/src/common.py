@@ -6,10 +6,12 @@ Timing rule (per scene):
 The scene lasts max(animation time, target, reading floor, MIN_T): holds between
 beats are stretched to fill the target, never shortened below a minimum hold.
 Reading floor = Hangul characters shown in the scene / READ_CPS (6 per second),
-so text-heavy scenes stay on screen long enough even if the voice is shorter.
+so text-heavy scenes stay on screen long enough. It applies in estimate mode only;
+with real audio it is off unless PB5_READ_FLOOR=1 (audio rule: max(animation, audio + 0.6 s)).
 Each render prints a "[timing]" line with all of these numbers.
 """
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -194,7 +196,10 @@ class BeatScene(Scene):
         n_h = sum(hangul_count(x) for x in _TXT_LOG)
         read_t = n_h / READ_CPS
         narr_t = self.target
-        self.target = max(self.target, read_t, self.MIN_T)
+        # Reading floor: always in estimate mode; with real audio only if PB5_READ_FLOOR=1
+        # (default audio rule = max(animation, audio + 0.6 s)).
+        use_floor = self.mode != "audio" or os.environ.get("PB5_READ_FLOOR") == "1"
+        self.target = max(self.target, read_t if use_floor else 0.0, self.MIN_T)
         print(f"[timing] {self.SID}: mode={self.mode} narration/audio={narr_t:.1f}s "
               f"on-screen hangul={n_h} read={read_t:.1f}s -> target={self.target:.1f}s")
         base = sum(b[1] for b in beats) + FADE_OUT

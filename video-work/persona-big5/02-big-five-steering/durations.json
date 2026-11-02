@@ -1,0 +1,74 @@
+[
+ {
+  "scene_id": "t01_title",
+  "start": 0.0,
+  "duration": 13.267,
+  "audio": true
+ },
+ {
+  "scene_id": "t02_ocean",
+  "start": 13.267,
+  "duration": 20.133,
+  "audio": true
+ },
+ {
+  "scene_id": "t03_measure",
+  "start": 33.4,
+  "duration": 20.867,
+  "audio": true
+ },
+ {
+  "scene_id": "t04_methods",
+  "start": 54.267,
+  "duration": 23.3,
+  "audio": true
+ },
+ {
+  "scene_id": "t05_setup",
+  "start": 77.567,
+  "duration": 17.1,
+  "audio": true
+ },
+ {
+  "scene_id": "t06_results",
+  "start": 94.667,
+  "duration": 16.9,
+  "audio": true
+ },
+ {
+  "scene_id": "t07_traits",
+  "start": 111.567,
+  "duration": 16.067,
+  "audio": true
+ },
+ {
+  "scene_id": "t08_meaning",
+  "start": 127.633,
+  "duration": 16.1,
+  "audio": true
+ },
+ {
+  "scene_id": "t09_sliders",
+  "start": 143.733,
+  "duration": 23.633,
+  "audio": true
+ },
+ {
+  "scene_id": "t10_limits",
+  "start": 167.367,
+  "duration": 10.533,
+  "audio": true
+ },
+ {
+  "scene_id": "t11_research",
+  "start": 177.9,
+  "duration": 19.933,
+  "audio": true
+ },
+ {
+  "scene_id": "t12_end",
+  "start": 197.833,
+  "duration": 8.967,
+  "audio": true
+ }
+]

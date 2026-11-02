@@ -26,9 +26,10 @@ def main(video):
     rows, total = [], 0.0
     for i, x in enumerate(narr, 1):
         sid = x["scene_id"]
+        m, sec = divmod(total, 60)
+        rows.append(f"| {i} | {sid} | {int(m)}:{sec:05.2f} | {dur[sid]:.1f} s |")
         total += dur[sid]
-        rows.append(f"| {i} | {sid} | {dur[sid]:.1f} s |")
-    rows.append(f"| | **합계** | **{total:.1f} s ({int(total // 60)}분 {total % 60:.0f}초)** |")
+    rows.append(f"| | **합계** | | **{total:.1f} s ({int(total // 60)}분 {total % 60:.0f}초)** |")
     out = tpl.replace("{{TABLE}}", "\n".join(rows)).replace("{{DURATION_MODE}}", mode)
     for x in narr:
         out = out.replace("{{N:" + x["scene_id"] + "}}", "\n\n  > " + x["text"])

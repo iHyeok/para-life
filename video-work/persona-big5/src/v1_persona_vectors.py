@@ -58,7 +58,7 @@ class S02Assistant(BeatScene):
                     "프롬프트·대화 맥락으로 흔들림\n예: Bing 챗봇의 위협·조종 모드",
                     color=FG, width=5.8, title_size=28, body_size=23)
         right = card("학습 중 (training)",
-                     "파인튜닝·RLHF 뒤 성격이 바뀜\n예: 2025년 4월 GPT-4o의 과한 아첨\n좁은 과제 → 넓은 어긋남 (emergent misalignment)",
+                     "파인튜닝·RLHF 뒤 성격이 바뀜\n예: 2025년 4월 GPT-4o의 과한 아첨\n좁은 과제 학습 → 넓게 어긋남\n(emergent misalignment)",
                      color=FG, width=5.8, title_size=28, body_size=23)
         left.move_to(P(-3.3, -2.0))
         right.move_to(P(3.3, -2.0))
@@ -234,7 +234,7 @@ class S06Extract(BeatScene):
         mv = Circle(radius=0.16, color=FG, stroke_width=4).move_to(cv)
         arr = Arrow(cv, ca, buff=0.18, color=TEAL, stroke_width=8, max_tip_length_to_length_ratio=0.12)
         alab = txt("v = 평균 차이\n(difference in means)", size=20, color=TEAL)
-        alab.next_to(arr.get_center(), UL, buff=0.2).shift(LEFT * 0.2)
+        alab.move_to(box.get_corner(DR) + P(-1.45, 0.75))
         note = footnote("오른쪽은 개념도 (실제 데이터 아님)")
         src = source("§2.2 · 그림 2 · 부록 A.3")
 
@@ -312,12 +312,12 @@ class S08Judge(BeatScene):
         rb = card("응답 B", "판정 점수 < 20", color=FG, width=2.7, title_size=24, body_size=20)
         pair = VGroup(ra, rb).arrange(RIGHT, buff=0.3)
         q = txt("저자 2명: 어느 쪽이\n특성이 더 강한가?", size=24)
-        left = VGroup(pair, q).arrange(DOWN, buff=0.4).move_to(P(-3.7, 0.0))
+        left = VGroup(pair, q).arrange(DOWN, buff=0.4).move_to(P(-4.0, 0.0))
         lt = txt("같은 질문의 두 답 (특성당 50쌍)", size=20, color=DIM).next_to(pair, UP, buff=0.25)
 
         names = ["evil", "sycophancy", "hallucination"]
         vals = [97, 92, 95]
-        x0, wmax, y = 0.9, 4.6, 1.0
+        x0, wmax, y = 1.75, 4.1, 1.0
         bars = VGroup()
         for i, (nm, vv) in enumerate(zip(names, vals)):
             yy = y - i * 0.8
@@ -375,6 +375,7 @@ class S09Steer(BeatScene):
             "hallucination → 정교하게 지어낸 내용",
         ], size=26, dot_colors=[AMBER] * 3, buff=0.38, maxw=5.6)
         res.move_to(P(3.2, -1.25)).align_to(P(0.9, 0), LEFT)
+        sch9 = footnote("왼쪽은 개념도 (실제 데이터 아님)")
         up = txt("α를 키울수록 특성 점수 ↑ (그림 3)", size=22, color=AMBER)
         up.next_to(res, DOWN, buff=0.35).align_to(res, LEFT)
         src = source("§3.2 · 그림 3")
@@ -383,7 +384,7 @@ class S09Steer(BeatScene):
             self.chapter_card("3", "조종하고 감시하기")
 
         def b1():
-            self.play(FadeIn(hdr), FadeIn(src), Write(f), run_time=1.0)
+            self.play(FadeIn(hdr), FadeIn(src), FadeIn(sch9), Write(f), run_time=1.0)
             self.play(FadeIn(leg), run_time=0.5)
 
         def b2():
@@ -809,6 +810,7 @@ class S19Research(BeatScene):
 
 class S20End(BeatScene):
     VIDEO, SID = V, "s20_end"
+    MIN_T = 9.0
 
     def beats(self):
         t = txt("출처", size=40, weight=BOLD)

@@ -2,11 +2,11 @@
 
 - 논문: Chen, R., Arditi, A., Sleight, H., Evans, O., Lindsey, J. (2025). *Persona Vectors: Monitoring and Controlling Character Traits in Language Models.* arXiv:2507.21509 (v3, 2025-09-05). 본문·부록 HTML 전문을 읽고 작성.
 - 화면 텍스트 = 키워드·짧은 구, 내레이션 = 설명. 내레이션은 `narration/01-persona-vectors.json`과 같은 내용(이 파일은 `src/gen_script.py`가 JSON에서 채움).
-- 길이: 오디오가 있으면 max(애니메이션, 오디오 + 0.6 s), 없으면 내레이션 글자 수(공백 제외) ÷ 7 + 0.6 s로 추정. 아래 "길이"는 {{DURATION_MODE}}.
+- 길이: 오디오가 있으면 max(애니메이션, 오디오 + 0.6 s)(음성은 장면 시작 0.3 s 뒤에 시작), 없으면 내레이션 글자 수(공백 제외) ÷ 7 + 0.6 s로 추정. 아래 "길이"와 "시작"은 {{DURATION_MODE}}.
 - 색 규칙(두 영상 공통): 청록 = 활성화 공간·방향(벡터), 주황 = 특성이 드러남/높음/+α, 보라 = 특성 억제/낮음/−α, 회색 = 기준선·주석.
 
-| # | scene_id | 길이 |
-|---|---|---|
+| # | scene_id | 시작 | 길이 |
+|---|---|---|---|
 {{TABLE}}
 
 ---
@@ -17,7 +17,7 @@
 - 내레이션: {{N:s01_title}}
 
 ## s02_assistant — 1장: LLM의 '성격'
-- 화면: 장 제목 "1 · LLM에게 '성격'이란"; 가운데 "어시스턴트 페르소나 (Assistant persona)", "도움 · 무해 · 정직 (helpful · harmless · honest)"; 두 갈래 "배포 중: 프롬프트·맥락으로 흔들림 (예: Bing 챗봇의 위협·조종)" / "학습 중: 파인튜닝·RLHF 후 변화 (예: 2025년 4월 GPT-4o 아첨, emergent misalignment)"
+- 화면: 장 제목 "1 · LLM에게 '성격'이란"; 가운데 "어시스턴트 페르소나 (Assistant persona)", "도움 · 무해 · 정직 (helpful · harmless · honest)"; 두 갈래 "배포 중: 프롬프트·맥락으로 흔들림 (예: Bing 챗봇의 위협·조종)" / "학습 중: 파인튜닝·RLHF 뒤 성격이 바뀜 (예: 2025년 4월 GPT-4o의 과한 아첨, 좁은 과제 학습 → 넓게 어긋남 (emergent misalignment))"
 - 근거: §1 Introduction (Bing, Grok, GPT-4o 2025년 4월, Betley et al. 2025 emergent misalignment)
 - 내레이션: {{N:s02_assistant}}
 
@@ -52,7 +52,7 @@
 - 내레이션: {{N:s08_judge}}
 
 ## s09_steer — 3장: 조종 (steering)
-- 화면: 장 제목 "3 · 조종하기 (steering)"; 식 "h_ℓ ← h_ℓ + α · v_ℓ" ("h_ℓ: ℓ층 잔차 스트림 활성화 · α: 스티어링 계수 · 생성하는 매 토큰마다"); 개념도: 점이 화살표 방향으로 밀림; 결과 "evil → 폭력적 내용 · sycophancy → 과한 동의·칭찬 · hallucination → 정교한 날조"
+- 화면: 장 제목 "3 · 조종하기 (steering)"; 식 "h_ℓ ← h_ℓ + α · v_ℓ" ("h_ℓ: ℓ층 잔차 스트림 활성화 · α: 스티어링 계수 · 생성하는 매 토큰마다"); 개념도(각주 "왼쪽은 개념도"): 점이 화살표 방향으로 밀림; 결과 "evil → 폭력적 내용 · sycophancy → 과한 동의·칭찬 · hallucination → 정교한 날조"
 - 근거: §3.2, 그림 3
 - 내레이션: {{N:s09_steer}}
 
