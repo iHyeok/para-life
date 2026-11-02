@@ -472,7 +472,9 @@ describe("process lifecycle", () => {
     expect((await second.callTool("reply", { text: "x" })).isError).toBeFalsy();
   });
 
-  test("an orphaned channel server holding the port is replaced", async () => {
+  // The server finds the port's owner with lsof; without it there is nothing to test
+  const hasLsof = Bun.which("lsof") !== null;
+  test.skipIf(!hasLsof)("an orphaned channel server holding the port is replaced", async () => {
     const home = tempHome();
     cleanup.push(() => removeDir(home));
     const port = await freePort();
