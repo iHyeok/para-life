@@ -63,7 +63,7 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 다음 후보: Assistant Axis, Persona Vectors, Huang 외를 지식 노트로 정독
 - 학습용 설명 영상 2편 제작 (Manim 모션 그래픽 + Fish Audio 내레이션 보이스1, 무료 모델 `s2.1-pro-free`)
   - [① Persona Vectors (Chen 외 2025, arXiv 2507.21509)](/me/files/projects/paper-research/01-persona-vectors.mp4) 4:35 · [대본·근거표](/me/files/projects/paper-research/01-persona-vectors-script.md) — 본문 전체 기반
-  - [② Big Five 스티어링 ("The Steerable Self", ICML 2026 MusIML 워크숍)](/me/files/projects/paper-research/02-big-five-steering.mp4) 3:27 · [대본·근거표](/me/files/projects/paper-research/02-big-five-steering-script.md) — 본문 미확보(OpenReview 차단), 초록 2개만 근거. 대비로 Hoppe 외(arXiv 2603.03326) 슬라이더 연구 포함
+  - [② Big Five 스티어링 (Sheta 2026, ICML 2026 MusIML 워크숍)](/me/files/projects/paper-research/02-big-five-steering.mp4) 7:24 · [대본·근거표](/me/files/projects/paper-research/02-big-five-steering-script.md) — 2026-11-03 본문 정독판으로 교체(처음 판은 초록 2개만 근거였음)
   - 확인된 사실: Big Five 논문은 본 학회가 아니라 워크숍 발표, 프롬프팅 비교는 초록에 없음, "약 25%"가 상대·절대 증가인지 불명. Hoppe 외는 신경성을 2.88→4.1로 올려 "신경성은 안 움직인다"와 충돌하지만 조건이 달라 직접 비교 불가
 - 토론: 스티어링 연구의 대상 모델 → 기제 실험(표상·스티어링·게이트 대 생성기, base 대 instruct)은 활성화 접근이 되는 오픈 모델(7~8B, 예: Qwen2.5-7B·Llama-3.1-8B, 24GB GPU 1장 수준)로 하고, 프론티어 모델은 API로 프롬프트 페르소나의 행동 수준 비교군으로 쓰는 2단 구성 제안. 한계: 소형 모델 결과의 일반화. 사용자 GPU 환경 확인 대기
 - 실험 환경: RTX 5090(32GB) 자유 사용, 필요 시 RunPod 대여 검토. 사용자가 이미 돌려 본 모델: Qwen 3.8 flash next, 27B급, muse glimmer, gemma4
@@ -87,3 +87,8 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 가설과의 연결: 감정과 가장 가까운 신경성이 양방향 모두 저항하고, α<0에서 perplexity가 2배 → 게이트 가설의 정황 증거. 단 "판정 모델이 화용 단서를 못 잡는다"는 대안 설명을 배제해야 함
   - 설계 교훈: 프로브로 읽히는 방향 ≠ 행동을 바꾸는 방향 → 2단계의 "표상" 측정은 평균차 사영·프로브·인과 스티어링 세 가지로 함께 본다
   - Huang 외 2023(페르소나 지정해도 MBTI 자기보고 불변)과 긴장: 자기보고 대 생성 텍스트 판정이라는 측정 차이. "말로 묻는 성격 ≠ 글에 드러나는 성격"
+- 영상 ② 재제작(사용자 요청: "이해하기 어려웠다, 더 직관적이고 깊게"): 본문 기준 21장면 7분 24초, 같은 R2 경로에 덮어씀
+  - 구성: 비유 먼저 → 숫자. 말풍선으로 본 OCEAN, 배우 비유(대본 첫 줄 = 시스템 프롬프트, 예시 대사 = 퓨샷), 볼륨 손잡이(ActAdd), 그림자 덜어 내기(방향 제거), 울타리에 수직(프로브), 키 비유(구분 특징 ≠ 원인)
+  - 깊이: 표 1 막대(3B/8B), 층 감쇠(L12/L14 → 기준선), 신경성 역방향(+1.0/+10.0), 펄플렉서티 ≈10 → ≈22, 한계와 반례(Hoppe 외), 2단계 측정 세 가지, Huang 대 Sheta
+  - 신경성 원인 후보에 **바닥 효과**(기본 점수 20점대라 내릴 여지가 적음)를 덧붙임. 논문에 없는 우리 해석이라 화면에 따로 표시. 저자 후보 둘(가드레일, 판정 한계)과 함께 우리 실험에서 갈라 볼 것
+  - 소스는 `video/persona-big5` 브랜치(b8ac896), 음성 mp3는 R2 `projects/paper-research/video-work/audio/02-big-five-steering/`
