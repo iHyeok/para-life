@@ -31,6 +31,17 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
 - [LLM의 기능적 감정 (Anthropic, 2026)](../resources/llm-functional-emotions.md) — 감정 표상·스티어링·정렬 사례, 학위 주제 3방향, 표상 대 표현
 - [[논문] Emotion Concepts and their Function in a LLM (Sofroniew et al., 2026)](../resources/emotion-concepts-llm-2026.md) — 원문 정독 노트: 방법·수치·그림, 수치 검증표, deflection 벡터, 사후학습의 감정 이동
 
+## 실험 계획
+
+실행 저장소: [iHyeok/persona-emotion-gate](https://github.com/iHyeok/persona-emotion-gate) (private). 5090 PC에서 pull 받아 실행하고, 결과 요약은 그 저장소의 `results/`에 쌓는다. 상세 계획은 저장소의 `PLAN.md`에 있다.
+
+- **연구 질문:** 페르소나를 바꿀 때 감정 *표상*은 그대로이고 *표현*만 바뀌는가(게이트), 표상 자체가 바뀌는가(생성기)? 페르소나 전환은 프롬프트와 활성화 스티어링 두 방식으로 비교한다.
+- **언어:** 기제는 영어로 확인, 평가는 한국어로 확장
+- **0단계 (진행 예정):** 새 venv 구축 + Persona Vectors 재현(Qwen2.5-7B-Instruct, 공식 코드 커밋 b8e0f04). 판정은 OpenAI gpt-4.1-mini라 키가 필요. 공식 고정 버전(torch 2.6/vllm 0.8.5)은 5090에서 올려야 함. 성공 기준: evil 최적 층 20 근처, 계수에 따라 특성 점수 단조 증가
+- **1단계:** base 대 instruct 감정 벡터 비교 (Qwen2.5-7B, Gemma 4 12B)
+- **2단계:** 기본 / 프롬프트 페르소나 / 스티어링 페르소나 조건에서 감정 표상·표현 측정 (+ Qwen3.8-27B, RunPod)
+- **3단계:** 한국어 함축·유머 평가
+
 ## Progress Log
 
 ### 2026-11-02
@@ -69,3 +80,4 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - Llama-3.1-8B는 HF 접근 403(승인 필요). Qwen2.5-7B는 접근 확인
 - 모델 배치 제안: 0 재현은 Qwen2.5-7B-Instruct → 1 base 대 instruct는 Qwen2.5-7B 주력에 Gemma 4 12B(최신 모델 확인) → 2 페르소나 전환은 base 불필요라 Qwen3.8-27B(dense, Apache-2.0)를 RunPod H100에서 bf16으로 추가. 연구용 venv 새로 만들기. 할 일: Llama-3.1-8B 접근 신청, Qwen3-8B-Base 공개 여부 확인
 - 실험 계획 문서 위치 확인 대기 (이 파일의 섹션 대 별도 파일)
+- 실험 계획 섹션 추가, 실행용 private 저장소 `iHyeok/persona-emotion-gate` 생성(PLAN.md, 실행 담당 Claude용 CLAUDE.md, setup_env.sh, 스모크 테스트). 5090 PC에서 pull 받아 0단계부터 실행
