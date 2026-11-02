@@ -8,7 +8,7 @@ area: "dev-career"
 goal: "PARA 기반 생활관리 웹앱 MVP 완성 및 Cloudflare 배포"
 deadline: ""
 createdAt: "2026-03-22"
-updatedAt: "2026-03-31"
+updatedAt: "2026-11-02"
 tags: ["para", "cloudflare", "web"]
 relatedResources: []
 ---
@@ -36,6 +36,8 @@ PARA methodology based life/task management system.
 - [x] Phase 2: para-life 채팅 UI + Cloudflare Tunnel 외부 접속 + Access 인증
 - [x] Phase 3: para-life 자동 업데이트 연동 (CLAUDE.md, 크로스 프로젝트 규칙)
 - [x] Phase 4-1: Multichat UI (다중 채널 관리 인터페이스)
+- [x] 전체 점검 및 개선 (보안·사이트·multichat 모바일·성능·디자인)
+- [x] 채팅 기록 영구 저장 (SQLite 최근 90일 + 아카이브 DB)
 - [ ] Phase 4: 고도화 (알림 통합, 브리핑 자동화)
 - [ ] Implement PARA CRUD operations
 - [ ] Add daily log feature
@@ -91,3 +93,13 @@ PARA methodology based life/task management system.
   - Permission relay, thinking indicator, 한글 IME 지원
   - main.kyxi.net 경유 외부 접속
   - tmux 시작 스크립트에 multichat 서버 자동 시작 추가
+
+### 2026-11-02
+
+- 저장소 전체 점검 후 개선 5묶음 반영 (6개 관점 감사 + 묶음별 교차 리뷰)
+  - 보안: 채널 서버 loopback 바인딩, Host/Origin 허용 목록(DNS rebinding 차단), 권한 카드에 실행 명령 표시, 업로드 25MB 제한
+  - 사이트: marked 기반 Markdown 렌더링, public/me 뷰 통합, /me 404·잠금 카드 수정, 모바일 레이아웃
+  - multichat: 모바일 단일 패널, 전송 상태·재시도, 오프라인 대기열, 하트비트로 끊김 감지, 안전한 Markdown 답변
+  - 성능: multichat 사전 빌드 (전송량 996KB → 334KB, 초기 로딩 870ms → 202ms)
+  - 디자인·기능: Focus/최근 활동 섹션, 라이트·다크 테마, Pretendard, 채팅 빠른 프롬프트
+- 채팅 기록 영구 저장: SQLite `chat.db`(최근 90일) + `chat-archive.db`(이전 기록), "이전 대화 더 보기" 페이징
