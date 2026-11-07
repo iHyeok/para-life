@@ -1,0 +1,13 @@
+{
+  "name": "paper-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "deploy": "node build.mjs && wrangler pages deploy dist --project-name persona-lab --branch main --commit-dirty=true"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "marked": "^18.1.2"
+  }
+}

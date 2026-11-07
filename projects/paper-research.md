@@ -8,7 +8,7 @@ area: "ai-study"
 goal: "링크·논문에서 쌓은 지식 노트를 바탕으로 토론하며 논문 주제를 잡고 초안을 작성"
 deadline: ""
 createdAt: "2026-11-02"
-updatedAt: "2026-11-03"
+updatedAt: "2026-11-07"
 tags: ["paper", "research", "llm", "writing"]
 relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion-concepts-llm-2026", "big-five-steering-asymmetry-2026"]
 ---
@@ -16,6 +16,8 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
 ## Overview
 
 링크로 받은 글·그림·논문을 지식 노트(`resources/`, `kind: "knowledge"`)로 쌓고, 그 노트들을 근거로 토론하면서 논문의 연구 질문·가설·구성을 다듬어 가는 프로젝트. 주제·제목은 토론하면서 확정한다.
+
+공개 연구 사이트(연구실 공유용): https://persona-lab-5d0.pages.dev — 이 문서와 지식 노트로 빌드한다(`paper-site/`).
 
 ## Tasks
 
@@ -92,3 +94,11 @@ relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion
   - 깊이: 표 1 막대(3B/8B), 층 감쇠(L12/L14 → 기준선), 신경성 역방향(+1.0/+10.0), 펄플렉서티 ≈10 → ≈22, 한계와 반례(Hoppe 외), 2단계 측정 세 가지, Huang 대 Sheta
   - 신경성 원인 후보에 **바닥 효과**(기본 점수 20점대라 내릴 여지가 적음)를 덧붙임. 논문에 없는 우리 해석이라 화면에 따로 표시. 저자 후보 둘(가드레일, 판정 한계)과 함께 우리 실험에서 갈라 볼 것
   - 소스는 `video/persona-big5` 브랜치(b8ac896), 음성 mp3는 R2 `projects/paper-research/video-work/audio/02-big-five-steering/`
+
+### 2026-11-07
+
+- 연구실 공유용 공개 사이트 개설: https://persona-lab-5d0.pages.dev
+  - 화면: 개요(연구 질문, 게이트 대 생성기 가설 그림, 실험 단계, 할 일), 토론 기록(날짜별), 영상 2편과 장면별 대본, 용어집(노트의 개념·용어 모음, 검색), 논문 노트 전문
+  - 공개 수준 결정: 누구나 열 수 있게 하되 검색엔진은 막는다. 가설이 아직 미발표라 실험 결과가 나오기 시작하면 연구실 이메일 인증으로 바꾸는 것을 다시 검토한다
+  - 공개본에서는 실행 환경·운영 정보와 원문 스냅샷 링크를 빼고, 논문 그림 원본은 싣지 않는다(설명 글만)
+  - 원본은 이 문서와 지식 노트 그대로다. 기록을 고친 뒤 다시 배포하면 사이트에 반영된다

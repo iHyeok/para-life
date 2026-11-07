@@ -1,0 +1,60 @@
+{
+  "title": "페르소나와 감정 표상",
+  "subtitle": "LLM의 페르소나가 바뀔 때 감정은 생기는가, 풀려나는가 — 연구 노트",
+  "project": "paper-research",
+  "assetBase": "https://kyxi.net/paper-research/site",
+  "videos": [
+    {
+      "id": "01-persona-vectors",
+      "title": "페르소나 벡터 (Persona Vectors)",
+      "paper": "Chen, Arditi, Sleight, Evans, Lindsey (2025) · arXiv 2507.21509",
+      "paperUrl": "https://arxiv.org/abs/2507.21509",
+      "length": "4:35",
+      "summary": "성격 특성을 활성화 공간의 한 방향으로 뽑아내는 자동 파이프라인, 그 방향으로 모델을 밀고(스티어링) 감시하는 법. 본문·부록 전체를 읽고 만들었습니다.",
+      "file": "01-persona-vectors.mp4",
+      "poster": "01-persona-vectors.jpg"
+    },
+    {
+      "id": "02-big-five-steering",
+      "title": "Big Five 성격 스티어링",
+      "paper": "Sheta (2026) · ICML 2026 워크숍 MusIML · OpenReview X89cn3iy8b",
+      "paperUrl": "https://openreview.net/forum?id=X89cn3iy8b",
+      "length": "7:24",
+      "summary": "프롬프트 두 가지와 활성화 개입 세 가지로 Big Five 성격을 바꿔 본 비교. 활성화 덧셈만 양방향으로 듣고, 신경성은 거의 안 움직인다. 비유로 먼저 보고 수치로 확인하는 구성입니다.",
+      "file": "02-big-five-steering.mp4",
+      "poster": "02-big-five-steering.jpg"
+    }
+  ],
+  "linkMap": {
+    "/me/files/projects/paper-research/01-persona-vectors.mp4": "videos.html#01-persona-vectors",
+    "/me/files/projects/paper-research/01-persona-vectors-script.md": "videos/01-persona-vectors.html",
+    "/me/files/projects/paper-research/02-big-five-steering.mp4": "videos.html#02-big-five-steering",
+    "/me/files/projects/paper-research/02-big-five-steering-script.md": "videos/02-big-five-steering.html"
+  },
+  "redact": [
+    "/me/files",
+    "persona-emotion-gate",
+    "/api/resource/lease",
+    "session.sh",
+    "sessions/paper",
+    "전담 채팅 세션",
+    "nvcc",
+    "video/persona-big5",
+    "para-life-private",
+    "claude.ai/chat",
+    "src/gen_script.py",
+    "narration/0",
+    "실험 계획 문서 위치"
+  ],
+  "notesExclude": [],
+  "shortTitles": {
+    "emotion-concepts-llm-2026": "Emotion Concepts 논문 (Sofroniew 외, 2026)",
+    "big-five-steering-asymmetry-2026": "Big Five 스티어링 논문 (Sheta, 2026)",
+    "llm-functional-emotions": "LLM의 기능적 감정 (토론 정리)",
+    "llm-speech-implicature": "LLM의 말은 왜 재미가 없을까"
+  },
+  "replace": {
+    ", 같은 R2 경로에 덮어씀": "",
+    "(사용자 박스의 다른 Claude 세션이 작성)": "(실험 PC의 Claude 세션이 작성)"
+  }
+}
