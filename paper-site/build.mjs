@@ -128,6 +128,7 @@ const updated = [project.updatedAt, ...notes.map((n) => n.updatedAt || n.created
 
 const NAV = [
   ["index.html", "개요"],
+  ["guide.html", "쉽게 보기"],
   ["results.html", "실험 결과"],
   ["log.html", "토론 기록"],
   ["videos.html", "영상"],
@@ -201,6 +202,7 @@ const hero = `
   <h1 id="hero-title">페르소나를 바꾸면,<br>감정은 생겨나는가, 풀려나는가</h1>
   <div class="hero-text">
     <p class="lede">${inline(question)}</p>
+    <p class="hero-guide"><a href="guide.html">처음 보신다면: 이 연구를 쉽게 풀어 쓴 설명</a></p>
     <p class="note-illus">오른쪽 막대는 두 가설을 설명하기 위한 가상 그림입니다. 실험 결과가 아니에요. 실험에서는 페르소나를 바꿀 때 표상이 그대로면 게이트, 같이 변하면 생성기 쪽으로 판단합니다.</p>
   </div>
   <figure class="gate" data-persona="assistant" data-hyp="gate">
@@ -257,6 +259,7 @@ const latestBlock = latest ? `
   <p class="more"><a href="log.html">날짜별 토론 기록 전체 보기</a></p>
 </section>` : "";
 
+const hasScript = (v) => fs.existsSync(path.join(HERE, "content/videos", `${v.id}.md`));
 const videoCard = (v, base = "") => `
 <article class="video" id="${v.id}">
   <video controls preload="none" poster="${ASSET}/${v.poster}" playsinline>
@@ -264,9 +267,9 @@ const videoCard = (v, base = "") => `
   </video>
   <div class="video-text">
     <h3>${esc(v.title)} <span class="len">${esc(v.length)}</span></h3>
-    <p class="paper"><a href="${esc(v.paperUrl)}">${esc(v.paper)}</a></p>
+    <p class="paper"><a href="${esc(v.paperUrl.startsWith("http") ? v.paperUrl : base + v.paperUrl)}">${esc(v.paper)}</a></p>
     <p>${esc(v.summary)}</p>
-    <p class="more"><a href="${base}videos/${v.id}.html">장면별 대본과 근거 보기</a></p>
+    ${hasScript(v) ? `<p class="more"><a href="${base}videos/${v.id}.html">장면별 대본과 근거 보기</a></p>` : ""}
   </div>
 </article>`;
 
@@ -284,6 +287,13 @@ ${latestBlock}
 <section class="block" aria-labelledby="v-title"><h2 id="v-title">공부용 영상</h2><div class="videos">${cfg.videos.map((v) => videoCard(v)).join("")}</div></section>
 <section class="block" aria-labelledby="n-title"><h2 id="n-title">읽은 논문과 글</h2>${notesList("")}
 <p class="more"><a href="glossary.html">용어집 ${glossary.length}개 보기</a></p></section>`,
+});
+
+page({
+  file: "guide.html",
+  title: "쉽게 보기",
+  desc: "무엇이 궁금하고, 어떻게 가려내고, 단계마다 무엇을 하는지 쉽게 풀어 쓴 설명",
+  body: `<div class="guide">${redact(fs.readFileSync(path.join(HERE, "content/guide.html"), "utf8"))}</div>`,
 });
 
 page({
@@ -306,11 +316,11 @@ page({
   file: "videos.html",
   title: "영상",
   desc: "논문을 설명하는 모션 그래픽 영상",
-  body: `<header class="page-head"><h1>공부용 영상</h1><p>핵심 논문을 모션 그래픽과 내레이션으로 풀어 본 영상입니다. 화면에 "개념도"라고 적힌 그래프는 논문 그림의 모양만 옮긴 것이고, 막대·표의 수치는 논문 값입니다.</p></header>
+  body: `<header class="page-head"><h1>공부용 영상</h1><p>핵심 논문과 우리 실험 결과를 모션 그래픽과 내레이션으로 풀어 본 영상입니다. 논문 영상에서 "개념도"라고 적힌 그래프는 논문 그림의 모양만 옮긴 것이고, 막대·표의 수치는 논문 값입니다. 실험 영상의 수치는 우리 실험 값이에요.</p></header>
 <div class="videos videos-wide">${cfg.videos.map((v) => videoCard(v)).join("")}</div>`,
 });
 
-for (const v of cfg.videos) {
+for (const v of cfg.videos.filter(hasScript)) {
   const mdText = fs.readFileSync(path.join(HERE, "content/videos", `${v.id}.md`), "utf8");
   page({
     file: `videos/${v.id}.html`,

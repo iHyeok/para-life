@@ -60,3 +60,57 @@
     empty.hidden = shown > 0;
   });
 })();
+
+// Guide page: why "reaction width" survives the system-prompt shift (illustrative values)
+(() => {
+  const fig = document.querySelector(".demo");
+  if (!fig) return;
+  // [neutral rep, neutral exp, sad rep, sad exp] per persona
+  const TRUTH = {
+    gate: { a: [0.15, 0.05, 0.65, 0.15], f: [0.15, 0.1, 0.65, 0.7] },
+    gen: { a: [0.15, 0.05, 0.35, 0.1], f: [0.15, 0.1, 0.7, 0.7] },
+  };
+  const SHIFT = 0.25; // instruction words push the friend persona's needle up in every situation
+  const bars = fig.querySelectorAll(".bar i");
+  const outs = fig.querySelectorAll(".bar output");
+  const direct = fig.querySelector('[data-r="direct"] dd');
+  const react = fig.querySelector('[data-r="react"] dd');
+  const cap = fig.querySelector("figcaption");
+  const f2 = (v) => v.toFixed(2);
+  const sign = (v) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2);
+  function render() {
+    const t = TRUTH[fig.dataset.hyp];
+    const trap = fig.dataset.trap === "on";
+    const a = t.a.slice();
+    const f = t.f.slice();
+    if (trap) { f[0] = Math.min(1, f[0] + SHIFT); f[2] = Math.min(1, f[2] + SHIFT); }
+    const vals = [...a, ...f];
+    bars.forEach((el, i) => el.style.setProperty("--w", vals[i]));
+    outs.forEach((el, i) => { el.textContent = f2(vals[i]); });
+    const d = f[2] - a[2];
+    const ra = a[2] - a[0];
+    const rf = f[2] - f[0];
+    const dSays = Math.abs(d) < 0.05 ? "gate" : "gen";
+    const rSays = Math.abs(rf - ra) < 0.05 ? "gate" : "gen";
+    const name = { gate: "게이트", gen: "생성기" };
+    const truth = fig.dataset.hyp;
+    const mark = (says) => (says === truth ? '<span class="ok">맞음</span>' : '<span class="bad">틀림</span>');
+    direct.innerHTML = `${sign(d)} → ${name[dSays]}처럼 보임 ${mark(dSays)}`;
+    react.innerHTML = `비서 ${f2(ra)} · 친구 ${f2(rf)} → ${name[rSays]}처럼 보임 ${mark(rSays)}`;
+    if (truth === "gate" && trap) {
+      cap.innerHTML = "<b>함정이 생기는 경우.</b> 진짜로는 게이트인데, 친구 지시문 때문에 바늘의 출발점이 올라갔어요. 높이를 바로 비교하면 \"친구가 더 슬퍼한다, 생성기다\"라고 잘못 읽습니다. 반응 폭은 두 페르소나가 같아서 게이트로 바르게 나와요.";
+    } else if (truth === "gate") {
+      cap.innerHTML = "<b>지시문 효과가 없다면</b> 두 방법 모두 게이트로 바르게 읽어요. 안은 같고, 겉(말)만 친구 쪽에서 커졌습니다. 문제는 지시문 효과가 실제로 있다는 것이고, 0단계가 그걸 보여 줬어요.";
+    } else {
+      cap.innerHTML = "<b>진짜로 생성기라면</b> 친구 페르소나에서 슬픈 이야기에 대한 반응 폭 자체가 커요. 지시문 효과가 있든 없든 반응 폭은 생성기로 바르게 읽습니다.";
+    }
+  }
+  fig.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-set]");
+    if (!b) return;
+    fig.dataset[b.dataset.set] = b.dataset.val;
+    b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  });
+  render();
+})();

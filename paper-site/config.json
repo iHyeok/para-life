@@ -23,6 +23,16 @@
       "summary": "프롬프트 두 가지와 활성화 개입 세 가지로 Big Five 성격을 바꿔 본 비교. 활성화 덧셈만 양방향으로 듣고, 신경성은 거의 안 움직인다. 비유로 먼저 보고 수치로 확인하는 구성입니다.",
       "file": "02-big-five-steering.mp4",
       "poster": "02-big-five-steering.jpg"
+    },
+    {
+      "id": "03-stage0-reproduction",
+      "title": "0단계 실험: Persona Vectors 재현",
+      "paper": "우리 실험 · 2026-11-03–05 · 실험 결과 페이지",
+      "paperUrl": "results.html",
+      "length": "8:30",
+      "summary": "공개 논문(Persona Vectors)을 RTX 5090과 Qwen2.5-7B-Instruct로 다시 해 본 0단계. 무엇을 했고, 최적 층·스티어링·모니터링 상관이 논문과 얼마나 맞았는지, 한계와 다음 단계까지. 실험 PC에서 만든 영상입니다.",
+      "file": "03-stage0-reproduction.mp4",
+      "poster": "03-stage0-reproduction.jpg"
     }
   ],
   "linkMap": {
