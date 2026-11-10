@@ -286,6 +286,10 @@ main { max-width: 1160px; margin: 0 auto; padding: 8px 24px 48px; }
 .demo figcaption b { color: var(--teal); }
 .demo .note-illus { margin: 10px 0 0; padding-left: 12px; border-left: 3px solid var(--amber-bar); font-size: 13.5px; color: var(--muted); }
 .decide li { margin-bottom: 10px; }
+.callout { background: var(--teal-soft); border-radius: var(--radius-sm); padding: 18px 22px; margin: 0 0 22px; max-width: 74ch; }
+.callout h3 { margin: 0 0 8px; font-size: 18px; }
+.callout p, .callout ul { margin: 0 0 10px; }
+.callout > :last-child { margin-bottom: 0; }
 .mini-gloss { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
 .mini-gloss > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .mini-gloss dt { font-weight: 700; }
