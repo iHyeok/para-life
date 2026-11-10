@@ -99,9 +99,42 @@ function ChannelAvatar({ name, color, size = 40, status }) {
 }
 
 // ---- Channel list item ----
-function ChannelListItem({ channel, active, onClick, density }) {
+function ChannelListItem({ channel, active, onClick, density, rail }) {
   const last = channel.messages[channel.messages.length - 1];
   const pad = density === 'compact' ? '10px 14px' : '14px 16px';
+
+  if (rail) {
+    const waiting = channel.pendingPermissions.length > 0;
+    const label = channel.name + (channel.unreadCount ? ` · 안 읽음 ${channel.unreadCount}` : '') + (waiting ? ' · 승인 대기' : '');
+    return (
+      <button
+        onClick={onClick}
+        className="focus-ring rail-item"
+        title={label}
+        aria-label={label}
+        aria-current={active ? 'true' : undefined}
+        style={{
+          display: 'flex', justifyContent: 'center', width: '100%',
+          padding: density === 'compact' ? '8px 0' : '10px 0',
+          background: active ? 'var(--active)' : 'transparent',
+          border: 'none',
+          borderLeft: active ? '2px solid var(--accent)' : '2px solid transparent',
+          cursor: 'pointer', position: 'relative',
+        }}
+      >
+        <ChannelAvatar name={channel.name} color={channel.color} size={density === 'compact' ? 34 : 38} status={channel.status} />
+        {(channel.unreadCount > 0 || waiting) && (
+          <span data-rail-badge style={{
+            position: 'absolute', top: 5, right: 9,
+            background: waiting ? 'var(--warn-line)' : 'var(--accent)', color: 'var(--accent-ink)',
+            fontSize: 10, fontWeight: 700, minWidth: 17, height: 17, padding: '0 4px',
+            borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid var(--panel)',
+          }}>{waiting ? '!' : channel.unreadCount > 99 ? '99+' : channel.unreadCount}</span>
+        )}
+      </button>
+    );
+  }
 
   return (
     <button
@@ -233,39 +266,90 @@ function AddChannelDialog({ onAdd, onClose }) {
 }
 
 // ---- Sidebar ----
-function Sidebar({ channels, activeId, onSelect, onAdd, density }) {
+const SIDEBAR_MIN = 240, SIDEBAR_MAX = 520, SIDEBAR_DEFAULT = 340, SIDEBAR_RAIL = 68;
+
+const PanelIcon = ({ open }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" />
+    {open ? <path d="M15.5 10l-2 2 2 2" /> : <path d="M13.5 10l2 2-2 2" />}
+  </svg>
+);
+
+function Sidebar({ channels, activeId, onSelect, onAdd, density, collapsed, width, onToggleCollapse, onResize }) {
   const [showAdd, setShowAdd] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const squareBtn = {
+    width: 36, height: 36, borderRadius: 8,
+    background: 'transparent', border: '1px solid var(--line-2)',
+    color: 'var(--ink-2)', cursor: 'pointer', flexShrink: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  };
+  const plusIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>;
+
+  // Drag the right edge to resize; dragging well past the minimum collapses to the rail.
+  const startResize = (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const left = e.currentTarget.parentElement.getBoundingClientRect().left;
+    setDragging(true);
+    const move = (ev) => {
+      const w = ev.clientX - left;
+      if (w < SIDEBAR_MIN - 80) { onToggleCollapse(true); return; }
+      onToggleCollapse(false);
+      onResize(Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, Math.round(w))));
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  const keyResize = (e) => {
+    const step = e.shiftKey ? 40 : 16;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); if (collapsed) return; if (width - step < SIDEBAR_MIN) onToggleCollapse(true); else onResize(width - step); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); if (collapsed) onToggleCollapse(false); else onResize(Math.min(SIDEBAR_MAX, width + step)); }
+  };
 
   return (
-    <aside className="sidebar" style={{
+    <aside className="sidebar" data-collapsed={collapsed ? 'true' : 'false'} data-dragging={dragging ? 'true' : undefined} style={{
+      '--sidebar-w': `${collapsed ? SIDEBAR_RAIL : width}px`,
       borderRight: '1px solid var(--line)',
-      background: 'var(--panel)', display: 'flex', flexDirection: 'column',
+      background: 'var(--panel)', display: 'flex', flexDirection: 'column', position: 'relative',
     }}>
       {/* Header */}
-      <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 26, height: 26, borderRadius: 7,
-              background: 'var(--ink)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--panel)', fontWeight: 700, fontSize: 13,
-            }}>채</div>
-            <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>채널</span>
-          </div>
-          <button onClick={() => setShowAdd(true)} className="focus-ring" title="채널 추가" aria-label="채널 추가" style={{
-            width: 36, height: 36, borderRadius: 8,
-            background: 'transparent', border: '1px solid var(--line-2)',
-            color: 'var(--ink-2)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+      {collapsed ? (
+        <div style={{ padding: '14px 0 12px', borderBottom: '1px solid var(--line)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => onToggleCollapse(false)} className="focus-ring" title="목록 펼치기 (Ctrl+\)" aria-label="채널 목록 펼치기" aria-expanded="false" style={squareBtn}>
+            <PanelIcon open={false} />
           </button>
+          <button onClick={() => setShowAdd(true)} className="focus-ring" title="채널 추가" aria-label="채널 추가" style={squareBtn}>{plusIcon}</button>
         </div>
-      </div>
+      ) : (
+        <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: 7,
+                background: 'var(--ink)', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--panel)', fontWeight: 700, fontSize: 13,
+              }}>채</div>
+              <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>채널</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={() => setShowAdd(true)} className="focus-ring" title="채널 추가" aria-label="채널 추가" style={squareBtn}>{plusIcon}</button>
+              <button onClick={() => onToggleCollapse(true)} className="focus-ring desktop-only" title="목록 접기 (Ctrl+\)" aria-label="채널 목록 접기" aria-expanded="true" style={squareBtn}>
+                <PanelIcon open />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Channel list */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {channels.length > 0 ? channels.map(ch => (
           <ChannelListItem
             key={ch.id}
@@ -273,13 +357,30 @@ function Sidebar({ channels, activeId, onSelect, onAdd, density }) {
             active={ch.id === activeId}
             onClick={() => onSelect(ch.id)}
             density={density}
+            rail={collapsed}
           />
-        )) : (
+        )) : !collapsed && (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>
             채널이 없습니다. + 버튼으로 추가하세요.
           </div>
         )}
       </div>
+
+      {/* Resize handle (desktop only) */}
+      <div
+        className="sidebar-resizer desktop-only"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="채널 목록 너비 조절"
+        aria-valuemin={SIDEBAR_RAIL}
+        aria-valuemax={SIDEBAR_MAX}
+        aria-valuenow={collapsed ? SIDEBAR_RAIL : width}
+        tabIndex={0}
+        title="드래그해서 너비 조절 · 더블클릭하면 기본 너비"
+        onPointerDown={startResize}
+        onDoubleClick={() => { onToggleCollapse(false); onResize(SIDEBAR_DEFAULT); }}
+        onKeyDown={keyResize}
+      />
 
       {showAdd && <AddChannelDialog onAdd={onAdd} onClose={() => setShowAdd(false)} />}
     </aside>

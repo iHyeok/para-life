@@ -147,6 +147,9 @@ function channelReducer(state, action) {
   }
 }
 
+function readPref(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function writePref(key, value) { try { localStorage.setItem(key, value); } catch {} }
+
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 const narrow = window.matchMedia('(max-width: 767px)');
 
@@ -162,6 +165,31 @@ function App() {
   uE(() => { paneRef.current = pane; }, [pane]);
   const [tweaks, setTweaks] = uS(() => ({ ...window.__TWEAKS, dark: window.__TWEAKS.dark || prefersDark.matches }));
   const [editMode, setEditMode] = uS(false);
+
+  // Desktop sidebar: collapsible to an avatar rail and resizable; remembered per browser
+  const [isNarrow, setIsNarrow] = uS(narrow.matches);
+  uE(() => {
+    const on = () => setIsNarrow(narrow.matches);
+    narrow.addEventListener('change', on);
+    return () => narrow.removeEventListener('change', on);
+  }, []);
+  const [sidebarCollapsed, setSidebarCollapsed] = uS(() => readPref('multichat-sidebar-collapsed') === '1');
+  const [sidebarWidth, setSidebarWidth] = uS(() => {
+    const w = Number(readPref('multichat-sidebar-width'));
+    return w >= 240 && w <= 520 ? w : 340;
+  });
+  uE(() => { writePref('multichat-sidebar-collapsed', sidebarCollapsed ? '1' : '0'); }, [sidebarCollapsed]);
+  uE(() => { writePref('multichat-sidebar-width', String(sidebarWidth)); }, [sidebarWidth]);
+  uE(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '\\') {
+        e.preventDefault();
+        setSidebarCollapsed(c => !c);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const [channelStates, dispatch] = useReducer(channelReducer, {});
   const managersRef = uR({});
@@ -460,6 +488,10 @@ function App() {
         onSelect={handleSelect}
         onAdd={handleAddChannel}
         density={tweaks.density}
+        collapsed={sidebarCollapsed && !isNarrow}
+        width={sidebarWidth}
+        onToggleCollapse={(v) => setSidebarCollapsed(typeof v === 'boolean' ? v : c => !c)}
+        onResize={setSidebarWidth}
       />
       {activeChannel ? (
         <Conversation
