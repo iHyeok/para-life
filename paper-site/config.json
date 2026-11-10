@@ -44,7 +44,8 @@
     "claude.ai/chat",
     "src/gen_script.py",
     "narration/0",
-    "실험 계획 문서 위치"
+    "실험 계획 문서 위치",
+    "사용자 질문: 공개 사이트"
   ],
   "notesExclude": [],
   "shortTitles": {
@@ -56,5 +57,6 @@
   "replace": {
     ", 같은 R2 경로에 덮어씀": "",
     "(사용자 박스의 다른 Claude 세션이 작성)": "(실험 PC의 Claude 세션이 작성)"
-  }
+  },
+  "siteUrl": "https://persona-lab-5d0.pages.dev/"
 }

@@ -66,8 +66,10 @@ function redact(md) {
 }
 
 const marked = new Marked({ gfm: true });
-const md2html = (md, base) => marked.parse(redact(rewriteLinks(md, base)));
-const inline = (md, base = "") => marked.parseInline(rewriteLinks(md, base));
+// A single "~" (e.g. "0.81~0.96", "~72%") must not turn into strikethrough
+const tilde = (md) => md.replace(/(?<!~)~(?!~)/g, "\\~");
+const md2html = (md, base) => marked.parse(tilde(redact(rewriteLinks(md, base))));
+const inline = (md, base = "") => marked.parseInline(tilde(rewriteLinks(md, base)));
 const plain = (md) => md.replace(/\*\*|\*|`/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
 
 // ---------- data ----------
@@ -126,6 +128,7 @@ const updated = [project.updatedAt, ...notes.map((n) => n.updatedAt || n.created
 
 const NAV = [
   ["index.html", "개요"],
+  ["results.html", "실험 결과"],
   ["log.html", "토론 기록"],
   ["videos.html", "영상"],
   ["glossary.html", "용어집"],
@@ -183,6 +186,11 @@ if (LOCAL) {
   if (src) fs.symlinkSync(path.resolve(src), path.join(DIST, "assets"));
 }
 
+fs.mkdirSync(path.join(DIST, "reports"), { recursive: true });
+for (const f of fs.readdirSync(path.join(HERE, "content/reports"))) fs.copyFileSync(path.join(HERE, "content/reports", f), path.join(DIST, "reports", f));
+
+const resultsMd = (psec["실험 결과"] || "").split(cfg.siteUrl).join("");
+
 const doneCount = tasks.filter((t) => t.done).length;
 const latest = logDays[0];
 
@@ -227,7 +235,7 @@ const stageList = `
 <section class="block" aria-labelledby="stages-title">
   <h2 id="stages-title">실험은 어디까지 왔나</h2>
   <ol class="stages">
-    ${stages.map((s) => `<li class="${s.status ? "is-now" : ""}"><span class="stage-n">${s.n}</span><div><p>${inline(s.text)}</p>${s.status ? `<span class="stage-status">${esc(s.status)}</span>` : ""}</div></li>`).join("")}
+    ${stages.map((s) => `<li class="${/완료/.test(s.status) ? "is-done" : s.status ? "is-now" : ""}"><span class="stage-n">${s.n}</span><div><p>${inline(s.text)}</p>${s.status ? `<span class="stage-status">${esc(s.status)}${/완료/.test(s.status) ? ` <a href="results.html">결과 보기</a>` : ""}</span>` : ""}</div></li>`).join("")}
   </ol>
 </section>`;
 
@@ -276,6 +284,14 @@ ${latestBlock}
 <section class="block" aria-labelledby="v-title"><h2 id="v-title">공부용 영상</h2><div class="videos">${cfg.videos.map((v) => videoCard(v)).join("")}</div></section>
 <section class="block" aria-labelledby="n-title"><h2 id="n-title">읽은 논문과 글</h2>${notesList("")}
 <p class="more"><a href="glossary.html">용어집 ${glossary.length}개 보기</a></p></section>`,
+});
+
+page({
+  file: "results.html",
+  title: "실험 결과",
+  desc: "단계별 실험 결과 요약",
+  body: `<header class="page-head"><h1>실험 결과</h1><p>단계마다 무엇을 확인했고 무엇이 나왔는지 요약합니다. 자세한 그림과 답변 예시는 단계별 보고서에 있어요.</p></header>
+<div class="prose prose-results">${resultsMd ? md2html(resultsMd, "") : "<p>아직 끝난 단계가 없어요.</p>"}</div>`,
 });
 
 page({

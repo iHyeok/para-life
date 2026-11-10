@@ -194,6 +194,7 @@ Claude Sonnet 4.5 내부에서 171개 감정 개념의 **선형 표상(감정 �
   - (a) 같은 방법(이야기 → difference-of-means → 중립 PC 제거)으로 Llama·Qwen·Gemma의 **베이스 모델과 instruct 모델**을 비교한다. playful·amused 활성 차이가 응답의 유머·함축 평가와 상관하는지 본다.
   - (b) playful·amused를 +로 스티어링하고, deflection 계열 방향도 함께 조작한다. 커뮤니티식 "받아치기" 과제에서 사람이 매기는 재미와 자연스러움을 측정한다.
   - (c) 협박·보상 해킹 대신 **기준값이 중간대인 과제**를 설계해 천장·바닥 효과를 피한다. 이 논문의 Fig 28이 반면교사다.
+- **스티어링 강도 단위를 따라 쓴다(2026-11-10):** 이 논문은 강도를 "그 층 residual 평균 노름 대비 비율"로 정한다(각주 4). 우리 0단계 재현에서는 고정 계수가 깊은 층에서 효과를 잃었다. 층이나 모델(base 대 instruct, Qwen 대 Gemma)을 가로질러 비교하는 1·2단계는 이 비율 단위로 계수를 정한다.
 - **선행 연구 축 (4절):** RepE(Zou), SAE 감정 특징(Wu), 회로 수준 분석(Wang), sentiment 선형성(Tigges), 동시 연구 Soligo(Gemma 고통 표현), 페르소나 원형(Lu), 롤플레이 관점(Shanahan), 감정적 프롬프트 효과(Li).
 - **인용할 만한 문장 (짧게):**
   - "these representations causally influence the LLM's outputs" (초록)
