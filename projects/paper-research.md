@@ -8,7 +8,7 @@ area: "ai-study"
 goal: "링크·논문에서 쌓은 지식 노트를 바탕으로 토론하며 논문 주제를 잡고 초안을 작성"
 deadline: ""
 createdAt: "2026-11-02"
-updatedAt: "2026-11-10"
+updatedAt: "2026-11-11"
 tags: ["paper", "research", "llm", "writing"]
 relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion-concepts-llm-2026", "big-five-steering-asymmetry-2026"]
 ---
@@ -146,3 +146,8 @@ Qwen2.5-7B-Instruct(bf16, RTX 5090)에서 공식 코드로 evil·sycophantic·ha
   - 비율 단위로 계수를 정하자는 제안은 그대로 둔다. 근거는 "깊은 층 효과 소실"이 아니라 층·모델 간 비교의 공정성이다
   - 확인할 것(실험 PC): 층별 응답 토큰 활성화 노름 ‖h[L]‖(층 10–28)을 재고 상대 세기 표를 만든다. 실험 저장소 README의 해당 해석도 고쳐야 한다
   - 설명 페이지 ②절, 이 문서 실험 결과, 두 지식 노트의 해당 문장을 정정했다
+
+### 2026-11-11
+
+- 결정: 실험 PC(5090) 쪽 Claude와 한 질의응답도 공개 사이트에 올린다. 실험 저장소의 `notes/qa/YYYY-MM-DD.md`에 고정 형식(질문·답·근거·확신도·할 일)으로 쌓게 하고, 이쪽에서 pull → 노트와 대조·검토 → 사이트의 "질의응답" 페이지(검토 메모 포함)와 토론 기록에 반영한다. 자동 동기화 대신 검토를 거치는 이유: 해석 오류(예: 2026-11-10 노름 정정)와 운영 정보가 섞일 수 있어서
+- 실험 PC에 함께 요청할 것: 층별(10–28) 응답 토큰 활성 노름을 재고 상대 세기 표를 만들어 2026-11-10 정정을 확인한다
