@@ -131,6 +131,7 @@ const NAV = [
   ["guide.html", "쉽게 보기"],
   ["results.html", "실험 결과"],
   ["log.html", "토론 기록"],
+  ["qa.html", "질의응답"],
   ["videos.html", "영상"],
   ["glossary.html", "용어집"],
   ["notes/index.html", "논문 노트"],
@@ -312,6 +313,36 @@ page({
 <div class="log">${logDays.map((d) => `<section class="day"><h2><time>${esc(d.date)}</time></h2><div class="prose">${md2html(d.md, "")}</div></section>`).join("")}</div>`,
 });
 
+// Q&A logs written by the experiment-PC session (content/qa/{date}.md), with our review notes ({date}.review.md)
+const QA_DIR = path.join(HERE, "content/qa");
+const qaDays = (fs.existsSync(QA_DIR) ? fs.readdirSync(QA_DIR) : [])
+  .filter((f) => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
+  .sort().reverse()
+  .map((f) => {
+    const date = f.slice(0, 10);
+    const { content } = matter(fs.readFileSync(path.join(QA_DIR, f), "utf8"));
+    const revFile = path.join(QA_DIR, `${date}.review.md`);
+    const review = fs.existsSync(revFile) ? fs.readFileSync(revFile, "utf8") : "";
+    const qs = [];
+    const body = content.replace(/^## (Q(\d+)\. .+)$/gm, (_, t, n) => {
+      qs.push({ n, t });
+      return `<h3 id="q-${date}-${n}">${esc(t)}</h3>\n`;
+    }).replace(/^## (.+)$/gm, "### $1")
+      .replace(/^(\*\*(?:질문|답|근거|확신도|할 일):\*\*)/gm, "\n$1");
+    return { date, body, review, qs };
+  });
+
+page({
+  file: "qa.html",
+  title: "질의응답",
+  desc: "실험 PC의 Claude 세션과 나눈 질의응답, 검토 메모",
+  body: `<header class="page-head"><h1>질의응답</h1><p>실험을 돌리는 PC의 Claude 세션과 나눈 질문과 답입니다. 그쪽 세션이 정리한 기록을 그대로 싣고, 이 사이트 쪽에서 노트와 대조한 <strong>검토 메모</strong>를 날짜마다 덧붙였어요. 틀린 답은 지우지 않고 정정으로 남깁니다.</p></header>
+<div class="log qa">${qaDays.map((d) => `<section class="day"><h2><time>${esc(d.date)}</time></h2><div>
+${d.review ? `<aside class="callout review"><h3>검토 메모</h3><div class="prose">${md2html(d.review, "")}</div></aside>` : ""}
+<nav class="qa-toc" aria-label="${esc(d.date)} 질문 목록"><ol>${d.qs.map((q) => `<li><a href="#q-${d.date}-${q.n}">${esc(q.t.replace(/^Q\d+\. /, ""))}</a></li>`).join("")}</ol></nav>
+<div class="prose">${md2html(d.body, "")}</div></div></section>`).join("") || "<p>아직 올라온 질의응답이 없어요.</p>"}</div>`,
+});
+
 page({
   file: "videos.html",
   title: "영상",
@@ -376,4 +407,4 @@ if (leaks.length) {
   console.error("Private strings found in output:\n" + leaks.join("\n"));
   process.exit(1);
 }
-console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${cfg.videos.length} videos -> dist/`);
+console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${qaDays.length} qa days, ${cfg.videos.length} videos -> dist/`);

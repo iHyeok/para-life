@@ -19,3 +19,7 @@ npm run deploy     # 빌드 + 배포
 ```
 
 로컬 미리 보기: `PAPER_SITE_ASSETS=<mp4·jpg가 있는 폴더> node build.mjs --local` 후 `dist/`를 정적 서버로 연다.
+
+## 질의응답 (qa.html)
+
+실험 PC 세션이 실험 저장소 `notes/qa/YYYY-MM-DD.md`에 쌓는 질의응답을 `content/qa/`에 복사해 싣는다. 검토 메모는 같은 날짜의 `YYYY-MM-DD.review.md`(마크다운 목록)에 쓴다. 자동 동기화하지 않고, 노트와 대조한 뒤 복사한다. 결정 사항은 프로젝트 Progress Log에도 남긴다.

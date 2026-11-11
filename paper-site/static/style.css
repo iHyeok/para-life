@@ -290,6 +290,16 @@ main { max-width: 1160px; margin: 0 auto; padding: 8px 24px 48px; }
 .callout h3 { margin: 0 0 8px; font-size: 18px; }
 .callout p, .callout ul { margin: 0 0 10px; }
 .callout > :last-child { margin-bottom: 0; }
+.qa .day > div { min-width: 0; }
+.review { max-width: 80ch; }
+.review .prose { max-width: none; }
+.review .prose ul { margin: 0; }
+.qa-toc { margin: 0 0 8px; font-size: 15px; }
+.qa-toc ol { margin: 0; padding-left: 1.6em; columns: 2; column-gap: 32px; }
+.qa-toc li { break-inside: avoid; margin: 2px 0; }
+.qa .prose p { margin: 8px 0; }
+.qa .prose h3 { scroll-margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--rule); }
+@media (max-width: 760px) { .qa-toc ol { columns: 1; } }
 .mini-gloss { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
 .mini-gloss > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .mini-gloss dt { font-weight: 700; }
