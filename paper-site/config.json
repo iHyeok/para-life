@@ -47,7 +47,7 @@
           "sub": "기초편",
           "length": "10:46",
           "summary": "이미지 인식의 첫걸음인 합성곱을 숫자로 직접 계산해 봅니다.",
-          "embed": false
+          "embed": true
         },
         {
           "yt": "Y0LVLgtTov8",
@@ -55,7 +55,7 @@
           "sub": "논문 노트 1",
           "length": "7:59",
           "summary": "층을 깊게 쌓는 법, 그리고 더 깊어져도 학습이 되게 만드는 법(잔차 연결).",
-          "embed": false
+          "embed": true
         },
         {
           "yt": "sO97XIxprxM",
@@ -63,7 +63,7 @@
           "sub": "논문 노트 2",
           "length": "17:59",
           "summary": "두 논문의 표, 학습 설정, 통제 실험을 하나씩 다시 읽습니다.",
-          "embed": false
+          "embed": true
         }
       ]
     },
