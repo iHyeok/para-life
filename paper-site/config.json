@@ -35,6 +35,78 @@
       "poster": "03-stage0-reproduction.jpg"
     }
   ],
+  "youtubeSeries": [
+    {
+      "id": "cnn",
+      "title": "배경 지식: CNN",
+      "intro": "트랜스포머로 넘어가기 전, 이미지 모델(CNN)이 어떻게 동작하는지 다시 짚는 영상이에요. 손계산으로 시작해 VGGNet·ResNet 논문까지 읽습니다.",
+      "items": [
+        {
+          "yt": "qSARIFxXxNw",
+          "title": "필터와 커널",
+          "sub": "기초편",
+          "length": "10:46",
+          "summary": "이미지 인식의 첫걸음인 합성곱을 숫자로 직접 계산해 봅니다.",
+          "embed": false
+        },
+        {
+          "yt": "Y0LVLgtTov8",
+          "title": "VGGNet과 ResNet",
+          "sub": "논문 노트 1",
+          "length": "7:59",
+          "summary": "층을 깊게 쌓는 법, 그리고 더 깊어져도 학습이 되게 만드는 법(잔차 연결).",
+          "embed": false
+        },
+        {
+          "yt": "sO97XIxprxM",
+          "title": "VGGNet과 ResNet 심화편",
+          "sub": "논문 노트 2",
+          "length": "17:59",
+          "summary": "두 논문의 표, 학습 설정, 통제 실험을 하나씩 다시 읽습니다.",
+          "embed": false
+        }
+      ]
+    },
+    {
+      "id": "transformer",
+      "title": "트랜스포머 구조",
+      "intro": "CNN에 익숙한 눈으로 트랜스포머를 보고, 우리 실험이 그 구조의 어디를 건드리는지 짚는 시리즈예요. 실험 PC에서 Qwen2.5-7B-Instruct를 기준으로 만들었습니다.",
+      "items": [
+        {
+          "yt": "rq3Uqo9j0Wk",
+          "title": "CNN에서 트랜스포머로",
+          "sub": "1편",
+          "length": "11:50",
+          "summary": "어디가 같고 어디가 다른지, Qwen2.5-7B-Instruct를 기준으로 비교합니다.",
+          "embed": true
+        },
+        {
+          "yt": "JnVulbllZG8",
+          "title": "Persona Vectors 재현 실험은 이 구조를 어떻게 쓰나",
+          "sub": "2편",
+          "length": "9:10",
+          "summary": "활성값을 꺼내고, 방향을 만들고, 더하고, 재는 네 동작이 구조의 어디에서 일어나는지.",
+          "embed": true
+        },
+        {
+          "yt": "BpD6KZGTW1g",
+          "title": "어텐션 심화 ①",
+          "sub": "3편",
+          "length": "17:33",
+          "summary": "입력부터 손계산까지, Query·Key·Value를 천천히 따라갑니다.",
+          "embed": true
+        },
+        {
+          "yt": "Y1i1vRjB920",
+          "title": "어텐션 심화 ②",
+          "sub": "4편",
+          "length": "13:11",
+          "summary": "왜 섞는지, 섞은 값, 헤드와 블록, 출력, 학습까지.",
+          "embed": true
+        }
+      ]
+    }
+  ],
   "linkMap": {
     "/me/files/projects/paper-research/01-persona-vectors.mp4": "videos.html#01-persona-vectors",
     "/me/files/projects/paper-research/01-persona-vectors-script.md": "videos/01-persona-vectors.html",

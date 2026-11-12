@@ -274,6 +274,32 @@ const videoCard = (v, base = "") => `
   </div>
 </article>`;
 
+const ytSeries = cfg.youtubeSeries || [];
+const ytCount = ytSeries.reduce((n, g) => n + g.items.length, 0);
+const ytCard = (y) => {
+  const watch = `https://www.youtube.com/watch?v=${y.yt}`;
+  const thumb = `<img src="https://i.ytimg.com/vi/${y.yt}/hq720.jpg" alt="" loading="lazy">`;
+  const media = y.embed
+    ? `<button type="button" class="yt-play" data-yt="${y.yt}" aria-label="${esc(y.title)} 재생">${thumb}<span class="yt-icon" aria-hidden="true"></span></button>`
+    : `<a class="yt-play" href="${watch}" target="_blank" rel="noopener" aria-label="${esc(y.title)} 유튜브에서 보기">${thumb}<span class="yt-icon" aria-hidden="true"></span></a>`;
+  return `
+<article class="yt" id="yt-${y.yt}">
+  <div class="yt-media">${media}</div>
+  <div class="video-text">
+    <p class="yt-sub">${esc(y.sub)}</p>
+    <h3>${esc(y.title)} <span class="len">${esc(y.length)}</span></h3>
+    <p>${esc(y.summary)}</p>
+    <p class="yt-link"><a href="${watch}" target="_blank" rel="noopener">유튜브에서 보기</a>${y.embed ? "" : " · 이 영상은 유튜브에서만 재생돼요"}</p>
+  </div>
+</article>`;
+};
+const ytSections = ytSeries.map((g) => `
+<section class="block yt-series" id="series-${g.id}" aria-labelledby="yt-${g.id}-title">
+  <h2 id="yt-${g.id}-title">${esc(g.title)} <span class="count">${g.items.length}편</span></h2>
+  <p class="series-intro">${esc(g.intro)}</p>
+  <div class="yt-list">${g.items.map(ytCard).join("")}</div>
+</section>`).join("");
+
 const notesList = (base) => `
 <ul class="notes">
   ${notes.map((n) => `<li><a href="${base}notes/${n.id}.html"><strong>${esc(n.title)}</strong><span>${esc(plain(n.summary).slice(0, 150))}${plain(n.summary).length > 150 ? "…" : ""}</span></a></li>`).join("")}
@@ -285,7 +311,7 @@ page({
   body: `${hero}
 <div class="grid-2">${stageList}${taskList}</div>
 ${latestBlock}
-<section class="block" aria-labelledby="v-title"><h2 id="v-title">공부용 영상</h2><div class="videos">${cfg.videos.map((v) => videoCard(v)).join("")}</div></section>
+<section class="block" aria-labelledby="v-title"><h2 id="v-title">공부용 영상</h2><div class="videos">${cfg.videos.map((v) => videoCard(v)).join("")}</div>${ytCount ? `<p class="more"><a href="videos.html#series-${ytSeries[0].id}">${ytSeries.map((g) => `${esc(g.title)} ${g.items.length}편`).join(", ")} 유튜브 강의 보기</a></p>` : ""}</section>
 <section class="block" aria-labelledby="n-title"><h2 id="n-title">읽은 논문과 글</h2>${notesList("")}
 <p class="more"><a href="glossary.html">용어집 ${glossary.length}개 보기</a></p></section>`,
 });
@@ -347,8 +373,9 @@ page({
   file: "videos.html",
   title: "영상",
   desc: "논문을 설명하는 모션 그래픽 영상",
-  body: `<header class="page-head"><h1>공부용 영상</h1><p>핵심 논문과 우리 실험 결과를 모션 그래픽과 내레이션으로 풀어 본 영상입니다. 논문 영상에서 "개념도"라고 적힌 그래프는 논문 그림의 모양만 옮긴 것이고, 막대·표의 수치는 논문 값입니다. 실험 영상의 수치는 우리 실험 값이에요.</p></header>
-<div class="videos videos-wide">${cfg.videos.map((v) => videoCard(v)).join("")}</div>`,
+  body: `<header class="page-head"><h1>공부용 영상</h1><p>핵심 논문과 우리 실험 결과를 모션 그래픽과 내레이션으로 풀어 본 영상입니다. 논문 영상에서 "개념도"라고 적힌 그래프는 논문 그림의 모양만 옮긴 것이고, 막대·표의 수치는 논문 값입니다. 실험 영상의 수치는 우리 실험 값이에요. 아래쪽에는 배경 지식(CNN)과 트랜스포머 구조를 다루는 유튜브 강의를 모았어요.</p></header>
+<div class="videos videos-wide">${cfg.videos.map((v) => videoCard(v)).join("")}</div>
+${ytSections}`,
 });
 
 for (const v of cfg.videos.filter(hasScript)) {
@@ -407,4 +434,4 @@ if (leaks.length) {
   console.error("Private strings found in output:\n" + leaks.join("\n"));
   process.exit(1);
 }
-console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${qaDays.length} qa days, ${cfg.videos.length} videos -> dist/`);
+console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${qaDays.length} qa days, ${cfg.videos.length} videos + ${ytCount} youtube -> dist/`);

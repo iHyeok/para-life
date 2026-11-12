@@ -114,3 +114,19 @@
   });
   render();
 })();
+
+// YouTube click-to-load: the iframe is created only when someone presses play
+(() => {
+  document.querySelectorAll("button.yt-play[data-yt]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const f = document.createElement("iframe");
+      f.src = `https://www.youtube-nocookie.com/embed/${btn.dataset.yt}?autoplay=1&rel=0`;
+      f.title = btn.getAttribute("aria-label") || "YouTube";
+      f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      f.allowFullscreen = true;
+      f.referrerPolicy = "strict-origin-when-cross-origin";
+      btn.replaceWith(f);
+      f.focus();
+    });
+  });
+})();

@@ -8,7 +8,7 @@ area: "ai-study"
 goal: "링크·논문에서 쌓은 지식 노트를 바탕으로 토론하며 논문 주제를 잡고 초안을 작성"
 deadline: ""
 createdAt: "2026-11-02"
-updatedAt: "2026-11-11"
+updatedAt: "2026-11-12"
 tags: ["paper", "research", "llm", "writing"]
 relatedResources: ["llm-speech-implicature", "llm-functional-emotions", "emotion-concepts-llm-2026", "big-five-steering-asymmetry-2026"]
 ---
@@ -158,3 +158,8 @@ Qwen2.5-7B-Instruct(bf16, RTX 5090)에서 공식 코드로 evil·sycophantic·ha
   - **성격 특성 대 감정(Q8) 보충:** 뽑는 방식이 다르다. Persona Vectors는 반대 지시문 답변의 활성 차이, Sofroniew 외는 감정 이야기를 읽힌 활성 평균 차이에서 중립 PC를 뺀다(노트: emotion-concepts-llm-2026). base 모델은 지시문을 못 따르므로 1단계는 이야기 방식이 사실상 강제된다. 1단계 설계에서 먼저 정할 항목이다
   - 실험 PC 쪽 남은 일: 설명 영상 2편 L030의 틀린 해석 수정 여부, RNN→어텐션 역사 영상 제작 여부
   - 공개 사이트의 0단계 보고서 사본도 정정판으로 교체했다
+
+### 2026-11-12
+
+- 유튜브 강의 7편을 공개 사이트 영상 페이지에 추가했다(모두 일부 공개). "배경 지식: CNN" 3편(필터와 커널 기초편, VGGNet·ResNet 논문 노트 1·2)과, 실험 PC가 만든 "트랜스포머 구조" 1–4편(CNN에서 트랜스포머로, 재현 실험이 구조를 쓰는 법, 어텐션 심화 ①②)이다: https://persona-lab-5d0.pages.dev/videos
+  - 트랜스포머 시리즈는 페이지 안에서 바로 재생된다(누를 때만 youtube-nocookie 임베드). CNN 3편은 유튜브에서 퍼가기가 꺼져 있어 유튜브로 연결한다
