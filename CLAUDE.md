@@ -57,7 +57,7 @@
 ### 프로젝트 세션 (필요할 때만)
 - 프로젝트별 전담 Claude Code 세션을 띄울 수 있다. 정의는 `sessions/{id}/`(`session.env`, `brief.md`)
   - `paper` → `paper-research`, para-life 폴더에서 돈다
-  - `museum` → `socratic-museum-guide`, 프로젝트 저장소 `~/projects/socratic-museum-guide`에서 돈다(그 저장소 문서가 폰 채팅·클코와의 공용 기억). 진행 페이지 `museum-site/` → https://museum-guide.pages.dev, `scripts/project-sync.sh museum`이 30분마다 저장소를 받고 바뀌면 다시 배포
+  - `museum` → `socratic-museum-guide`, 프로젝트 저장소 `~/projects/socratic-museum-guide`에서 돈다(그 저장소 문서가 폰 채팅·클코와의 공용 기억). 진행 페이지 `museum-site/` → https://museum-guide-3s8.pages.dev, `scripts/project-sync.sh museum`이 30분마다 저장소를 받고 바뀌면 다시 배포
 - "{id} 세션 열어줘/닫아줘/상태" 요청 → `scripts/session.sh start|stop|status {id}` 실행 후 결과를 답한다. 시작하면 tmux `dev:{id}` 창에서 같은 대화를 이어서(resume) 열고, multichat의 같은 이름 채팅(`wss://api.kyxi.net/p/{id}/ws`)이 연결된다
 - 그 프로젝트 토론은 프로젝트 세션에서 하도록 안내한다. 세션이 저장소를 함께 쓰므로 오케스트레이터도 커밋 전에 `git pull --rebase`
 

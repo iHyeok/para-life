@@ -24,7 +24,7 @@
 - PARA 쪽: 큰 흐름(마일스톤, 주요 결정)만 `~/para-life/projects/socratic-museum-guide.md`의 Progress Log·Tasks에 적고, `projects/_index.json`의 **이 프로젝트 항목 updatedAt만** 고친다. para-life도 `git -C ~/para-life pull --rebase` 후 commit → push.
 
 ## 진행 페이지
-- https://museum-guide.pages.dev (코워커 공유용, 검색 차단). 저장소 문서와 PARA 프로젝트 파일로 만든다.
+- https://museum-guide-3s8.pages.dev (코워커 공유용, 검색 차단). 저장소 문서와 PARA 프로젝트 파일로 만든다.
 - 저장소는 30분마다 자동으로 받아 오고(작업 트리가 깨끗할 때만), 바뀌면 페이지를 다시 배포한다(`~/para-life/scripts/project-sync.sh museum`).
 - 기록 직후 바로 반영하고 싶으면 `cd ~/para-life/museum-site && npm run deploy`.
 - 페이지에 실리면 안 되는 것(개인 계정 링크, 실제 방문자 데이터, 내부 경로)이 문서에 들어가면 `~/para-life/museum-site/config.json`의 `redact`에 추가한다.

@@ -51,7 +51,8 @@ SITE="$ROOT/$SESSION_SITE"
 stamp="$( {
   echo "$after"
   cat "$ROOT/projects/$SESSION_PROJECT.md"
-  find "$SITE" -path "$SITE/node_modules" -prune -o -path "$SITE/dist" -prune -o -type f -print0 | sort -z | xargs -0 cat
+  # Site sources only (not node_modules, dist or the .wrangler cache a deploy rewrites)
+  find "$SITE" \( -name node_modules -o -name dist -o -name .wrangler \) -prune -o -type f -print0 | LC_ALL=C sort -z | xargs -0 cat
 } | shasum | cut -c1-40)"
 if [[ "$(cat "$STATE/site-stamp" 2>/dev/null)" == "$stamp" && "${FORCE:-}" != "1" ]]; then
   exit 0

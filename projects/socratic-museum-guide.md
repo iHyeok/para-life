@@ -19,7 +19,7 @@ RTD Roams 2027(Research through Design) 제출용 소크라테스식 박물관 �
 
 - 코드·설계 문서: [iHyeok/socratic-museum-guide](https://github.com/iHyeok/socratic-museum-guide) (private). 로컬 클론은 `~/projects/socratic-museum-guide`.
 - **그 저장소가 공용 기억 장소다.** 폰(claude.ai "RTD Roams" 프로젝트), 집(Claude Code), 전담 채팅 세션(multichat "Museum")이 모두 저장소의 `docs/handoff.md`(진행 기록, 새 항목이 맨 위)와 `docs/decisions.md`(결정)를 읽고 쓴다. 이 문서에는 큰 흐름만 적는다.
-- 진행 페이지(코워커 공유용): https://museum-guide.pages.dev — 저장소 문서와 이 파일로 빌드한다(`museum-site/`).
+- 진행 페이지(코워커 공유용): https://museum-guide-3s8.pages.dev — 저장소 문서와 이 파일로 빌드한다(`museum-site/`).
 - 마감: 2027-02-01 확장 초록(1,000단어) + 이미지 6~8장. 학회는 2027-07-26~28 도쿄.
 
 ## Tasks
