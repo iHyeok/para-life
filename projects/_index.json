@@ -77,7 +77,7 @@
       "goal": "논문의 세 역할(Answerer·Interpreter·Interlocutor)을 따르는 박물관 가이드 챗봇 프로토타입을 만들고, 제작 과정을 RTD Roams 2027 제출 재료(확장 초록 + 이미지 6~8장)로 남긴다",
       "deadline": "2027-02-01",
       "createdAt": "2026-11-13",
-      "updatedAt": "2026-11-13",
+      "updatedAt": "2026-11-13T07:00:21Z",
       "tags": ["rtd", "chatbot", "museum", "socratic", "prototype", "llm"],
       "relatedResources": []
     }

@@ -45,7 +45,22 @@ fi
 after="$(git -C "$REPO" rev-parse HEAD)"
 [[ "$before" != "$after" ]] && log "pulled ${before:0:7}..${after:0:7}: $(git -C "$REPO" log --oneline "$before..$after" | wc -l | tr -d ' ') commit(s)"
 
-# 2. deploy when inputs changed
+# 2a. the project's own web app (optional): rebuild and deploy when the repo HEAD changed.
+# Built inside the repo (dist/ is gitignored) so wrangler picks up the repo's functions/ folder.
+if [[ -n "${SESSION_APP_PROJECT:-}" && "${NO_DEPLOY:-}" != "1" && -f "$REPO/web/build.sh" && -n "${SESSION_SITE:-}" ]] \
+   && [[ "$(cat "$STATE/app-stamp" 2>/dev/null)" != "$after" || "${FORCE:-}" == "1" ]]; then
+  [[ -d "$ROOT/$SESSION_SITE/node_modules" ]] || (cd "$ROOT/$SESSION_SITE" && npm install --silent >>"$LOG" 2>&1)
+  if (cd "$REPO" && bash web/build.sh >>"$LOG" 2>&1 \
+      && npx --prefix "$ROOT/$SESSION_SITE" wrangler pages deploy dist --project-name "$SESSION_APP_PROJECT" \
+           --branch main --commit-hash "$after" --commit-dirty=true >>"$LOG" 2>&1); then
+    echo "$after" > "$STATE/app-stamp"
+    log "deployed app $SESSION_APP_PROJECT (repo ${after:0:7})"
+  else
+    log "app deploy failed (see above)"
+  fi
+fi
+
+# 2b. progress site: deploy when inputs changed
 [[ -n "${SESSION_SITE:-}" && "${NO_DEPLOY:-}" != "1" ]] || exit 0
 SITE="$ROOT/$SESSION_SITE"
 stamp="$( {

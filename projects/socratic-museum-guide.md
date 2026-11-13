@@ -26,6 +26,8 @@ RTD Roams 2027(Research through Design) 제출용 소크라테스식 박물관 �
 
 - [x] 저장소와 공용 기억 문서(CLAUDE.md, docs/) 세팅
 - [x] v0 뼈대 코드 업로드 (mock 모드 동작 확인)
+- [x] 웹 대화형 버전 배포 (Cloudflare Pages 직접 업로드, OpenRouter 경유 DeepSeek V4.1 Flash 1017)
+- [ ] 웹 앱 잠금(Cloudflare Access)과 OpenRouter 키 등록 후 실제 대화 확인
 - [ ] 실제 LLM 백엔드를 붙여 재생 스크립트 두 개 돌리고 출력 기록
 - [ ] 코워커 F2F 미팅 후 `decisions.md` "미정" 8개를 확정으로 옮기기
 - [ ] 실제 전시물·소장 기록 데이터 반영
@@ -36,5 +38,6 @@ RTD Roams 2027(Research through Design) 제출용 소크라테스식 박물관 �
 
 ### 2026-11-13
 
+- 웹 대화형 버전을 main에 합치고 진행 페이지와 별도 프로젝트로 배포했다. 모델은 DeepSeek V4.1 Flash 1017 고정판(사용자 결정), 직접 업로드 방식(사용자 결정). 잠금과 키 등록은 사용자 몫으로 남음.
 - 프로젝트 등록. 저장소 생성(private), 공용 기억 문서 세팅, v0 뼈대 코드 업로드까지 폰 채팅에서 진행됨(저장소 `docs/handoff.md`).
 - 전담 채팅 세션 "Museum"과 진행 페이지를 만들었다. 세션은 저장소 폴더에서 돌아서, 집에서 Claude Code로 나눈 대화와 같은 곳에 기록이 쌓인다. 저장소는 30분마다 자동으로 받아 오고 바뀌면 페이지를 다시 배포한다.
