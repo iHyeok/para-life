@@ -33,6 +33,16 @@
       "summary": "공개 논문(Persona Vectors)을 RTX 5090과 Qwen2.5-7B-Instruct로 다시 해 본 0단계. 무엇을 했고, 최적 층·스티어링·모니터링 상관이 논문과 얼마나 맞았는지, 한계와 다음 단계까지. 실험 PC에서 만든 영상입니다.",
       "file": "03-stage0-reproduction.mp4",
       "poster": "03-stage0-reproduction.jpg"
+    },
+    {
+      "id": "04-stage1-explained",
+      "title": "1단계 실험 풀어 보기",
+      "paper": "우리 실험 · 2026-11-11–13 · 실험 결과 페이지",
+      "paperUrl": "results.html",
+      "length": "9:23",
+      "summary": "비서 훈련은 감정을 약하게 만들었을까? 감정 이야기 6,210편으로 바늘(감정 벡터)을 만들고 검증한 과정, (a) 개념 표상과 (b) 답하기 직전 기분의 결과, 사람 말 끝 자리의 재검증, Gemma 판정 보류까지 실제 예시와 수치로 풉니다.",
+      "file": "04-stage1-explained.mp4",
+      "poster": "04-stage1-explained.jpg"
     }
   ],
   "youtubeSeries": [

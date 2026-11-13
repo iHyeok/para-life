@@ -1,0 +1,20 @@
+<section id="stage2" class="alt">
+<p class="eyebrow">다음 단계</p>
+<h2>2단계: 페르소나는 이 기울기를 바꾸는가</h2>
+<div class="row" style="gap:48px;">
+<div class="col" style="width:760px; gap:20px;">
+<h3>조건 (Qwen2.5-7B-Instruct, 같은 질문)</h3>
+<p style="font-size:28px;"><b>D</b>  기본 조수</p>
+<p style="font-size:28px;"><b>P+ / P−</b>  페르소나 시스템 프롬프트 / 반대 프롬프트</p>
+<p style="font-size:28px;"><b>S+</b>  기본 조수 + 페르소나 벡터 스티어링</p>
+<p style="font-size:28px;"><b>고정 글</b>  같은 답을 다른 문맥에 넣어 다시 읽힘 (2 × 2)</p>
+<p class="small">페르소나 후보: humorous · optimistic · evil</p>
+</div>
+<div class="col grow" style="gap:20px;">
+<div class="card teal" style="padding:22px 30px;"><p class="tag">문지기 예측</p><p class="body">같은 글이면 문맥이 달라도 감정 값이 같다</p></div>
+<div class="card violet" style="padding:22px 30px;"><p class="tag">공장 예측</p><p class="body">같은 글이어도 페르소나 문맥이 감정 값을 바꾼다</p></div>
+<div class="card amber" style="padding:22px 30px;"><p class="tag">정할 것</p><p class="body">재는 자리 · 평범/곤란 질문을 교차한 차이의 차이 · 변화 기준 δ</p></div>
+</div>
+</div>
+<aside>2단계는 instruct 모델 하나 안에서 기본 조수(D), 페르소나 시스템 프롬프트(P+), 반대 프롬프트(P−), 페르소나 벡터 스티어링(S+)을 비교합니다. P−를 두는 이유는, 프롬프트 안에 특성 낱말이 있는 것 자체의 효과를 통제하기 위해서입니다. 핵심 장치는 고정 글 조건입니다. 기본 조수가 쓴 답과 페르소나가 쓴 답을 각각 두 문맥에 그대로 넣어 다시 읽힙니다. 문지기라면 같은 글은 문맥이 달라도 감정 값이 같고, 공장이라면 같은 글이어도 페르소나 문맥이 값을 바꿉니다. 아직 정할 것이 있습니다. 하나, 어느 자리에서 잴지. 사람 말 끝이 1단계에서 가장 견고했지만 앞 장의 '누구의 감정인가' 문제가 있어서, 조수가 현재 화자인 응답 토큰을 주 위치로 하자는 의견이 있습니다. 둘, 지시문 페르소나에서는 바늘이 지시문 낱말 자체를 읽을 수 있으므로, 평범한 질문과 곤란한 질문을 교차해 '반응 폭'의 차이(차이의 차이)를 주 지표로 쓰는 안. 셋, 얼마나 바뀌어야 바뀌었다고 할지(δ, 초안은 이야기 읽기 폭의 20%). 1단계 사후학습 이동이 같은 단위로 어느 정도인지도 함께 보고할 예정입니다. 페르소나 후보는 humorous(사후학습에서 줄어든 playful·amused와 이어짐), optimistic, evil입니다.</aside>
+</section>

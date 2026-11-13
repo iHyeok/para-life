@@ -1,0 +1,14 @@
+<section id="validate">
+<p class="eyebrow">검증</p>
+<h2>바늘은 네 가지 관문을 통과했다</h2>
+<table style="font-size:28px;">
+<tr><th style="width:30%;">검증</th><th style="width:38%;">결과 (Qwen 19층, base / instruct)</th><th style="width:32%;">비교 기준</th></tr>
+<tr><td>떼어 둔 주제의 이야기를 30개 중 하나로 분류</td><td>0.37 / 0.42</td><td>우연 0.033 (약 12배)</td></tr>
+<tr><td>작성 모델 사이 같은 감정 벡터</td><td>코사인 0.73–0.79 (다른 감정 −0.02)</td><td>교차 분류도 같은 모델 분류와 비슷</td></tr>
+<tr><td>첫 주성분과 사람 valence 평정</td><td>|r| = 0.83 / 0.84</td><td>논문 0.81</td></tr>
+<tr><td>instruct를 playful·gloomy로 스티어링</td><td>방향·특이성 확인, 효과는 약함</td><td>다음 장</td></tr>
+</table>
+<p style="font-size:28px;">틀린 분류도 가까운 감정끼리다: sad → gloomy, amused → playful, relaxed → serene, spiteful → angry</p>
+<p class="source">사람 평정: Warriner, Kuperman &amp; Brysbaert (2013), 감정 30개 중 28개 · Gemma도 통과 (분류 0.41 / 0.43, valence 0.68 / 0.72)</p>
+<aside>바늘을 믿어도 되는지 네 가지로 확인했습니다. 첫째, 일반화. 주제 두 개의 이야기를 통째로 떼어 두고 나머지로 만든 벡터로 30개 중 어느 감정인지 맞혔습니다. 우연은 3.3%인데 base 37%, instruct 42%입니다. 같은 호출에서 나온 형제 이야기가 학습과 시험에 갈라지지 않게 주제 단위로 뗐습니다. 둘째, 문체가 아니라 감정을 잡았는가. 작성 모델마다 따로 만든 벡터끼리 같은 감정은 코사인 0.73–0.79, 다른 감정은 −0.02입니다. Claude 이야기로 만든 벡터로 Gemini 이야기를 맞혀도 성적이 비슷했습니다. 다만 0.73–0.79라서 작성 모델 고유 성분도 일부 있습니다. 셋째, 사람 감각과의 일치. 감정 벡터 30개의 첫 주성분이 사람이 매긴 긍정·부정 평정과 0.83–0.84로 상관했고, 논문의 0.81과 비슷합니다. arousal은 PC2와 PC3에 나뉘어 각 0.58입니다. 넷째, 스티어링은 다음 장에서 봅니다. 이 관문 판정은 11월 12일에 했습니다.</aside>
+</section>

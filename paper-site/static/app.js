@@ -130,3 +130,17 @@
     });
   });
 })();
+
+// Seminar decks: scale each 1920x1080 slide to its frame
+(() => {
+  const frames = document.querySelectorAll(".slide-frame");
+  if (!frames.length) return;
+  const fit = (f) => f.style.setProperty("--s", String(f.clientWidth / 1920));
+  frames.forEach(fit);
+  if ("ResizeObserver" in window) {
+    const ro = new ResizeObserver((es) => es.forEach((e) => fit(e.target)));
+    frames.forEach((f) => ro.observe(f));
+  } else {
+    window.addEventListener("resize", () => frames.forEach(fit));
+  }
+})();

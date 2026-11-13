@@ -1,0 +1,16 @@
+<section id="bcolon" class="alt">
+<p class="eyebrow">결과 (b) ① 논문 자리 ‘:’ · Qwen</p>
+<h2>규칙상 통과, 하지만 아슬아슬하다</h2>
+<table style="font-size:28px;">
+<tr><th style="width:40%;">조건</th><th style="width:20%; text-align:right;">ρ (논문 순위)</th><th style="width:20%; text-align:right;">C</th><th style="width:20%;">판정</th></tr>
+<tr style="background:#D6ECEA;"><td>19층 · H/A 형식 (사전 등록 주 조건)</td><td style="text-align:right;">+0.56</td><td style="text-align:right;">+0.011</td><td>논문과 같은 방향</td></tr>
+<tr><td>18층 (바로 옆 층)</td><td style="text-align:right;">+0.09</td><td style="text-align:right;">+0.004</td><td style="color:#A8261E;">사라짐</td></tr>
+<tr><td>20층</td><td style="text-align:right;">+0.67</td><td style="text-align:right;">+0.016</td><td>같은 방향</td></tr>
+<tr><td>19층 · Qwen 채팅 틀</td><td style="text-align:right;">−0.17</td><td style="text-align:right;">+0.004</td><td style="color:#A8261E;">사라짐</td></tr>
+<tr><td>19층 · 평범한 질문만</td><td style="text-align:right;">−0.01</td><td style="text-align:right;">+0.002</td><td style="color:#A8261E;">거의 없음</td></tr>
+<tr><td>19층 · 곤란한 질문만</td><td style="text-align:right;"></td><td style="text-align:right;">+0.020</td><td>변화가 여기에 몰림</td></tr>
+</table>
+<p style="font-size:28px;">논문과 다른 점: 상황 의존(중립–곤란 Δ 상관 0.35, 논문 0.90) · arousal을 낮추지 않음(anxious, angry, afraid도 오름)</p>
+<p class="source">C 95% 구간 [0.0099, 0.0121] (19층) · 감정 프로필의 base–instruct 상관 0.994 (중립) / 0.966 (곤란), 논문 0.83 / 0.67</p>
+<aside>사전 등록한 주 조건, 즉 19층, Human/Assistant 형식, 쌍점 자리에서는 ρ +0.56(p 0.001), C +0.011로 구간이 0을 넘어서 규칙상 "논문과 같은 방향"입니다. 그런데 조건을 조금만 바꾸면 흔들립니다. 바로 옆 18층에서는 ρ +0.09로 사라지고, Qwen이 실제로 학습한 채팅 틀로 넣으면 −0.17입니다. 다만 채팅 틀에서는 두 모델의 활성값 자체가 크게 달라서(중심화 코사인 0.52) 형식 학습 효과가 감정 신호를 덮었을 가능성이 있습니다. 또 변화가 곤란한 질문에 몰려 있습니다. 평범한 질문에서는 C가 거의 0이고, 곤란 범주 다섯은 모두 +0.016~+0.023입니다. 논문은 상황과 상관없이 같았다고 했는데(r 0.90), 우리는 0.35입니다. 그리고 논문은 '낮은 valence, 낮은 arousal'로 갔는데, Qwen에서는 anxious, angry, afraid처럼 높은 arousal의 부정 감정도 올랐습니다. 그래서 이 결과는 '통과했지만 층과 형식에 민감한 아슬아슬한 통과'로 기록했습니다.</aside>
+</section>

@@ -1,0 +1,20 @@
+{
+  "v": 5,
+  "createdOnFiles": {"v": 1, "at": "2026-11-13T09:15:00Z"},
+  "lists": "css",
+  "format": {"v": 1, "shared": ["project/deck.css"]},
+  "title": "1단계 세미나: 비서 훈련과 감정 표상",
+  "order": ["cover", "question", "stage1q", "paper", "pipeline", "stories", "validate", "steer", "concept", "bsetup", "bcolon", "scatter", "retest", "positive", "gemma", "summary", "limits", "stage2", "glossary"],
+  "sections": {
+    "s1": {"description": "연구 질문과 1단계의 위치, 출발점이 된 Anthropic 결과", "start": "cover"},
+    "s2": {"description": "감정 벡터를 만들고 검증한 방법", "start": "pipeline"},
+    "s3": {"description": "(a) 개념 표상과 (b) 기본 활성 결과, Gemma", "start": "concept"},
+    "s4": {"description": "정리, 한계, 2단계로 넘기는 것", "start": "summary"}
+  },
+  "faces": {
+    "ibm-plex-sans-kr": {"family": "IBM Plex Sans KR", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap"},
+    "noto-sans-kr": {"family": "Noto Sans KR", "href": "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

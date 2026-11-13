@@ -305,6 +305,26 @@ main { max-width: 1160px; margin: 0 auto; padding: 8px 24px 48px; }
 .mini-gloss dt { font-weight: 700; }
 .mini-gloss dd { margin: 0; font-size: 15.5px; }
 @media (prefers-color-scheme: dark) { .bad { background: #4a2020; color: #ffb3b3; } }
+/* Seminar decks (slides are 1920x1080 canvases scaled to the column) */
+.deck-meta { color: var(--muted); margin: -8px 0 20px; }
+.deckview { display: flex; flex-direction: column; gap: 36px; }
+.slide-wrap { margin: 0; }
+.slide-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; border: 1px solid var(--rule); background: #F4F6F8; }
+.slide-frame .deck { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; transform-origin: 0 0; transform: scale(var(--s, 0.4)); }
+.slide-frame .deck > section { width: 1920px; height: 1080px; box-sizing: border-box; position: relative; margin: 0; }
+.slide-frame .deck h1, .slide-frame .deck h2, .slide-frame .deck h3, .slide-frame .deck p { margin: 0; letter-spacing: 0; }
+.slide-frame .deck table { border-collapse: collapse; }
+.slide-frame .deck th { text-align: left; padding: .35em .6em; border-bottom: 2px solid #9AA6B2; font-weight: 700; background: none; }
+.slide-frame .deck td { padding: .35em .6em; border-bottom: 1px solid #CBD5DF; background: none; }
+.slide-frame .deck .night td { border-bottom-color: #3A4858; }
+.slide-frame .deck .night th { border-bottom-color: #6B7A8A; }
+.slide-frame .deck .xarrow { font-size: 44px; color: #9AA6B2; }
+.slide-frame .deck svg { display: block; }
+.slide-wrap figcaption { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-top: 8px; color: var(--muted); font-size: 14px; }
+.slide-wrap details { flex: 1; min-width: 240px; }
+.slide-wrap summary { cursor: pointer; color: var(--teal); }
+.slide-wrap details p { color: var(--ink); font-size: 15px; line-height: 1.7; margin: 8px 0 0; max-width: 75ch; }
+
 /* YouTube series on the videos page */
 .yt-series .count { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 4px; }
 .series-intro { margin: 0 0 20px; color: var(--muted); max-width: 70ch; }

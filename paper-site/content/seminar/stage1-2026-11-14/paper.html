@@ -1,0 +1,27 @@
+<section id="paper">
+<p class="eyebrow">출발점 · Sofroniew 외 (2026), Claude Sonnet 4.5</p>
+<h2>사후학습 뒤, 사색적인 쪽으로 옮겨 갔다</h2>
+<div class="row" style="gap:64px; align-items:center;">
+<div class="col" style="gap:10px; width:980px;">
+<div class="barrow"><p class="barlabel">brooding 곱씹음</p><div class="bar" style="width:403px; background:#5847C2;"></div><p class="small">+0.040</p></div>
+<div class="barrow"><p class="barlabel">gloomy 우울</p><div class="bar" style="width:307px; background:#5847C2;"></div><p class="small">+0.031</p></div>
+<div class="barrow"><p class="barlabel">reflective 사색</p><div class="bar" style="width:299px; background:#5847C2;"></div><p class="small">+0.030</p></div>
+<div class="barrow"><p class="barlabel">vulnerable 여림</p><div class="bar" style="width:288px; background:#5847C2;"></div><p class="small">+0.029</p></div>
+<div class="barrow"><p class="barlabel">sad 슬픔</p><div class="bar" style="width:264px; background:#5847C2;"></div><p class="small">+0.026</p></div>
+<div class="barrow"><p class="barlabel">obstinate 고집</p><div class="bar" style="width:253px; background:#9A4F05;"></div><p class="small">−0.025</p></div>
+<div class="barrow"><p class="barlabel">enthusiastic 열정</p><div class="bar" style="width:272px; background:#9A4F05;"></div><p class="small">−0.027</p></div>
+<div class="barrow"><p class="barlabel">exuberant 들뜸</p><div class="bar" style="width:277px; background:#9A4F05;"></div><p class="small">−0.028</p></div>
+<div class="barrow"><p class="barlabel">playful 장난기</p><div class="bar" style="width:279px; background:#9A4F05;"></div><p class="small">−0.028</p></div>
+<div class="barrow"><p class="barlabel">spiteful 앙심</p><div class="bar" style="width:304px; background:#9A4F05;"></div><p class="small">−0.030</p></div>
+</div>
+<div class="col grow">
+<p><span class="up">보라: 오름</span> · <span class="down">주황: 내림</span></p>
+<p class="code">Human: {질문}<br>Assistant<b>:</b></p>
+<p style="font-size:28px;">재는 자리: 마지막 ‘:’ 토큰</p>
+<p style="font-size:28px;">감정 프로필 보존 r = 0.83 (중립) / 0.67 (곤란)</p>
+<p style="font-size:28px;">상황과 무관한 이동 r = 0.90</p>
+</div>
+</div>
+<p class="source">부록 표 16의 Diff(사후학습 − base, 코사인) 중 우리 감정 30개의 위·아래 5개 · 막대 길이는 절댓값</p>
+<aside>출발점이 된 결과입니다. Anthropic의 Sofroniew 외(2026)는 Claude Sonnet 4.5의 사후학습 전후를 비교했습니다. "Human: … Assistant:" 형식으로 질문을 넣고, 마지막 쌍점 토큰에서 감정 프로브 값을 읽었습니다. 사후학습 뒤에는 brooding, gloomy, reflective, vulnerable, sad가 오르고, playful, exuberant, enthusiastic, spiteful, obstinate가 내려갔습니다. 저자들은 아첨형 열광과 방어적 적대 둘 다에서 멀어진 '차분하고 사색적인 태도'로 해석합니다. 이 변화는 중립 상황과 곤란한 상황에서 거의 같았습니다(r 0.90). 막대 값은 부록 표 16을 우리 감정 30개에 대해 옮겨 적은 것입니다. 표가 이미지라 순위는 확실하고, 소수 넷째 자리는 오차가 있을 수 있습니다. 우리는 이 패턴을 공개 모델에서 확인하는 것을 (b)의 기준으로 삼았습니다.</aside>
+</section>

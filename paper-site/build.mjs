@@ -130,6 +130,7 @@ const NAV = [
   ["index.html", "개요"],
   ["guide.html", "쉽게 보기"],
   ["results.html", "실험 결과"],
+  ["seminar.html", "발표 자료"],
   ["log.html", "토론 기록"],
   ["qa.html", "질의응답"],
   ["videos.html", "영상"],
@@ -369,6 +370,47 @@ ${d.review ? `<aside class="callout review"><h3>검토 메모</h3><div class="pr
 <div class="prose">${md2html(d.body, "")}</div></div></section>`).join("") || "<p>아직 올라온 질의응답이 없어요.</p>"}</div>`,
 });
 
+// Seminar decks: content/seminar/<dir>/{deck.json, deck.css, <slide>.html} copied from the Slides artifact
+function scopeCss(css, scope) {
+  const kfs = [];
+  css = css.replace(/@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, (m) => { kfs.push(m); return `/*KF${kfs.length - 1}*/`; });
+  css = css.replace(/([^{}]+)\{/g, (m, sel) => {
+    const keep = (sel.match(/\/\*KF\d+\*\//g) || []).join("\n");
+    const sc = sel.replace(/\/\*KF\d+\*\//g, "").split(",").map((x) => x.trim()).filter(Boolean)
+      .map((x) => (x === ":root" ? scope : `${scope} ${x}`)).join(", ");
+    return `${keep}\n${sc} {`;
+  });
+  return css.replace(/\/\*KF(\d+)\*\//g, (_, n) => kfs[Number(n)]);
+}
+const SEM_DIR = path.join(HERE, "content/seminar");
+const decks = (fs.existsSync(SEM_DIR) ? fs.readdirSync(SEM_DIR) : []).filter((d) => fs.existsSync(path.join(SEM_DIR, d, "deck.json"))).sort().reverse()
+  .map((d) => {
+    const dir = path.join(SEM_DIR, d);
+    const meta = JSON.parse(fs.readFileSync(path.join(dir, "deck.json"), "utf8"));
+    const css = scopeCss(fs.readFileSync(path.join(dir, "deck.css"), "utf8"), `.deck-${d}`);
+    const slides = meta.order.map((id) => {
+      let h = redact(fs.readFileSync(path.join(dir, `${id}.html`), "utf8"));
+      const note = (h.match(/<aside>([\s\S]*?)<\/aside>/) || [])[1] || "";
+      h = h.replace(/<aside>[\s\S]*?<\/aside>/, "").replace(/<x-shape[^>]*><\/x-shape>/g, '<span class="xarrow">→</span>')
+        .replace(/\[발표자 이름\] · /g, "");
+      return { id, h, note };
+    });
+    const fonts = Object.values(meta.faces || {}).map((f) => f.href).filter(Boolean);
+    return { d, meta, css, slides, fonts };
+  });
+page({
+  file: "seminar.html",
+  title: "발표 자료",
+  desc: "연구실 세미나 발표 슬라이드와 발표 노트",
+  body: `<header class="page-head"><h1>발표 자료</h1><p>연구실 세미나에서 쓴 슬라이드입니다. 장마다 "발표 노트"를 펼치면 그 장에서 할 설명이 있어요. 같은 내용을 영상으로 보려면 <a href="videos.html#04-stage1-explained">1단계 실험 풀어 보기</a>를 보세요.</p></header>
+${decks.map((k) => `${k.fonts.map((f) => `<link rel="stylesheet" href="${esc(f)}">`).join("")}
+<style>${k.css}</style>
+<section class="block deckblock" aria-labelledby="deck-${k.d}"><h2 id="deck-${k.d}">${esc(k.meta.title)}</h2>
+<p class="deck-meta">${k.slides.length}장 · ${esc(k.d.replace(/^.*?(\d{4}-\d{2}-\d{2})$/, "$1"))}</p>
+<div class="deckview">${k.slides.map((s, i) => `<figure class="slide-wrap" id="${k.d}-${i + 1}"><div class="slide-frame"><div class="deck deck-${k.d}">${s.h}</div></div>
+<figcaption><span>${i + 1} / ${k.slides.length}</span>${s.note ? `<details><summary>발표 노트</summary><p>${esc(s.note)}</p></details>` : ""}</figcaption></figure>`).join("\n")}</div></section>`).join("\n") || "<p>아직 올라온 발표 자료가 없어요.</p>"}`,
+});
+
 page({
   file: "videos.html",
   title: "영상",
@@ -434,4 +476,4 @@ if (leaks.length) {
   console.error("Private strings found in output:\n" + leaks.join("\n"));
   process.exit(1);
 }
-console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${qaDays.length} qa days, ${cfg.videos.length} videos + ${ytCount} youtube -> dist/`);
+console.log(`built ${notes.length} notes, ${glossary.length} terms, ${logDays.length} log days, ${qaDays.length} qa days, ${cfg.videos.length} videos + ${ytCount} youtube, ${decks.length} decks -> dist/`);

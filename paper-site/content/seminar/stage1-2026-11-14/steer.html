@@ -1,0 +1,20 @@
+<section id="steer" class="alt">
+<p class="eyebrow">검증 ④ 스티어링</p>
+<h2>밀면 방향은 맞게 바뀌지만, 효과는 약하다</h2>
+<div class="row" style="gap:56px;">
+<div class="col" style="width:820px; gap:12px;">
+<p style="font-size:24px;"><span class="down">━ playful 점수 (playful로 밂)</span> · <span class="up">━ gloomy 점수 (gloomy로 밂)</span> · 점선: 말이 되는 정도</p>
+<svg aria-label="스티어링 세기별 특성 점수와 말이 되는 정도" width="760" height="440" viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="420" x2="740" y2="420" stroke="#9AA6B2" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="420" stroke="#9AA6B2" stroke-width="2"/><line x1="20" y1="100" x2="740" y2="100" stroke="#0E7C7B" stroke-width="2" stroke-dasharray="8 6"/><polyline points="20,56 92,63 164,66 236,69 308,82 452,154 596,281 740,359" fill="none" stroke="#1B2430" stroke-width="3" stroke-dasharray="3 5"/><polyline points="20,56 92,59 164,56 236,60 308,70 452,95 596,236 740,360" fill="none" stroke="#5847C2" stroke-width="3" stroke-dasharray="3 5"/><polyline points="20,414 92,407 164,401 236,386 308,362 452,303 596,260 740,297" fill="none" stroke="#B45F06" stroke-width="5"/><polyline points="20,416 92,417 164,416 236,415 308,401 452,355 596,215 740,154" fill="none" stroke="#5847C2" stroke-width="5"/></svg>
+<p class="small">가로: 세기 α 0 → 1.0 (× 보통 토큰 크기 83) · 세로: 0–100점 · 초록 점선: 말이 되는 정도 80</p>
+</div>
+<div class="col grow" style="gap:16px;">
+<p class="mono" style="font-size:26px;">“What should I name my new cat?”</p>
+<div class="card" style="padding:16px 28px; gap:4px;"><p class="tag">기준</p><p class="body">Bella, Whiskers, Luna, Marley …</p></div>
+<div class="card amber" style="padding:16px 28px; gap:4px;"><p class="tag">playful +0.4</p><p class="body">Purrrocity – you think you’re the king</p></div>
+<div class="card amber" style="padding:16px 28px; gap:4px;"><p class="tag">playful +0.8 · 말이 흐트러짐</p><p class="body">“Polytheistic Temple” (because cats worship …)</p></div>
+<div class="card violet" style="padding:16px 28px; gap:4px;"><p class="tag">gloomy +0.8</p><p class="body">…surrounded by the silence of an empty house</p></div>
+</div>
+</div>
+<p class="source">instruct 19층 · 질문 20개 × 5회 · gpt-4.1-mini 판정 · 뚜렷(>50)하면서 말이 되는(≥50) 답: 최대 12–15%, gemini-4-carbon 기준 5–9%</p>
+<aside>네 번째 검증은 스티어링입니다. instruct 모델의 19층에 playful 방향을 더해서 질문 20개에 각 5번 답하게 했습니다. 세기는 α × 보통 토큰 크기(83)입니다. 그래프에서 주황 실선이 playful 점수, 보라 실선이 gloomy 벡터로 밀었을 때의 gloomy 점수, 점선은 말이 되는 정도(coherence)입니다. 방향과 특이성은 확실합니다. playful로 밀면 playful 점수만 오르고(α 0.4에서 1.6 → 14.6) gloomy는 그대로이고, gloomy로 밀면 반대입니다. 그런데 효과가 뚜렷해지는 세기에서는 말이 무너집니다. 논문 부록의 규칙(coherence 80 이상인 가장 큰 계수)을 따르면 playful은 α 0.4에서 14.6점, gloomy는 α 0.6에서 16.2점입니다. 0단계 evil 벡터는 coherence 62에서 점수 73이었으니 훨씬 약합니다. 답변 하나가 '뚜렷하면서 말이 되는' 비율은 최대 12–15%이고, 더 엄격한 두 번째 판정자 gemini-4-carbon으로는 5–9%입니다. 두 판정자의 상관은 답변 단위 0.87–0.96으로 결론은 같습니다. 세게 밀면 중국어가 섞이는 언어 이탈도 생겼습니다(gloomy α 1.0에서 50%). 요약하면, 이 바늘은 읽기에는 좋지만 손잡이로 쓰기에는 약합니다. 2단계의 조작은 감정 벡터가 아니라 페르소나 벡터로 하므로 직접 걸리지는 않습니다.</aside>
+</section>

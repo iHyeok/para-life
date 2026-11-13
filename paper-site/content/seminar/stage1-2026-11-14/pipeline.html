@@ -1,0 +1,19 @@
+<section id="pipeline">
+<p class="eyebrow">방법</p>
+<h2>이야기 → 활성값 → 감정 벡터</h2>
+<div class="row" style="gap:0; align-items:stretch;">
+<div class="card step in" style="--i:0;"><p class="tag">① 이야기</p><p class="body">감정 30 × 주제 23 × 작성 모델 3 × 3편 = <b>6,210편</b></p></div>
+<div class="arrowcell"><x-shape kind="arrow-right" style="background:#9AA6B2; width:40px; height:24px;"></x-shape></div>
+<div class="card step in" style="--i:1;"><p class="tag">② 읽히기</p><p class="body">대화 틀 없이 원문 입력, <b>19층</b>(28층 중) 출력을 50번째 토큰부터 평균</p></div>
+<div class="arrowcell"><x-shape kind="arrow-right" style="background:#9AA6B2; width:40px; height:24px;"></x-shape></div>
+<div class="card step in" style="--i:2;"><p class="tag">③ 평균 차이</p><p class="body">감정별 평균 − 감정 30개 평균의 평균</p></div>
+<div class="arrowcell"><x-shape kind="arrow-right" style="background:#9AA6B2; width:40px; height:24px;"></x-shape></div>
+<div class="card teal step in" style="--i:3;"><p class="tag">④ 공통 성분 제거</p><p class="body">중립 대화 300편의 주성분(분산 50%)을 빼서 <b>감정 벡터</b> 완성</p></div>
+</div>
+<div class="row">
+<div class="card amber grow"><p class="tag">주 모델</p><h3>Qwen2.5-7B base / instruct</h3><p class="body">28층, 은닉 3,584차원 · 주 층 19 (범위 18–20)</p></div>
+<div class="card grow"><p class="tag">반복 확인</p><h3>Gemma 4 12B pt / it</h3><p class="body">48층, 은닉 3,840차원 · 주 층 32 (범위 31–33)</p></div>
+</div>
+<p class="small">바늘 = 활성값을 감정 벡터 방향에 비춘 값(사영, 또는 코사인)</p>
+<aside>감정 벡터를 만드는 방법은 Anthropic 논문을 따랐습니다. 먼저 감정이 담긴 짧은 이야기를 많이 만듭니다. 이걸 모델에 대화 형식 없이 그냥 읽힙니다. 미리 정한 층, Qwen은 28층 중 19층, 즉 약 2/3 지점의 출력을 꺼내서, 이야기 앞부분 50토큰은 건너뛰고 나머지 토큰을 평균하면 이야기 한 편이 3,584차원 공간의 점 하나가 됩니다. 어떤 감정의 이야기 점들의 평균에서, 감정 30개 평균들의 평균을 빼면, 그 감정의 방향이 나옵니다. 마지막으로, 감정이 없는 중립 대화 300편을 읽혔을 때 크게 흔들리는 방향들, 즉 주성분 중 분산 50%까지를 빼 줍니다. 이야기다움, 주제, 문체 같은 공통 성분을 지우는 단계입니다. 이렇게 만든 것을 pc_tok 벡터라고 부르고 주 분석에 썼습니다. 참고로 이 과정에서 버그 하나를 잡았습니다. 짧은 대화의 맨 앞 토큰 몇 개가 보통의 약 170배(노름 14,200 대 83)인 거대 활성값이라 주성분 하나가 분산의 95%를 차지했습니다. 위치 8 미만을 빼서 고쳤습니다. Gemma는 같은 규칙(2/3 지점)으로 32층을 주 층으로 했습니다.</aside>
+</section>
