@@ -18,6 +18,14 @@ const DEFAULT_CHANNELS = [
     httpUrl: 'https://api.kyxi.net/p/paper',
     color: '#c084fc',
   },
+  // On-demand project session for socratic-museum-guide: `scripts/session.sh start museum`
+  {
+    id: 'museum',
+    name: 'Museum',
+    wsUrl: 'wss://api.kyxi.net/p/museum/ws',
+    httpUrl: 'https://api.kyxi.net/p/museum',
+    color: '#2dd4bf',
+  },
 ];
 
 // Defaults added after a browser saved its list are appended once; a default the user
@@ -68,11 +76,17 @@ const QUICK_PROMPTS = {
     { label: '마감·방치 점검', text: '마감이 임박했거나 오래 업데이트되지 않은 프로젝트를 알려줘.' },
     { label: '진행 기록', text: '오늘 진행한 내용을 기록하고 싶어. 어떤 프로젝트인지 물어봐줘.' },
     { label: 'Paper 세션 열기', text: 'paper 세션 열어줘.' },
+    { label: 'Museum 세션 열기', text: 'museum 세션 열어줘.' },
   ],
   paper: [
     { label: '지금 어디까지', text: '논문 프로젝트 현재 상태를 정리해줘. Progress Log와 지식 노트 기준으로, 다음에 할 일까지.' },
     { label: '연구 질문 다듬기', text: '지금까지 지식 노트를 바탕으로 연구 질문 후보를 같이 다듬자. 후보마다 근거 노트와 약점도 같이.' },
     { label: '토론 내용 기록', text: '오늘 토론에서 나온 주장·반론·결정을 Progress Log에 정리해줘.' },
+  ],
+  museum: [
+    { label: '지금 어디까지', text: '저장소를 받아서 handoff 최근 항목 기준으로 지금 상태와 다음 할 일을 정리해줘.' },
+    { label: '클코 대화 따라잡기', text: '집에서 Claude Code로 나눈 최근 대화를 읽고, handoff에 빠진 진행이나 결정이 있으면 알려줘.' },
+    { label: '오늘 작업 기록', text: '오늘 논의하고 정한 것을 handoff와 decisions에 정리하고 커밋해줘.' },
   ],
 };
 

@@ -12,7 +12,7 @@ test.beforeEach(async ({ page, ui }) => {
     if (sessionStorage.getItem("booted")) return;
     sessionStorage.setItem("booted", "1");
     localStorage.setItem("multichat-channels", JSON.stringify(saved));
-    localStorage.setItem("multichat-seen-defaults", JSON.stringify(["para-life", "paper"]));
+    localStorage.setItem("multichat-seen-defaults", JSON.stringify(["para-life", "paper", "museum"]));
   }, saved);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(`${ui.origin}/`);

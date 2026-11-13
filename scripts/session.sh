@@ -24,6 +24,8 @@ load() {
   source "$DIR/session.env"
   STATE="$HOME/.claude/channels/$ID"
   SERVER="para-$ID-channel"
+  # Optional: run inside the project's own repo instead of para-life (see sessions/museum)
+  CWD="${SESSION_CWD:-$ROOT}"
 }
 
 window_exists() { "$TMUX_BIN" list-windows -t "$TMUX_SESSION" -F '#{window_name}' 2>/dev/null | grep -qx "$ID"; }
@@ -63,10 +65,26 @@ start() {
 }
 JSON
 
+  # A session outside para-life doesn't load para-life's .claude/settings.json, so give it
+  # the chat activity hooks and access to para-life explicitly.
+  local outside=()
+  if [[ "$CWD" != "$ROOT" ]]; then
+    [[ -d "$CWD/.git" ]] || die "$ID: $CWD is not a git checkout (clone ${SESSION_REPO:-the project repo} there first)"
+    python3 - "$ROOT/channel/hooks/activity.ts" > "$STATE/settings.json" <<'PY'
+import json, sys
+cmd = '"$HOME/.bun/bin/bun" "%s"' % sys.argv[1]
+hook = {"hooks": [{"type": "command", "command": cmd, "timeout": 3}]}
+tool = {"matcher": "*", **hook}
+print(json.dumps({"hooks": {"UserPromptSubmit": [hook], "PreToolUse": [tool], "PostToolUse": [tool], "Stop": [hook]}}, indent=2))
+PY
+    outside=(--add-dir "$ROOT" --settings "$STATE/settings.json")
+  fi
+
   "$TMUX_BIN" has-session -t "$TMUX_SESSION" 2>/dev/null || "$TMUX_BIN" new-session -d -s "$TMUX_SESSION" -c "$ROOT"
-  "$TMUX_BIN" new-window -d -t "$TMUX_SESSION:" -n "$ID" -c "$ROOT" \
+  "$TMUX_BIN" new-window -d -t "$TMUX_SESSION:" -n "$ID" -c "$CWD" \
     env PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:$PATH" \
     claude "${resume[@]}" -n "PARA · $SESSION_NAME" \
+      ${outside[@]+"${outside[@]}"} \
       --strict-mcp-config --mcp-config "$STATE/mcp.json" \
       --dangerously-load-development-channels "server:$SERVER" \
       --append-system-prompt "$(cat "$DIR/brief.md")"

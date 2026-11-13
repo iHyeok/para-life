@@ -1,0 +1,25 @@
+{
+  "title": "소크라테스식 박물관 가이드",
+  "subtitle": "RTD Roams 2027 프로토타입 제작 기록 — 무엇을 만들고, 왜 그렇게 정했는지",
+  "project": "socratic-museum-guide",
+  "repoDocs": {
+    "handoff": "docs/handoff.md",
+    "decisions": "docs/decisions.md",
+    "context": "docs/context.md",
+    "readme": "README.md"
+  },
+  "deadline": "2027-02-01",
+  "redact": [
+    "claude.ai/artifact",
+    "claude.ai/chat",
+    "본인 계정에서만",
+    "~/projects/",
+    "/Users/",
+    "museum-site/",
+    "scripts/project-sync",
+    "multichat",
+    "전담 채팅 세션"
+  ],
+  "replace": {},
+  "siteUrl": "https://museum-guide.pages.dev/"
+}

@@ -14,6 +14,7 @@
 
 - `~/para-life/` → 쓰기 가능 (PARA 데이터 관리)
 - 그 외 다른 프로젝트 디렉토리 (`~/projects/` 하위, `~/llm_novel` 같은 홈 디렉토리의 다른 저장소) → **읽기만** (상태 확인용, 절대 수정 금지)
+  - 예외: 프로젝트 세션이 자기 저장소에서 도는 경우(`sessions/{id}/session.env`의 `SESSION_CWD`, 지금은 `museum` → `~/projects/socratic-museum-guide`) 그 세션은 그 저장소에 쓴다. 오케스트레이터는 여전히 읽기만
 
 ## 크로스 프로젝트 참조
 
@@ -54,8 +55,10 @@
 - 토론에서 새로 나온 주장·반론·결정은 해당 프로젝트 Progress Log에, 특정 노트에 대한 새 해석은 그 노트의 `## 비판적 검토`/`## 논문 활용 포인트`에 덧붙인다
 
 ### 프로젝트 세션 (필요할 때만)
-- 프로젝트별 전담 Claude Code 세션을 띄울 수 있다. 정의는 `sessions/{id}/`(`session.env`, `brief.md`), 지금은 `paper`(→ `paper-research`)
-- "paper 세션 열어줘/닫아줘/상태" 요청 → `scripts/session.sh start|stop|status paper` 실행 후 결과를 답한다. 시작하면 tmux `dev:paper` 창에서 같은 대화를 이어서(resume) 열고, multichat "Paper" 채팅(`wss://api.kyxi.net/p/paper/ws`)이 연결된다
+- 프로젝트별 전담 Claude Code 세션을 띄울 수 있다. 정의는 `sessions/{id}/`(`session.env`, `brief.md`)
+  - `paper` → `paper-research`, para-life 폴더에서 돈다
+  - `museum` → `socratic-museum-guide`, 프로젝트 저장소 `~/projects/socratic-museum-guide`에서 돈다(그 저장소 문서가 폰 채팅·클코와의 공용 기억). 진행 페이지 `museum-site/` → https://museum-guide.pages.dev, `scripts/project-sync.sh museum`이 30분마다 저장소를 받고 바뀌면 다시 배포
+- "{id} 세션 열어줘/닫아줘/상태" 요청 → `scripts/session.sh start|stop|status {id}` 실행 후 결과를 답한다. 시작하면 tmux `dev:{id}` 창에서 같은 대화를 이어서(resume) 열고, multichat의 같은 이름 채팅(`wss://api.kyxi.net/p/{id}/ws`)이 연결된다
 - 그 프로젝트 토론은 프로젝트 세션에서 하도록 안내한다. 세션이 저장소를 함께 쓰므로 오케스트레이터도 커밋 전에 `git pull --rebase`
 
 ### 파일 업로드
