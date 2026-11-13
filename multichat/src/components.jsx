@@ -704,6 +704,42 @@ function Composer({ onSend, offline, quickPrompts = [] }) {
     setFiles(prev => [...prev, ...arr]);
   };
 
+  // Clipboard images arrive as "image.png" (or nameless): give each a distinct, dated name
+  const pastedFiles = (dt) => {
+    if (!dt || !dt.files || dt.files.length === 0) return [];
+    // Copied text (cells, rich text) often carries an image rendering too: keep it as text
+    if ((dt.getData('text/plain') || '').trim()) return [];
+    const stamp = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const base = `붙여넣기-${stamp.getFullYear()}${pad(stamp.getMonth() + 1)}${pad(stamp.getDate())}-${pad(stamp.getHours())}${pad(stamp.getMinutes())}${pad(stamp.getSeconds())}`;
+    return Array.from(dt.files).map((f, i) => {
+      if (!f.type.startsWith('image/') || (f.name && !/^image\.\w+$/i.test(f.name))) return f;
+      const ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg').replace(/\+.*$/, '');
+      return new File([f], `${base}${dt.files.length > 1 ? `-${i + 1}` : ''}.${ext}`, { type: f.type, lastModified: f.lastModified });
+    });
+  };
+
+  const handlePaste = (e) => {
+    const pasted = pastedFiles(e.clipboardData);
+    if (pasted.length === 0) return;
+    e.preventDefault();
+    addFiles(pasted);
+  };
+
+  // Cmd/Ctrl+V while nothing editable has focus (reading the chat) still attaches
+  const pasteRef = useRef(handlePaste);
+  pasteRef.current = handlePaste;
+  useEffect(() => {
+    const onDocPaste = (e) => {
+      const t = e.target;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      pasteRef.current(e);
+      if (e.defaultPrevented) taRef.current?.focus();
+    };
+    document.addEventListener('paste', onDocPaste);
+    return () => document.removeEventListener('paste', onDocPaste);
+  }, []);
+
   const removeFile = (idx) => {
     setFiles(prev => {
       const next = [...prev];
@@ -783,6 +819,7 @@ function Composer({ onSend, offline, quickPrompts = [] }) {
           ref={taRef}
           value={text}
           onChange={e => setText(e.target.value)}
+          onPaste={handlePaste}
           onCompositionStart={() => setComposing(true)}
           onCompositionEnd={() => setComposing(false)}
           onKeyDown={e => {
@@ -823,7 +860,7 @@ function Composer({ onSend, offline, quickPrompts = [] }) {
       </div>
       {!coarsePointer && (
         <div style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 6, paddingLeft: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.02em' }}>
-          Enter 전송 · Shift+Enter 줄바꿈 · 파일 드래그앤드롭
+          Enter 전송 · Shift+Enter 줄바꿈 · 파일 드래그앤드롭 · 이미지 붙여넣기
         </div>
       )}
     </div>

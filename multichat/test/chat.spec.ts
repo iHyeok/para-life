@@ -179,3 +179,40 @@ test("activity: delivered mark, what Claude is doing with elapsed time, approval
   await page.reload();
   await expect(row).toContainText("명령 실행 · Run tests");
 });
+
+// 1x1 PNG, as a screenshot copied to the clipboard would arrive
+const PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+const pasteInto = (page: import("@playwright/test").Page, selector: string | null, withText = "") =>
+  page.evaluate(([sel, b64, txt]) => {
+    const bytes = Uint8Array.from(atob(b64 as string), (c) => c.charCodeAt(0));
+    const dt = new DataTransfer();
+    dt.items.add(new File([bytes], "image.png", { type: "image/png" }));
+    if (txt) dt.setData("text/plain", txt as string);
+    const target = sel ? document.querySelector(sel as string)! : document.body;
+    const ev = new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true });
+    target.dispatchEvent(ev);
+    return ev.defaultPrevented;
+  }, [selector, PNG_B64, withText] as const);
+
+test("a pasted clipboard image becomes an attachment and is uploaded", async ({ page, server }) => {
+  expect(await pasteInto(page, "textarea")).toBe(true);
+  const chip = page.locator(".composer img");
+  await expect(chip).toHaveCount(1);
+  await expect(page.locator(".composer")).toContainText(/붙여넣기-\d{8}-\d{6}\.png/);
+  await page.locator("textarea").fill("이 화면 봐줘");
+  await page.click(sendButton);
+  const delivered = await server.waitDelivered((p) => p.content === "이 화면 봐줘");
+  expect(delivered.meta.file_name).toMatch(/^붙여넣기-\d{8}-\d{6}\.png$/);
+  expect(delivered.meta.file_path).toMatch(/\.png$/);
+  await expect(page.locator(".conversation img")).toHaveCount(1);
+});
+
+test("paste with nothing focused attaches; copied text with an image stays text", async ({ page }) => {
+  await page.locator(".conversation").click();
+  expect(await pasteInto(page, null)).toBe(true);
+  await expect(page.locator(".composer img")).toHaveCount(1);
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe("TEXTAREA");
+  // Spreadsheet cells come with an image rendering: the text paste is left alone
+  expect(await pasteInto(page, "textarea", "a\tb")).toBe(false);
+  await expect(page.locator(".composer img")).toHaveCount(1);
+});
